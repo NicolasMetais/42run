@@ -30,6 +30,7 @@ void GltfModel::parseJson(std::string fileName) {
 
 		for (auto& primitives : meshJson["primitives"]) {
 			(void)primitives;
+			
 		}
 	}
 };
