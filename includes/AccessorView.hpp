@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <BufferView.hpp>
+#include <json.hpp>
 #include <cstdint>
 
 enum class ComponentType : uint16_t {

@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <json.hpp>
 
 struct BufferView {
 	uint32_t buffer = 0;

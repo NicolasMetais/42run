@@ -44,7 +44,10 @@ class GltfModel {
 		void parseTexture(const nlohmann::json& gltf);
 		void parseMaterials(const nlohmann::json& gltf);
 		void parseNodes(const nlohmann::json& gltf);
+		void parseBuffer(const nlohmann::json& gltf);
 		void parseScenes(const nlohmann::json& gltf);
+
+		void linkBufferViewToBinary();
 		constexpr uint32_t componentCount(ValueType t);
 		size_t accesorByteSize(const AccessorView& a);
 		size_t componentSize(ComponentType c);
