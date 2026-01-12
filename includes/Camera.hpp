@@ -2,7 +2,7 @@
 #include <iostream>
 #include <Matrix/Matrix.hpp>
 #include <SDL2/SDL.h>
-#include <Mesh.hpp>
+#include <ObjImporter.hpp>
 
 class Camera {
 	private:

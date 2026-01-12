@@ -42,7 +42,7 @@ Renderer::Renderer() {
 };
 
 
-void Renderer::InitObj(Mesh& obj) {
+void Renderer::InitObj(ObjImporter& obj) {
 	
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
@@ -89,7 +89,7 @@ void Renderer::bindTexture(int& texSlot, GLuint loc, GLuint flagLoc, const std::
 		glUniform1i(flagLoc, 0);
 }
 
-void Renderer::renderObj(Matrix<float>& mvp, Mesh& obj, Matrix<float> model, Camera& camera, float deltaTime) {
+void Renderer::renderObj(Matrix<float>& mvp, ObjImporter& obj, Matrix<float> model, Camera& camera, float deltaTime) {
 	glUseProgram(this->shaderProgram);
 
 	glUniformMatrix4fv(loc.MVP, 1, GL_TRUE, mvp.datal());
@@ -163,7 +163,7 @@ void Renderer::renderObj(Matrix<float>& mvp, Mesh& obj, Matrix<float> model, Cam
 	}
 };
 
-void Renderer::cleanup(Mesh& obj) {
+void Renderer::cleanup(ObjImporter& obj) {
 	for (auto& mesh : obj.getMeshes()) {
 		if (mesh.VAO)
 			glDeleteVertexArrays(1, &mesh.VAO);

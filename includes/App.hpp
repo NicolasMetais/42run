@@ -3,7 +3,7 @@
 #include <Window.hpp>
 #include <Renderer.hpp>
 #include <Camera.hpp>
-#include <Mesh.hpp>
+#include <ObjImporter.hpp>
 #include <Skybox.hpp>
 #include <Transform.hpp>
 #include <Timer.hpp>
@@ -15,7 +15,7 @@ class App {
 	private:
 		Window window;
 		Renderer renderer;
-		Mesh mesh;
+		ObjImporter mesh;
 		Camera camera;
 		Transform transform;
 		Skybox skybox;

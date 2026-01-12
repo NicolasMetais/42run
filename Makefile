@@ -11,7 +11,7 @@ SRCS =	srcs/main.cpp \
 		srcs/Window.cpp \
 		srcs/GltfModel.cpp \
 		srcs/Camera.cpp \
-		srcs/Mesh.cpp \
+		srcs/ObjImporter.cpp \
 		srcs/Skybox.cpp \
 		srcs/Renderer.cpp \
 		srcs/Transform.cpp \

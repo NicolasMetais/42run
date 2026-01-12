@@ -4,7 +4,7 @@ App::App(int width, int height, const std::string& objPath) : window(width, heig
 		, camera(static_cast<float>(width), static_cast<float>(height), Vector<float>{0, 0, 5}, Vector<float>{0,0,0}, Vector<float>{0,1,0})
 		, transform(), skybox(), timer(), running(true) {
 
-			this->mesh.loadObj(objPath, true);
+			this->mesh.loadObj(objPath, false);
 
 			this->renderer.InitObj(this->mesh);
 			this->transform.setScale(1.0f);

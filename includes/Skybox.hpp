@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 #include <Matrix/Matrix.hpp>
-#include <Mesh.hpp>
+#include <ObjImporter.hpp>
 #include <algorithm>
 #include <include/glad/glad.h>
 #include <Window.hpp>

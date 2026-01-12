@@ -1,6 +1,6 @@
-#include <Mesh.hpp>
+#include <ObjImporter.hpp>
 
-Mesh::FaceVertex Mesh::parseFaceElement(const std::string& part)
+ObjImporter::FaceVertex ObjImporter::parseFaceElement(const std::string& part)
 {
 	FaceVertex fv { -1, -1, -1 };
 	int i = 0;
@@ -45,7 +45,7 @@ std::string trim(const std::string& str) {
 	return str.substr(first, last - first + 1);
 }
 
-void Mesh::loadMtlFile(const std::string& fileName) {
+void ObjImporter::loadMtlFile(const std::string& fileName) {
 	std::ifstream file;
 	file.open("resources/" + fileName);
 	if (!file.is_open())
@@ -115,28 +115,28 @@ void Mesh::loadMtlFile(const std::string& fileName) {
 		this->materials[current.getName()] = current;
 };
 
-void	Mesh::parseVertexLine(std::istringstream& iss) {
+void	ObjImporter::parseVertexLine(std::istringstream& iss) {
 	Vector<float> vec(3);
 	if (!(iss >> vec.x() >> vec.y() >> vec.z()))
 		throw std::runtime_error("Error : Invalid v value");
 	v.push_back(vec);
 };
 
-void	Mesh::parseTexCoordLine(std::istringstream& iss) {
+void	ObjImporter::parseTexCoordLine(std::istringstream& iss) {
 	Vector<float> vec(3);
 	if ((!(iss >> vec.x() >> vec.y())))
 		throw std::runtime_error("Error : Invalid vt value");
 	vt.push_back(vec);
 }
 
-void	Mesh::parseNormalLine(std::istringstream& iss) {
+void	ObjImporter::parseNormalLine(std::istringstream& iss) {
 	Vector<float> vec(3);
 	if ((!(iss >> vec.x() >> vec.y() >> vec.z())))
 		throw std::runtime_error("Error : Invalid vn value");
 	vn.push_back(vec);
 }
 
-void	Mesh::parseFaceLine(std::istringstream& iss) {
+void	ObjImporter::parseFaceLine(std::istringstream& iss) {
 	Face face;
 	face.materialName = currentMaterial;
 	std::string vertStr;
@@ -146,19 +146,19 @@ void	Mesh::parseFaceLine(std::istringstream& iss) {
 	f.push_back(face);
 }
 
-void	Mesh::parseMtlUseLine(std::istringstream& iss) {
+void	ObjImporter::parseMtlUseLine(std::istringstream& iss) {
 	std::string name;
 	iss >> name;
 	this->currentMaterial = name;
 }
 
-void	Mesh::parseMtlLibLine(std::istringstream& iss) {
+void	ObjImporter::parseMtlLibLine(std::istringstream& iss) {
 	std::string mtlFile;
 	iss >> mtlFile;
 	loadMtlFile(mtlFile);
 }
 
-void Mesh::parseObjFile(const std::string& fileName) {
+void ObjImporter::parseObjFile(const std::string& fileName) {
 		std::ifstream file;
 		file.open(fileName);
 		if (!file.is_open())
@@ -181,7 +181,7 @@ void Mesh::parseObjFile(const std::string& fileName) {
 		file.close();
 }
 
-void Mesh::CenterAndNormalize() {
+void ObjImporter::CenterAndNormalize() {
 	colors = {
         {0.0f, 0.0f, 0.0f},
         {0.2f, 0.2f, 0.2f},
@@ -215,19 +215,19 @@ void Mesh::CenterAndNormalize() {
 	this->scaleFactor = 1.0f / this->radius;
 };
 
-Vector<float> Mesh::computeFaceNormal(const Vector<float>& p0, const Vector<float>& p1, const Vector<float>& p2) const {
+Vector<float> ObjImporter::computeFaceNormal(const Vector<float>& p0, const Vector<float>& p1, const Vector<float>& p2) const {
 	Vector<float> edge1 = p1 - p0;
 	Vector<float> edge2 = p2 - p0;
 	return cross_product(edge1, edge2).normalize();
 }
 
-Vector<float> Mesh::getVertexNormal(const FaceVertex& fv) const {
+Vector<float> ObjImporter::getVertexNormal(const FaceVertex& fv) const {
 	if (fv.vn != -1)
 		return vn[fv.vn];
 	return this->smoothNormals[fv.v];
 };
 
-Vector<float> Mesh::getVertexUV(const FaceVertex& fv, const Vector<float>& pos) const {
+Vector<float> ObjImporter::getVertexUV(const FaceVertex& fv, const Vector<float>& pos) const {
 	if (fv.vt != -1)
 		return vt[fv.vt];
 	Vector <float> p = (pos - this->center) * this->scaleFactor;
@@ -238,7 +238,7 @@ Vector<float> Mesh::getVertexUV(const FaceVertex& fv, const Vector<float>& pos) 
 	return {u, v};
 };
 
-void Mesh::pushVertex(MaterialMesh& mesh, const Vector<float>& pos, const std::array<float, 3>& color, const Vector<float>& normal, const Vector<float>& uv) {
+void ObjImporter::pushVertex(MaterialMesh& mesh, const Vector<float>& pos, const std::array<float, 3>& color, const Vector<float>& normal, const Vector<float>& uv) {
 	mesh.vertices.push_back((pos.x() - this->center.x()) * this->scaleFactor);
 	mesh.vertices.push_back((pos.y() - this->center.y()) * this->scaleFactor);
 	mesh.vertices.push_back((pos.z() - this->center.z()) * this->scaleFactor);
@@ -256,7 +256,7 @@ void Mesh::pushVertex(MaterialMesh& mesh, const Vector<float>& pos, const std::a
 };
 
 
-void Mesh::BuildRenderMesh() {
+void ObjImporter::BuildRenderMesh() {
 	if (this->culling)
 		glEnable(GL_CULL_FACE);
 	else
@@ -304,7 +304,7 @@ static inline std::size_t hash_tuple(int a, int b, int c) {
     return std::hash<long long>()(((long long)a << 42) ^ ((long long)b << 21) ^ (long long)c);
 }
 
-void Mesh::normalsHandler()
+void ObjImporter::normalsHandler()
 {
     bool hasNormals = true;
     for (auto &face : this->f) {
@@ -365,7 +365,7 @@ void Mesh::normalsHandler()
     }
 }
 
-void Mesh::loadObj(const std::string& fileName, bool culling) {
+void ObjImporter::loadObj(const std::string& fileName, bool culling) {
 	if (!culling)
 		this->culling = false;
 	if (fileName.size() > 4 || fileName.substr(fileName.size() - 4) == ".obj")
