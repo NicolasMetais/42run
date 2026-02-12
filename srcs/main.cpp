@@ -16,15 +16,14 @@
 #define WIDTH 1500
 
 int main(int ac, char **av) {
-    if (ac != 2)
+	(void)av;
+    if (ac != 1)
     {
 		std::cerr << "Error: Invalid format" << std::endl;
         return (1);
 	}
 	try {
-		App app(WIDTH, HEIGHT, av[1]);
-		GltfModel test;
-		test.parseJson("resources/DamagedHelmet.gltf");
+		App app(WIDTH, HEIGHT);
 		app.run();
 	}
 	catch (const std::exception& e) {

@@ -1,18 +1,127 @@
 #include <App.hpp>
 
-App::App(int width, int height, const std::string& objPath) : window(width, height), renderer(), mesh()
-		, camera(static_cast<float>(width), static_cast<float>(height), Vector<float>{0, 0, 5}, Vector<float>{0,0,0}, Vector<float>{0,1,0})
+// Affichage d'un Vector<float> (supposé en 3D)
+void printVector(const Vector<float>& v, const std::string& name)
+{
+	if (v.size() == 3) {
+		std::cout << name << ": ("
+				<< v.x() << ", "
+				<< v.y() << ", "
+				<< v.z() << ")\n";
+	}
+	else if (v.size() == 2) {
+		std::cout << name << ": ("
+				<< v.x() << ", "
+				<< v.y() << ")\n";
+	}
+}
+
+// Affichage d'un Vertex
+void printVertex(const Vertex& v)
+{
+    std::cout << "Vertex:\n";
+
+    printVector(v.position, "  position");
+    printVector(v.normal, "  normal");
+    printVector(v.tangent, "  tangent");
+
+    // UVs
+    for (size_t i = 0; i < v.uv.size(); ++i)
+    {
+        printVector(v.uv[i], "  uv[" + std::to_string(i) + "]");
+    }
+
+    // Couleurs
+    std::cout << "  color: ";
+    for (float c : v.color)
+    {
+        std::cout << c << " ";
+    }
+    std::cout << "\n";
+
+    // Joints
+    std::cout << "  joints: ";
+    for (int j : v.joints)
+    {
+        std::cout << j << " ";
+    }
+    std::cout << "\n";
+
+    // Weights
+    std::cout << "  weights: ";
+    for (float w : v.weights)
+    {
+        std::cout << w << " ";
+    }
+    std::cout << "\n";
+}
+
+
+// Affichage d'un SubMesh
+void printSubMesh(const SubMesh& sm)
+{
+    std::cout << "SubMesh:\n";
+    std::cout << "  VAO: " << sm.VAO << "\n";
+    std::cout << "  VBO: " << sm.VBO << "\n";
+    std::cout << "  EBO: " << sm.EBO << "\n";
+    std::cout << "  material ptr: " << sm.material << "\n";
+
+    std::cout << "  Vertices count: " << sm.vertices.size() << "\n";
+    for (size_t i = 0; i < sm.vertices.size(); ++i)
+    {
+        std::cout << " Vertex[" << i << "]\n";
+        printVertex(sm.vertices[i]);
+    }
+
+    std::cout << "  Indices: ";
+    for (size_t i = 0; i < 1; ++i)
+    {
+        std::cout << sm.indices[0] << " ";
+    }
+    std::cout << "\n";
+}
+
+// Affichage d'un MeshData
+void printMeshData(const MeshData& mesh)
+{
+    std::cout << "MeshData:\n";
+
+    printVector(mesh.min, "  min");
+    printVector(mesh.max, "  max");
+    printVector(mesh.center, "  center");
+
+    std::cout << "  radius: " << mesh.radius << "\n";
+
+    std::cout << "SubMeshes count: " << mesh.submeshes.size() << "\n";
+    for (size_t i = 0; i < mesh.submeshes.size(); ++i)
+    {
+        std::cout << "\nSubMesh[" << i << "]\n";
+        printSubMesh(mesh.submeshes[i]);
+    }
+}
+
+App::App(int width, int height) : window(width, height), renderer(), mesh()
+		, camera(static_cast<float>(width), static_cast<float>(height), Vector<float>{5, 0, 0}, Vector<float>{0,0,0}, Vector<float>{0,1,0})
 		, transform(), skybox(), timer(), running(true) {
 
-			this->mesh.loadObj(objPath, false);
+			GltfModel model;
+			model.parseJson("resources/TwoSidedPlane.gltf");
+			// model.printData();
+			this->data = this->gltf.buildMeshData(model);
+			printMeshData(this->data);
 
-			this->renderer.InitObj(this->mesh);
-			this->transform.setScale(1.0f);
-			this->transform.setPosition(0.0f, 0.0f, 0.0f);
+			this->renderer.InitObj(this->data);
+			this->transform.setScale(2.0f);
+			Vector<float> cent(3);
+			std::cout << "max: " << data.max << " min: " << data.min << std::endl;
+			cent = (data.max + data.min) * 0.5f;
+			std::cout << "center: " << cent << std::endl;
+			this->transform.setPosition(-cent.x(), -cent.y(), -cent.z());
 
 			glEnable(GL_DEPTH_TEST);
+			glDisable(GL_CULL_FACE);
 			glDepthFunc(GL_LESS);
-			glDepthMask(GL_FALSE);
+			glDepthMask(GL_TRUE);
 			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 };
@@ -41,7 +150,7 @@ void App::render() {
 	Matrix<float> projection = this->camera.buildProjection();
 	Matrix<float> MVP = projection * view * model;
 
-	this->renderer.renderObj(MVP, this->mesh, model, this->camera, this->deltaTime);
+	this->renderer.renderObj(MVP, this->data, model, this->camera, this->deltaTime);
 	this->skybox.draw(this->camera.buildViewNoTranslation(), projection);
 	SDL_GL_SwapWindow(this->window.getWin());
 };
@@ -57,7 +166,7 @@ void App::run(){
 		render(); //render stuff
 		FPScalculator(); //FPShandler
 	}
-	this->renderer.cleanup(this->mesh);
+	this->renderer.cleanup(this->data);
 };
 
 void App::FPScalculator() {

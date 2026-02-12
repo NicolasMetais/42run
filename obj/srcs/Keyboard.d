@@ -4,7 +4,9 @@ obj/srcs/Keyboard.o: srcs/Keyboard.cpp includes/Keyboard.hpp \
   includes/Matrix/Quaternion.tpp includes/Matrix/Vector.tpp \
   includes/Matrix/Matrix.tpp includes/ObjImporter.hpp \
   loader/include/glad/glad.h includes/Material.hpp includes/Texture.hpp \
-  includes/Renderer.hpp includes/Window.hpp includes/Transform.hpp
+  includes/MeshData.hpp includes/Mat.hpp includes/json.hpp \
+  includes/Renderer.hpp includes/TextureManager.hpp includes/Window.hpp \
+  includes/Transform.hpp
 
 includes/Keyboard.hpp:
 
@@ -30,7 +32,15 @@ includes/Material.hpp:
 
 includes/Texture.hpp:
 
+includes/MeshData.hpp:
+
+includes/Mat.hpp:
+
+includes/json.hpp:
+
 includes/Renderer.hpp:
+
+includes/TextureManager.hpp:
 
 includes/Window.hpp:
 

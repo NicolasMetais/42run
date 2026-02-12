@@ -1,6 +1,10 @@
 #pragma once
 #include <iostream>
-#include "Matrix/Matrix.hpp"
+#include <Matrix/Matrix.hpp>
+#include <MeshData.hpp>
+#include <TextureManager.hpp>
+
+
 
 namespace utils {
 	Matrix<float> rotationX(float x);
@@ -11,4 +15,9 @@ namespace utils {
 	Matrix<float> translation(const Vector<float>& position);
 	float Todegres(float rad);
 	float ToRad(float rad);
+
+	void smoothNormals(MeshData& meshdata);
+	void prepareMats(MeshData& meshdata, TextureManager& texMng);
+	std::string resolveUri(MeshData& meshdata, int index);
+
 }

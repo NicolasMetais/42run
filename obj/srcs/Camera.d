@@ -3,7 +3,8 @@ obj/srcs/Camera.o: srcs/Camera.cpp includes/Camera.hpp \
   includes/Matrix/Quaternion.hpp includes/Matrix/Quaternion.tpp \
   includes/Matrix/Vector.tpp includes/Matrix/Matrix.tpp \
   includes/ObjImporter.hpp loader/include/glad/glad.h \
-  includes/Material.hpp includes/Texture.hpp includes/Transform.hpp \
+  includes/Material.hpp includes/Texture.hpp includes/MeshData.hpp \
+  includes/Mat.hpp includes/json.hpp includes/Transform.hpp \
   includes/utils.hpp
 
 includes/Camera.hpp:
@@ -27,6 +28,12 @@ loader/include/glad/glad.h:
 includes/Material.hpp:
 
 includes/Texture.hpp:
+
+includes/MeshData.hpp:
+
+includes/Mat.hpp:
+
+includes/json.hpp:
 
 includes/Transform.hpp:
 

@@ -3,8 +3,10 @@ obj/srcs/Skybox.o: srcs/Skybox.cpp includes/Skybox.hpp \
   includes/Matrix/Quaternion.hpp includes/Matrix/Quaternion.tpp \
   includes/Matrix/Vector.tpp includes/Matrix/Matrix.tpp \
   includes/ObjImporter.hpp loader/include/glad/glad.h \
-  includes/Material.hpp includes/Texture.hpp includes/Window.hpp \
-  includes/Camera.hpp srcs/shader.cpp includes/Renderer.hpp
+  includes/Material.hpp includes/Texture.hpp includes/MeshData.hpp \
+  includes/Mat.hpp includes/json.hpp includes/Window.hpp \
+  includes/Camera.hpp srcs/shader.cpp includes/Renderer.hpp \
+  includes/TextureManager.hpp
 
 includes/Skybox.hpp:
 
@@ -28,6 +30,12 @@ includes/Material.hpp:
 
 includes/Texture.hpp:
 
+includes/MeshData.hpp:
+
+includes/Mat.hpp:
+
+includes/json.hpp:
+
 includes/Window.hpp:
 
 includes/Camera.hpp:
@@ -35,3 +43,5 @@ includes/Camera.hpp:
 srcs/shader.cpp:
 
 includes/Renderer.hpp:
+
+includes/TextureManager.hpp:

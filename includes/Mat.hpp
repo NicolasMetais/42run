@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <json.hpp>
 #include <Matrix/Matrix.hpp>
 
 struct TextureInfo {
@@ -32,4 +33,14 @@ struct Mat {
 
 	std::unordered_map<std::string, nlohmann::json> extensions;
 	std::unordered_map<std::string, nlohmann::json> extras;
+
+	// pointeur gpu directement sur les bonne textures,
+	// pour pas avoir a tout reparcourir pour trouver les bonne data de textures
+
+	Texture* baseColorTextureGPU = nullptr;
+	Texture* metallicRoughnessTextureGPU = nullptr;
+	Texture* normalTextureGPU = nullptr;
+	Texture* occlusionTextureGPU = nullptr;
+	Texture* emissiveTextureGPU = nullptr;
+
 };

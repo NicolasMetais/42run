@@ -9,7 +9,7 @@ ObjImporter::FaceVertex ObjImporter::parseFaceElement(const std::string& part)
 	while (std::getline(ss, token, '/')) {
 		if (!token.empty()) {
 			int value = std::stoi(token);
-			if (i == 0) 
+			if (i == 0)
 			{
 				if (value < 0)
 					fv.v = v.size() + value;
@@ -36,7 +36,6 @@ ObjImporter::FaceVertex ObjImporter::parseFaceElement(const std::string& part)
 	return fv;
 }
 
-
 std::string trim(const std::string& str) {
 	size_t first = str.find_first_not_of(" \t\r\n");
 	if (first == std::string::npos)
@@ -55,7 +54,7 @@ void ObjImporter::loadMtlFile(const std::string& fileName) {
 	while (std::getline(file, line)) {
 		line = trim(line);
 		if (line.empty() || line[0] == '#')
-			continue ;
+			continue ; 
 		std::stringstream ss(line);
 		std::string token;
 		ss >> token;
@@ -181,45 +180,39 @@ void ObjImporter::parseObjFile(const std::string& fileName) {
 		file.close();
 }
 
-void ObjImporter::CenterAndNormalize() {
-	colors = {
-        {0.0f, 0.0f, 0.0f},
-        {0.2f, 0.2f, 0.2f},
-        {0.4f, 0.4f, 0.4f},
-        {0.6f, 0.6f, 0.6f},
-        {0.8f, 0.8f, 0.8f},
-        {0.9f, 0.9f, 0.9f}
-	};
-	this->minVert = this->maxVert = v[0];
-	for (const Vector<float>& vert : v) {
-		if (vert.x() < this->minVert.x()) this->minVert.x() = vert.x();
-		if (vert.y() < this->minVert.y()) this->minVert.y() = vert.y();
-		if (vert.z() < this->minVert.z()) this->minVert.z() = vert.z();
+// void ObjImporter::CenterAndNormalize() {
+// 	colors = {
+//         {0.0f, 0.0f, 0.0f},
+//         {0.2f, 0.2f, 0.2f},
+//         {0.4f, 0.4f, 0.4f},
+//         {0.6f, 0.6f, 0.6f},
+//         {0.8f, 0.8f, 0.8f},
+//         {0.9f, 0.9f, 0.9f}
+// 	};
+// 	this->minVert = this->maxVert = v[0];
+// 	for (const Vector<float>& vert : v) {
+// 		if (vert.x() < this->minVert.x()) this->minVert.x() = vert.x();
+// 		if (vert.y() < this->minVert.y()) this->minVert.y() = vert.y();
+// 		if (vert.z() < this->minVert.z()) this->minVert.z() = vert.z();
 
-		if (vert.x() > this->maxVert.x()) this->maxVert.x() = vert.x();
-		if (vert.y() > this->maxVert.y()) this->maxVert.y() = vert.y();
-		if (vert.z() > this->maxVert.z()) this->maxVert.z() = vert.z();
-	}
+// 		if (vert.x() > this->maxVert.x()) this->maxVert.x() = vert.x();
+// 		if (vert.y() > this->maxVert.y()) this->maxVert.y() = vert.y();
+// 		if (vert.z() > this->maxVert.z()) this->maxVert.z() = vert.z();
+// 	}
 
-	this->center = { 
-		(this->minVert.x() + this->maxVert.x()) / 2.0f,
-		(this->minVert.y() + this->maxVert.y()) / 2.0f,
-		(this->minVert.z() + this->maxVert.z()) / 2.0f 
-	};
+// 	this->center = { 
+// 		(this->minVert.x() + this->maxVert.x()) / 2.0f,
+// 		(this->minVert.y() + this->maxVert.y()) / 2.0f,
+// 		(this->minVert.z() + this->maxVert.z()) / 2.0f 
+// 	};
 
-	float radiusX = (this->maxVert.x() - this->minVert.x()) / 2.0f;
-	float radiusY = (this->maxVert.y() - this->minVert.y()) / 2.0f;
-	float radiusZ = (this->maxVert.z() - this->minVert.z()) / 2.0f;
-	this->radius = std::max({radiusX, radiusY, radiusZ});
+// 	float radiusX = (this->maxVert.x() - this->minVert.x()) / 2.0f;
+// 	float radiusY = (this->maxVert.y() - this->minVert.y()) / 2.0f;
+// 	float radiusZ = (this->maxVert.z() - this->minVert.z()) / 2.0f;
+// 	this->radius = std::max({radiusX, radiusY, radiusZ});
 
-	this->scaleFactor = 1.0f / this->radius;
-};
-
-Vector<float> ObjImporter::computeFaceNormal(const Vector<float>& p0, const Vector<float>& p1, const Vector<float>& p2) const {
-	Vector<float> edge1 = p1 - p0;
-	Vector<float> edge2 = p2 - p0;
-	return cross_product(edge1, edge2).normalize();
-}
+// 	this->scaleFactor = 1.0f / this->radius;
+// };
 
 Vector<float> ObjImporter::getVertexNormal(const FaceVertex& fv) const {
 	if (fv.vn != -1)
@@ -228,77 +221,83 @@ Vector<float> ObjImporter::getVertexNormal(const FaceVertex& fv) const {
 };
 
 Vector<float> ObjImporter::getVertexUV(const FaceVertex& fv, const Vector<float>& pos) const {
+	(void)pos;
 	if (fv.vt != -1)
 		return vt[fv.vt];
-	Vector <float> p = (pos - this->center) * this->scaleFactor;
-	float u = 0.5f + atan2(pos.z(), pos.x()) / (2.0f * M_PI);
-	float v = 0.5f - asin(pos.y() / this->radius) / M_PI;
-	if (u < 0.0f) u += 1.0f;
-	if (u > 1.0f) u -= 1.0f;
-	return {u, v};
+	// Vector <float> p = (pos - this->center) * this->scaleFactor;
+	// float u = 0.5f + atan2(pos.z(), pos.x()) / (2.0f * M_PI);
+	// float v = 0.5f - asin(pos.y() / this->radius) / M_PI;
+	// if (u < 0.0f) u += 1.0f;
+	// if (u > 1.0f) u -= 1.0f;
+	return {0.0f, 0.0f};
 };
 
-void ObjImporter::pushVertex(MaterialMesh& mesh, const Vector<float>& pos, const std::array<float, 3>& color, const Vector<float>& normal, const Vector<float>& uv) {
-	mesh.vertices.push_back((pos.x() - this->center.x()) * this->scaleFactor);
-	mesh.vertices.push_back((pos.y() - this->center.y()) * this->scaleFactor);
-	mesh.vertices.push_back((pos.z() - this->center.z()) * this->scaleFactor);
+// void ObjImporter::pushVertex(MaterialMesh& mesh, const Vector<float>& pos, const std::array<float, 3>& color, const Vector<float>& normal, const Vector<float>& uv) {
+// 	mesh.vertices.push_back((pos.x() - this->center.x()) * this->scaleFactor);
+// 	mesh.vertices.push_back((pos.y() - this->center.y()) * this->scaleFactor);
+// 	mesh.vertices.push_back((pos.z() - this->center.z()) * this->scaleFactor);
 
-	mesh.vertices.push_back(color[0]);
-	mesh.vertices.push_back(color[1]);
-	mesh.vertices.push_back(color[2]);
+// 	mesh.vertices.push_back(color[0]);
+// 	mesh.vertices.push_back(color[1]);
+// 	mesh.vertices.push_back(color[2]);
 
-	mesh.vertices.push_back(normal.x());
-	mesh.vertices.push_back(normal.y());
-	mesh.vertices.push_back(normal.z());
+// 	mesh.vertices.push_back(normal.x());
+// 	mesh.vertices.push_back(normal.y());
+// 	mesh.vertices.push_back(normal.z());
 
-	mesh.vertices.push_back(uv.x());
-	mesh.vertices.push_back(uv.y());
-};
+// 	mesh.vertices.push_back(uv.x());
+// 	mesh.vertices.push_back(uv.y());
+// };
 
 
-void ObjImporter::BuildRenderMesh() {
-	if (this->culling)
-		glEnable(GL_CULL_FACE);
-	else
-		glDisable(GL_CULL_FACE);
-	std::unordered_map<std::string, MaterialMesh> tempMesh;
-	for (size_t faceIndex = 0; faceIndex < f.size(); ++faceIndex) {
+// void ObjImporter::BuildRenderMesh() {
+// 	if (this->culling)
+// 		glEnable(GL_CULL_FACE);
+// 	else
+// 		glDisable(GL_CULL_FACE);
+// 	std::unordered_map<std::string, MaterialMesh> tempMesh;
+// 	for (size_t faceIndex = 0; faceIndex < f.size(); ++faceIndex) {
 
-		const auto& face = f[faceIndex];
+// 		const auto& face = f[faceIndex];
 
-		std::string matName = face.materialName.empty() ? "None" : face.materialName;
-		if (tempMesh.find(matName) == tempMesh.end())
-			tempMesh[matName].mat = (materials.count(matName) ? &materials[matName] : nullptr);
-		MaterialMesh& mesh = tempMesh[matName];
+// 		std::string matName = face.materialName.empty() ? "None" : face.materialName;
+// 		if (tempMesh.find(matName) == tempMesh.end())
+// 			tempMesh[matName].mat = (materials.count(matName) ? &materials[matName] : nullptr);
+// 		MaterialMesh& mesh = tempMesh[matName];
 
-		std::array<float, 3> color = colors[faceIndex % colors.size()];
+// 		std::array<float, 3> color = colors[faceIndex % colors.size()];
 
-		for (size_t j = 1; j + 1 < face.fvertices.size(); ++j) {
-			FaceVertex fv0 = face.fvertices[0];
-			FaceVertex fv1 = face.fvertices[j];
-			FaceVertex fv2 = face.fvertices[j + 1];
+// 		for (size_t j = 1; j + 1 < face.fvertices.size(); ++j) {
+// 			FaceVertex fv0 = face.fvertices[0];
+// 			FaceVertex fv1 = face.fvertices[j];
+// 			FaceVertex fv2 = face.fvertices[j + 1];
 
-			Vector<float> pos0 = v[fv0.v], pos1 = v[fv1.v], pos2 = v[fv2.v];
+// 			Vector<float> pos0 = v[fv0.v], pos1 = v[fv1.v], pos2 = v[fv2.v];
 
-			Vector<float> n0 = getVertexNormal(fv0);
-			Vector<float> n1 = getVertexNormal(fv1);
-			Vector<float> n2 = getVertexNormal(fv2);
+// 			Vector<float> n0 = getVertexNormal(fv0);
+// 			Vector<float> n1 = getVertexNormal(fv1);
+// 			Vector<float> n2 = getVertexNormal(fv2);
 		
-			Vector<float> uv0 = getVertexUV(fv0, pos0);
-			Vector<float> uv1 = getVertexUV(fv1, pos1);
-			Vector<float> uv2 = getVertexUV(fv2, pos2);
+// 			Vector<float> uv0 = getVertexUV(fv0, pos0);
+// 			Vector<float> uv1 = getVertexUV(fv1, pos1);
+// 			Vector<float> uv2 = getVertexUV(fv2, pos2);
 
-			pushVertex(mesh, pos0, color, n0, uv0);
-			pushVertex(mesh, pos1, color, n1, uv1);
-			pushVertex(mesh, pos2, color, n2, uv2);
+// 			pushVertex(mesh, pos0, color, n0, uv0);
+// 			pushVertex(mesh, pos1, color, n1, uv1);
+// 			pushVertex(mesh, pos2, color, n2, uv2);
 
-		}
-	}
-	meshes.clear();
-	for (auto& pair : tempMesh) {
-		meshes.push_back(std::move(pair.second));
-	}
-};
+// 		}
+// 	}
+// 	meshes.clear();
+// 	for (auto& pair : tempMesh) {
+// 		meshes.push_back(std::move(pair.second));
+// 	}
+// };
+Vector<float> ObjImporter::computeFaceNormal(const Vector<float>& p0, const Vector<float>& p1, const Vector<float>& p2) const {
+	Vector<float> edge1 = p1 - p0;
+	Vector<float> edge2 = p2 - p0;
+	return cross_product(edge1, edge2).normalize();
+}
 
 static inline std::size_t hash_tuple(int a, int b, int c) {
     return std::hash<long long>()(((long long)a << 42) ^ ((long long)b << 21) ^ (long long)c);
@@ -313,8 +312,6 @@ void ObjImporter::normalsHandler()
                 hasNormals = false;
         }
     }
-    if (hasNormals)
-        return ;
 
     const float eps = 1e-6f;
     std::unordered_map<std::size_t, std::vector<int>> posGroups;
@@ -365,15 +362,69 @@ void ObjImporter::normalsHandler()
     }
 }
 
-void ObjImporter::loadObj(const std::string& fileName, bool culling) {
-	if (!culling)
-		this->culling = false;
-	if (fileName.size() > 4 || fileName.substr(fileName.size() - 4) == ".obj")
-   		parseObjFile(fileName);
-	else
+MeshData ObjImporter::loadObj(const std::string& fileName) {
+	if (fileName.size() < 4 || fileName.substr(fileName.size() - 4) != ".obj")
 		throw std::runtime_error("Error: wrong obj extension file");
     parseObjFile(fileName);
     normalsHandler();
-    CenterAndNormalize();
-    BuildRenderMesh();
+    // CenterAndNormalize();
+    // BuildRenderMesh();
+	return buildMeshData();
 }
+
+MeshData ObjImporter::buildMeshData() {
+	MeshData data;
+
+	std::unordered_map<std::string, SubMesh> submeshMap;
+
+	for (const Face& face: f) {
+
+		std::string matName = face.materialName;
+		SubMesh& submesh = submeshMap[matName];
+
+		// if (!matName.empty() && materials.count(matName))
+		// 	submesh.material = &materials[matName];
+		// else
+		// 	submesh.material = nullptr;
+		for (size_t i = 1; i + 1 < face.fvertices.size(); ++i) {
+
+			FaceVertex fv[3] = {
+				face.fvertices[0],
+				face.fvertices[i],
+				face.fvertices[i + 1]
+			};
+
+			for (int j = 0; j < 3; ++j) {
+				Vertex vtx;
+
+				const Vector<float>& pos = v[fv[j].v];
+				vtx.position = pos;
+				vtx.normal = getVertexNormal(fv[j]);
+				vtx.uv.push_back(getVertexUV(fv[j], pos));
+				vtx.color = {1.0f, 1.0f, 1.0f};
+
+				submesh.vertices.push_back(vtx);
+
+				if (submesh.vertices.size() == 1)
+					data.min = data.max = pos;
+				else {
+					data.min.x() = std::min(data.min.x(), pos.x());
+					data.min.y() = std::min(data.min.y(), pos.y());
+					data.min.z() = std::min(data.min.z(), pos.z());
+
+					data.max.x() = std::max(data.max.x(), pos.x());
+					data.max.y() = std::max(data.max.y(), pos.y());
+					data.max.z() = std::max(data.max.z(), pos.z());
+				}
+			}
+		}
+	}
+
+	for (auto& [_, sm] : submeshMap)
+		data.submeshes.push_back(std::move(sm));
+
+	data.center = (data.min + data.max) * 0.5f;
+	data.radius = (data.max - data.center).size();
+
+	return data;
+};

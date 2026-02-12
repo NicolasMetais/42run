@@ -10,6 +10,8 @@ SRCS =	srcs/main.cpp \
 		srcs/Keyboard.cpp \
 		srcs/Window.cpp \
 		srcs/GltfModel.cpp \
+		srcs/GltfImporter.cpp \
+		srcs/AccessorView.cpp \
 		srcs/Camera.cpp \
 		srcs/ObjImporter.cpp \
 		srcs/Skybox.cpp \

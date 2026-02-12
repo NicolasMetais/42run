@@ -1,6 +1,8 @@
 #pragma once
 #include <iostream>
 #include <ObjImporter.hpp>
+#include <TextureManager.hpp>
+#include <TextureManager.hpp>
 #include <algorithm>
 #include <include/glad/glad.h>
 #include <Window.hpp>
@@ -62,14 +64,14 @@ class Renderer {
 		float transitionTarget = 0.0f;
 		float transitionSpeed = 0.5f;
 
-
 		ShaderLocations loc;
 		Texture ScopTexture;
+        TextureManager cache;
 	public:
 		Renderer();
-		void renderObj(Matrix<float>& mvp, ObjImporter& obj, Matrix<float> model, Camera& camera, float deltaTime);
-		void InitObj(ObjImporter& obj);
-		void cleanup(ObjImporter& obj);
+		void renderObj(Matrix<float>& mvp, MeshData& obj, Matrix<float> model, Camera& camera, float deltaTime);
+		void InitObj(MeshData& obj);
+		void cleanup(MeshData& obj);
 		GLuint getShader() { return shaderProgram; };
 		ShaderLocations& getLocs() { return loc; };
 		void bindTexture(int& texSlot, GLuint loc, GLuint , const std::optional<Texture>& texture);

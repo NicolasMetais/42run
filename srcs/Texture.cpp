@@ -162,6 +162,8 @@ void Texture::openGl2DTextureGen() {
              width, height, 0, dataFormat, GL_UNSIGNED_BYTE, this->data.data());
 
 	glGenerateMipmap(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
 }
 
 // void Texture::loadPNG(const std::string& path) {

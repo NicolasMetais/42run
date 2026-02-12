@@ -9,6 +9,7 @@
 #include <Timer.hpp>
 #include <Event.hpp>
 #include <Keyboard.hpp>
+#include <GltfImporter.hpp>
 #include <Mouse.hpp>
 
 class App {
@@ -22,7 +23,8 @@ class App {
 		Timer timer;
 		Keyboard keyboard;
 		Mouse mouse;
-
+		GltfImporter gltf;
+		MeshData data; //temporaire
 		bool running;
 		bool mouselock = true;
 		float fps;
@@ -32,7 +34,7 @@ class App {
 		void update();
 		void render();
 	public:
-		App(int width, int height, const std::string& objPath);
+		App(int width, int height);
 		~App();
 		void run();
 		void FPScalculator();

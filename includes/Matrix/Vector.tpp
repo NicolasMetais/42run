@@ -318,3 +318,4 @@ Vector<K> Vector<K>::operator-() const{
 		res[i] = -data[i];
 	return res;
 };
+

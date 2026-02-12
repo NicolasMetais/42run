@@ -13,31 +13,6 @@ void GltfModel::loadBinaryBuffer(const std::string& filename) {
 		throw std::runtime_error("Read binary file failed");
 }
 
-constexpr uint32_t GltfModel::componentCount(ValueType t) {
-	switch (t) {
-		case ValueType::SCALAR: return 1;
-        case ValueType::VEC2:   return 2;
-        case ValueType::VEC3:   return 3;
-        case ValueType::VEC4:   return 4;
-        case ValueType::MAT2:   return 4;
-        case ValueType::MAT3:   return 9;
-        case ValueType::MAT4:   return 16;
-    }
-    return 0;
-};
-
-size_t GltfModel::componentSize(ComponentType c) {
-	switch (c) {
-		case ComponentType::BYTE:
-		case ComponentType::UNSIGNED_BYTE: return 1;
-		case ComponentType::SHORT:
-		case ComponentType::UNSIGNED_SHORT: return 2;
-		case ComponentType::UNSIGNED_INT:
-		case ComponentType::FLOAT: return 4;
-	}
-	return 0;
-}
-
 size_t GltfModel::accesorByteSize(const AccessorView& a) {
 	return a.count * componentCount(a.type) * componentSize(a.component);
 }
@@ -99,6 +74,7 @@ void GltfModel::parseBuffer(const nlohmann::json& gltf) {
 	
 	for (auto& jsonBuffer : gltf["buffers"]) {
 		Buffer newBuffer;
+		
 		//uri
 		if (!jsonBuffer.contains("uri"))
 			throw std::runtime_error("uri is missing ! .glb not supported");
@@ -264,9 +240,13 @@ void GltfModel::parseMaterials(const nlohmann::json& gltf) {
 		if (jsonMaterial.contains("pbrMetallicRoughness")) {
 			auto& pbr = jsonMaterial["pbrMetallicRoughness"];
 
+			//baseColorTexture
+			if (pbr.contains("baseColorTexture"))
+				newMaterial.pbrMetallicRoughness.baseColorTexture = parseTextureInfo(pbr["baseColorTexture"], gltf);
+
 			//baseColorFactor
 			if (pbr.contains("baseColorFactor")) {
-				newMaterial.pbrMetallicRoughness.baseColorTexture = parseTextureInfo(pbr["baseColorTexture"], gltf);
+				newMaterial.pbrMetallicRoughness.baseColorFactor =pbr["baseColorFactor"].get<std::vector<float>>();
 			}
 
 			//metallicFactor
@@ -526,7 +506,7 @@ void GltfModel::parseImage(const nlohmann::json& gltf) {
 
 void GltfModel::parseAccessors(const nlohmann::json& gltf) {
 	if (!gltf.contains("accessors") || gltf["accessors"].empty())
-		throw std::runtime_error("Gltf file has no accessors");
+		throw std::runtime_error("Gltf file has no accessors"); 
 	for (auto& jsonAccessor : gltf["accessors"]) {
 		AccessorView newAccessors;
 
@@ -537,6 +517,7 @@ void GltfModel::parseAccessors(const nlohmann::json& gltf) {
 		if (idx < 0 || idx >= (int)bufferViews.size())
 			throw std::runtime_error("Accessor's bufferView index is corrupted");
 		newAccessors.bufferView = &bufferViews[idx];
+
 
 		//count
 		if (!jsonAccessor.contains("count"))
@@ -552,7 +533,7 @@ void GltfModel::parseAccessors(const nlohmann::json& gltf) {
 		newAccessors.component = static_cast<ComponentType>(component);
 
 		//ValueType
-		if (!jsonAccessor.contains("type")) 
+		if (!jsonAccessor.contains("type"))
 			throw std::runtime_error("There is no type in one of the accessors");
 		std::string type = jsonAccessor["type"].get<std::string>();
 		if (type == "SCALAR")
@@ -682,8 +663,9 @@ void GltfModel::parseMeshes(const nlohmann::json& gltf) {
 					throw std::runtime_error("accessor out of bounds in primitive of mesh '" + meshJson.value("name", "Unnamed") + "'");
 				if (key == "POSITION")
 					prim.positionAccessor = accesorValue;
-				else if (key == "NORMAL")
+				else if (key == "NORMAL") {
 					prim.normalAccessor = accesorValue;
+				}
 				else if (key == "TANGENT")
 					prim.tangentAccessor= accesorValue;
 				else if (key.find("TEXCOORD_") == 0) {
@@ -728,4 +710,63 @@ void GltfModel::parseMeshes(const nlohmann::json& gltf) {
 		meshes.push_back(newMesh);
 	}
 };
+
+void GltfModel::printData() const {
+    std::cout << "=== Buffers ===\n";
+    for (size_t i = 0; i < buffers.size(); ++i) {
+        std::cout << "Buffer[" << i << "]: uri=" << buffers[i].uri 
+                  << ", byteLength=" << buffers[i].byteLength << "\n";
+    }
+
+    std::cout << "\n=== BufferViews ===\n";
+    for (size_t i = 0; i < bufferViews.size(); ++i) {
+        std::cout << "BufferView[" << i << "]: buffer=" << bufferViews[i].buffer
+                  << ", offset=" << bufferViews[i].byteOffset
+                  << ", length=" << bufferViews[i].byteLength
+                  << ", stride=" << bufferViews[i].byteStride << "\n";
+    }
+
+    std::cout << "\n=== Accessors ===\n";
+    for (size_t i = 0; i < accessors.size(); ++i) {
+        std::cout << "Accessor[" << i << "]: bufferView=" << (accessors[i].bufferView ? std::to_string(accessors[i].bufferView - &bufferViews[0]) : "null")
+                  << ", count=" << accessors[i].count
+                  << ", type=" << static_cast<int>(accessors[i].type)
+                  << ", component=" << static_cast<int>(accessors[i].component)
+                  << ", byteOffset=" << accessors[i].byteOffset
+                  << "\n";
+    }
+
+    std::cout << "\n=== Meshes ===\n";
+    for (size_t i = 0; i < meshes.size(); ++i) {
+        std::cout << "Mesh[" << i << "]: " << meshes[i].primitives.size() << " primitives\n";
+        for (size_t j = 0; j < meshes[i].primitives.size(); ++j) {
+            const auto& prim = meshes[i].primitives[j];
+            std::cout << "  Primitive[" << j << "]: posAccessor=" << prim.positionAccessor
+                      << ", normalAccessor=" << prim.normalAccessor
+                      << ", tangentAccessor=" << prim.tangentAccessor
+                      << ", indicesAccessor=" << prim.indexAccessor
+                      << ", materialIndex=" << prim.materialIndex
+                      << ", texcoords=" << prim.texcoords.size() << "\n";
+        }
+    }
+
+    std::cout << "\n=== Materials ===\n";
+    for (size_t i = 0; i < materials.size(); ++i) {
+        std::cout << "Material[" << i << "]: name=" << materials[i].name
+                  << ", baseColorTexture=" << (materials[i].pbrMetallicRoughness.baseColorTexture.index)
+                  << ", metallicRoughnessTexture=" << (materials[i].pbrMetallicRoughness.metallicRoughnessTexture.index)
+                  << ", normalTexture=" << (materials[i].normalTexture.index)
+                  << ", emissiveTexture=" << (materials[i].emissiveTexture.index)
+                  << ", occlusionTexture=" << (materials[i].occlusionTexture.index)
+                  << "\n";
+    }
+
+    std::cout << "\n=== Nodes ===\n";
+    for (size_t i = 0; i < nodes.size(); ++i) {
+        std::cout << "Node[" << i << "]: name=" << nodes[i].name
+                  << ", mesh=" << nodes[i].mesh
+                  << ", children=" << nodes[i].children.size() << "\n";
+    }
+};
+
 

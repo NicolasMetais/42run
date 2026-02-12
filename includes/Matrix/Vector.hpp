@@ -30,6 +30,7 @@ struct Vector {
 	// template <typename... Args>
 	// Vector(Args... args) : data{static_cast<K>(args)...} {};
 	Vector(std::initializer_list<K> list) : data{list} {};
+	std::vector<K> flattenVector(const std::vector<Vector<K>>&vecs, size_t size);
 	Vector<K>& operator=(const Vector<K>& v) = default;
 	// Vector<K>& operator=(const Vector<K>& v);
 	Vector<K> operator*(K f) const;
@@ -53,6 +54,12 @@ struct Vector {
 	const K& z() const;
 	K& w();
 	const K& w() const;
+	float lengthSquared() const {
+		return x() * x() + y() * y() + z() * z();
+	};
+	float length() const {
+		return std::sqrt(lengthSquared());
+	};
 	friend std::ostream& operator<<(std::ostream& os, const Vector<K>& v) {
 		os << "{";
 		for (size_t i = 0; i < v.data.size(); ++i)

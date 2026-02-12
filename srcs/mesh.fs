@@ -90,16 +90,19 @@ void main() {
     switch(illum) {
         case 3:
             finalColor += specular;
+            break;
         case 2:
             finalColor += diffuse;
+            break;
         case 1:
             finalColor += ambient;
-            break ;
+            break;
         case 0:
             finalColor = outputColor;
             break;
         default:
             finalColor = outputColor;
     }
-    FragColor = vec4(finalColor, d);
+    // FragColor = vec4(abs(normalize(vNormal)), 1.0); //pour checker si les normales sont bien appliquee. Si rendu noir bizzare y a une merde
+   FragColor = vec4(finalColor, 1.0f);
 }

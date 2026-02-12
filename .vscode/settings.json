@@ -59,6 +59,7 @@
 		"forward_list": "cpp",
 		"map": "cpp",
 		"iomanip": "cpp",
-		"valarray": "cpp"
+		"valarray": "cpp",
+		"cassert": "cpp"
 	}
 }
