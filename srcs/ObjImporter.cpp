@@ -50,7 +50,7 @@ void ObjImporter::loadMtlFile(const std::string& fileName) {
 	if (!file.is_open())
 		throw std::runtime_error("Error: cannot open mtl file");
 	std::string line;
-	Material current;
+	Mat current;
 	while (std::getline(file, line)) {
 		line = trim(line);
 		if (line.empty() || line[0] == '#')
@@ -60,58 +60,64 @@ void ObjImporter::loadMtlFile(const std::string& fileName) {
 		ss >> token;
 		if (token == "newmtl")
 		{
-			if (!current.getName().empty())
-				materials[current.getName()] = current;
-			current = Material();
+			if (!current.name.empty())
+				materials[current.name] = current;
+			current = Mat();
 			std::string name;
 			ss >> name;
-			current.setName(name);
+			current.name = name;
 		}
 		else if (token == "Ka") {
 			float r, g, b;
 			ss >> r >> g >> b;
-			current.setKa({r, g, b});
+			current.Ka = {r, g, b};
 		}
 		else if (token == "Kd") {
 			float r, g, b;
 			ss >> r >> g >> b;
-			current.setKd({r, g, b});
+			current.Kd = {r, g, b};
 		}
 		else if (token == "Ks") {
 			float r, g, b;
 			ss >> r >> g >> b;
-			current.setKs({r, g, b});
+			current.Ks = {r, g, b};
 		}
 		else if (token == "Ns") {
 			float ns;
 			ss >> ns;
-			current.setNs(ns);
+			current.Ns = ns;
 		}
 		else if (token == "d") {
 			float d;
 			ss >> d;
-			current.setd(d);
+			current.d = d;
 		}
 		else if (token == "illum") {
 			int illum;
 			ss >> illum;
-			current.setIllum(illum);
+			current.illum = illum;
 		}
 		else if (token == "bump" || token.rfind("map_", 0) == 0) {
 			std::string path;
 			ss >> path;
-			try {
-				Texture text;
-				text.loadTexture("resources/" + path);
-				text.openGl2DTextureGen();
-				current.setTexture(token, std::move(text));
-			} catch (std::runtime_error) {
-				std::cerr << "Warning texture not loaded" << path << std::endl;
-			}
+				if (token == "map_Ka")
+					current.map_Ka = "ressources/" + path;
+				else if (token == "map_Kd")
+					current.map_Kd = "ressources/" + path;
+				else if (token == "map_Ks")
+					current.map_Ks = "ressources/" + path;
+				else if (token == "map_Ns")
+					current.map_Ns = "ressources/" + path;
+				else if (token == "map_d")
+					current.map_d = "ressources/" + path;
+				else if (token == "bump")
+					current.bump = "ressources/" + path;
+				else
+					std::cerr << "Strange map type: " << token << std::endl;
 		}
 	}
-	if (!current.getName().empty())
-		this->materials[current.getName()] = current;
+	if (!current.name.empty())
+		this->materials[current.name] = current;
 };
 
 void	ObjImporter::parseVertexLine(std::istringstream& iss) {
@@ -382,10 +388,10 @@ MeshData ObjImporter::buildMeshData() {
 		std::string matName = face.materialName;
 		SubMesh& submesh = submeshMap[matName];
 
-		// if (!matName.empty() && materials.count(matName))
-		// 	submesh.material = &materials[matName];
-		// else
-		// 	submesh.material = nullptr;
+		if (!matName.empty() && materials.count(matName))
+			submesh.material = &materials[matName];
+		else
+			submesh.material = nullptr;
 		for (size_t i = 1; i + 1 < face.fvertices.size(); ++i) {
 
 			FaceVertex fv[3] = {

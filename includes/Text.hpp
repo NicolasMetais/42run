@@ -1,5 +1,7 @@
 #pragma once
 #include <iostream>
+#include <unordered_map>
+#include <json.hpp>
 
 struct Text {
 	int sampler = -1;

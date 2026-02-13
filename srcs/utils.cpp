@@ -158,6 +158,7 @@ std::string utils::resolveUri(MeshData& meshdata, int index) {
 	return meshdata.images[uriIndex].uri;
 }
 
+//FAUT REFACTO C HORRIBLE
 void utils::prepareMats(MeshData& meshdata, TextureManager& texMng) {
 	for (auto& mat : meshdata.materials) {
 
@@ -190,5 +191,30 @@ void utils::prepareMats(MeshData& meshdata, TextureManager& texMng) {
 			std::string uri = resolveUri(meshdata, mat.emissiveTexture.index);
 			mat.emissiveTextureGPU = &texMng.getOrLoad(uri);
 		}
+
+		//Ka
+		if (mat.map_Ka.c_str())
+			mat.map_KaGPU = &texMng.getOrLoad(mat.map_Ka);
+
+		//Kd
+		if (mat.map_Kd.c_str())
+			mat.map_KdGPU = &texMng.getOrLoad(mat.map_Kd);
+
+		//Ks
+		if (mat.map_Ks.c_str())
+			mat.map_KsGPU = &texMng.getOrLoad(mat.map_Ks);
+
+		//Ns
+		if (mat.map_Ns.c_str())
+			mat.map_NsGPU = &texMng.getOrLoad(mat.map_Ns);
+
+		//d
+		if (mat.map_d.c_str())
+			mat.map_dGPU = &texMng.getOrLoad(mat.map_d);
+
+		//bump
+		if (mat.bump.c_str())
+			mat.bumpGPU = &texMng.getOrLoad(mat.bump);
+
 	}
 };

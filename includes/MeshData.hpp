@@ -1,12 +1,9 @@
 #pragma once
 #include <array>
-#include <Material.hpp>
 #include <Image.hpp>
 #include <Text.hpp>
 #include <Mat.hpp>
 #include <cfloat>
-
-
 
 #include <Matrix/Matrix.hpp>
 

@@ -235,6 +235,7 @@ void GltfModel::parseMaterials(const nlohmann::json& gltf) {
 
 	for (auto& jsonMaterial : gltf["materials"]) {
 		Mat newMaterial;
+		newMaterial.type = PBR; //type for shader pick
 
 		//pbrMetallicRougness
 		if (jsonMaterial.contains("pbrMetallicRoughness")) {
@@ -346,7 +347,7 @@ void GltfModel::parseMaterials(const nlohmann::json& gltf) {
 				newMaterial.extras[key] = value;
 		}
 
-		materials.push_back(newMaterial);
+		materials.push_back(std::move(newMaterial));
 	}
 };
 

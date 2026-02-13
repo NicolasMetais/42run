@@ -150,7 +150,7 @@ void App::render() {
 	Matrix<float> projection = this->camera.buildProjection();
 	Matrix<float> MVP = projection * view * model;
 
-	this->renderer.renderObj(MVP, this->data, model, this->camera, this->deltaTime);
+	this->renderer.rendering(MVP, this->data, model, this->camera, this->deltaTime);
 	this->skybox.draw(this->camera.buildViewNoTranslation(), projection);
 	SDL_GL_SwapWindow(this->window.getWin());
 };

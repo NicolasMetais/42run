@@ -7,7 +7,7 @@
 #include "Matrix/Matrix.hpp"
 #include <array>
 #include <include/glad/glad.h>
-#include <Material.hpp>
+#include <Mat.hpp>
 #include <Texture.hpp>
 #include <MeshData.hpp>
 #include <unordered_map>
@@ -38,7 +38,7 @@ class ObjImporter {
 			std::vector<FaceVertex> fvertices;
 			std::string materialName;
 		};
-		std::unordered_map <std::string, Material> materials;
+		std::unordered_map <std::string, Mat> materials;
 		std::vector<Face> f;
 	public:
 		ObjImporter () = default;

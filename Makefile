@@ -15,12 +15,12 @@ SRCS =	srcs/main.cpp \
 		srcs/Camera.cpp \
 		srcs/ObjImporter.cpp \
 		srcs/Skybox.cpp \
+		srcs/Shader.cpp \
 		srcs/Renderer.cpp \
 		srcs/Transform.cpp \
 		srcs/Texture.cpp \
 		srcs/Event.cpp \
 		srcs/utils.cpp \
-		srcs/Material.cpp \
 		loader/src/glad.c \
 
 OBJ_DIR = obj
