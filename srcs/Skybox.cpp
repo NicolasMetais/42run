@@ -1,7 +1,6 @@
 #include <Skybox.hpp>
-#include "shader.cpp"
 
-Skybox::Skybox() {
+Skybox::Skybox() : shaders("srcs/skybox.vs", "srcs/skybox.fs") {
 	this->skyboxVertices = {
     -1.0f,  1.0f, -1.0f,
     -1.0f, -1.0f, -1.0f,
@@ -87,11 +86,8 @@ Skybox::Skybox() {
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-	std::string vertexShader("srcs/skybox.vs");
-	std::string fragmentShader("srcs/skybox.fs");
-	this->shaderID = createShaderProgram(vertexShader, fragmentShader);
-	glUseProgram(this->shaderID);
-	glUniform1i(glGetUniformLocation(this->shaderID, "skybox"), 0);
+	shaders.bind();
+	shaders.setInt("skybox", 0);
 };
 
 void Skybox::draw(Matrix<float> view, Matrix<float>& projection) {
@@ -100,8 +96,10 @@ void Skybox::draw(Matrix<float> view, Matrix<float>& projection) {
 	glDepthMask(GL_FALSE);
 	glUseProgram(this->shaderID);
 
-	glUniformMatrix4fv(glGetUniformLocation(shaderID, "view"), 1, GL_TRUE, view.datal());
-	glUniformMatrix4fv(glGetUniformLocation(shaderID, "projection"), 1, GL_TRUE, projection.datal());
+	shaders.setMatrix4("view", view.datal());
+	shaders.setMatrix4("projection", projection.datal());
+	// glUniformMatrix4fv(glGetUniformLocation(shaderID, "view"), 1, GL_TRUE, view.datal());
+	// glUniformMatrix4fv(glGetUniformLocation(shaderID, "projection"), 1, GL_TRUE, projection.datal());
 
 	glBindVertexArray(this->skyboxVAO);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMaptexture);

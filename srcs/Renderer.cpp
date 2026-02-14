@@ -1,35 +1,51 @@
 #include <Renderer.hpp>
 
-Renderer::Renderer() : gltfShader("srcs/gltf.fs", "srcs/gltf.vs"), objShader("srcs/obj.fs", "srcs/obj.vs") {
+Renderer::Renderer() : gltfShader(), objShader() {
 	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
     	throw std::runtime_error("Failed to initialize GLAD");
+	new (&gltfShader) Shader("srcs/gltf.fs", "srcs/gltf.vs");
+	new (&objShader) Shader("srcs/obj.fs", "srcs/obj.vs");
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	glDepthMask(GL_TRUE);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glCullFace(GL_BACK);
+
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 };
 
-std::vector<float> flattenVertexData(const std::vector<Vertex>& vertices) {
+std::vector<float> flattenVertexData(SubMesh& subMesh) {
 	std::vector<float> flat;
-	flat.reserve(vertices.size() * (3+3+2+3));
-	for (const auto& v : vertices) {
+
+	for (const auto& v : subMesh.vertices) {
+		if (subMesh.hasPos)
 		for (size_t i = 0; i < 3; ++i) flat.push_back(v.position[i]);
 
-		for (size_t i = 0; i < 3; ++i) flat.push_back(v.normal[i]);
+		if (subMesh.hasNormal)
+			for (size_t i = 0; i < 3; ++i) flat.push_back(v.normal[i]);
 
-		// if (v.tangent.size() == 4) {
-		// 	for (int i = 0; i < 4; ++i) flat.push_back(v.tangent[i]);
-		// } else {
-		// 	// std::cout << "PAS DE TANGENT WESH" << std::endl;
-		// 	flat.push_back(1.0f); flat.push_back(0.0f); flat.push_back(0.0f); flat.push_back(0.0f);
-		// }
+		if (subMesh.hasTangent) {
+			for (int i = 0; i < 4; ++i) flat.push_back(v.tangent[i]);
+		} else {
+			// std::cout << "PAS DE TANGENT WESH" << std::endl;
+			flat.push_back(1.0f); flat.push_back(0.0f); flat.push_back(0.0f); flat.push_back(0.0f);
+		}
 
-		if (!v.uv.empty()) {
-			flat.push_back(v.uv[0][0]);
-			flat.push_back(v.uv[0][1]);
+		if (subMesh.hasTexCoord) {
+			for (size_t i = 0; i < subMesh.texCoordCount; ++i) {
+				flat.push_back(v.uv[i][0]);
+				flat.push_back(v.uv[i][1]);
+			}
 		} else {
 			flat.push_back(0.0f);
 			flat.push_back(0.0f);
 		}
-		if ((!v.color.empty())) {
-			// std::cout << "color exist" << std::endl;
-			flat.insert(flat.end(), v.color.begin(), v.color.end());
+		if (subMesh.hasColor) {
+			for (auto f : v.color)
+				flat.push_back(f);
 		} else {
 			// std::cout << "color empty" << std::endl;
 			flat.push_back(1.0f);
@@ -40,48 +56,60 @@ std::vector<float> flattenVertexData(const std::vector<Vertex>& vertices) {
 	return flat;
 }
 
-void Renderer::InitObj(MeshData& obj) {
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	glEnable(GL_CULL_FACE);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+void Renderer::InitMesh(SubMesh& subMesh) {
+	if (subMesh.vertices.empty()) 
+		return;
+	glGenVertexArrays(1, &subMesh.VAO);
+	glBindVertexArray(subMesh.VAO);
+	
+	glGenBuffers(1, &subMesh.VBO);
+	glBindBuffer(GL_ARRAY_BUFFER , subMesh.VBO);
 
-	for (auto& mesh : obj.submeshes) {
-		//mesh.vertexCount = mesh.vertices.size() / 11;
-		glGenVertexArrays(1, &mesh.VAO);
-		glBindVertexArray(mesh.VAO);
-		
-		glGenBuffers(1, &mesh.VBO);
-		glBindBuffer(GL_ARRAY_BUFFER , mesh.VBO);
-
-		std::vector<float> flatData = flattenVertexData(mesh.vertices);
-		glBufferData(GL_ARRAY_BUFFER, flatData.size() * sizeof(float), flatData.data(), GL_STATIC_DRAW);
-
-		if (!mesh.indices.empty()) {
-			glGenBuffers(1, &mesh.EBO);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.EBO);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.indices.size() * sizeof(uint32_t), mesh.indices.data(), GL_STATIC_DRAW);
-		}
-
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(3 * sizeof(float)));
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6 * sizeof(float)));
-		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(8 * sizeof(float)));
-		glEnableVertexAttribArray(3);
-		glBindVertexArray(0);
+	std::vector<float> flatData = flattenVertexData(subMesh);
+	glBufferData(GL_ARRAY_BUFFER, flatData.size() * sizeof(float), flatData.data(), GL_STATIC_DRAW);
+	if (!subMesh.indices.empty()) {
+		glGenBuffers(1, &subMesh.EBO);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, subMesh.EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, subMesh.indices.size() * sizeof(uint32_t), subMesh.indices.data(), GL_STATIC_DRAW);
 	}
-};
 
- void Renderer::toggleTexture() {
-	if (isTransitionning())
-		return ;
-	useTexture = !useTexture; 
-	transitionTarget = useTexture ? 1.0f : 0.0f; 
-};
+	VertexLayout layout;
+	size_t offset = 0;
+	GLuint attribIndex = 0;
+	
+	if (subMesh.hasPos) {
+		layout.attributes.push_back({attribIndex++, 3, GL_FLOAT, false, offset});
+		offset += 3 * sizeof(float);
+	}
+	if (subMesh.hasNormal) {
+		layout.attributes.push_back({attribIndex++, 3, GL_FLOAT, false, offset});
+		offset += 3 * sizeof(float);
+	}
+	if (subMesh.hasTangent) {
+		layout.attributes.push_back({attribIndex++, 4, GL_FLOAT, false, offset});
+		offset += 4 * sizeof(float);
+	}
+	if (subMesh.hasTexCoord) {
+		for (size_t i = 0; i < subMesh.texCoordCount; ++i) {
+			layout.attributes.push_back({attribIndex++, 2, GL_FLOAT, false, offset});
+			offset += 2 * sizeof(float);
+		}
+	}
+	if (subMesh.hasColor) {
+		for (size_t i = 0; i < subMesh.colorCount; ++i) {
+			layout.attributes.push_back({attribIndex++, 3, GL_FLOAT, false, offset});
+			offset += 3 * sizeof(float);
+		}
+	}
 
+	layout.stride = offset;
+
+	for (const auto& attr : layout.attributes) {
+		glVertexAttribPointer(attr.index, attr.size, attr.type, attr.normalized, layout.stride, (void*)attr.offset);
+		glEnableVertexAttribArray(attr.index);
+	}
+	glBindVertexArray(0);
+};
 
 void Renderer::bindTexture(int& texSlot, GLuint loc, GLuint flagLoc, const Texture* texture)  {
 
@@ -120,16 +148,20 @@ void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat) {
 		shader.setInt("isMap_Ns", 0);
 		shader.setInt("isMap_d", 0);
 		shader.setInt("isBump", 0);
+		shader.setVec3("lightColor", 1.0f, 0.0f, 1.0f);
+		shader.setVec3("lightDir", -0.5f, -1.0f, -0.3f);
 		return ;
 	} else if (mat->type == MaterialType::PHONG) {
 		shader.setVec3("Kd", mat->Kd.x(), mat->Kd.y(), mat->Kd.z());
 		shader.setVec3("Ka", mat->Ka.x(), mat->Ka.y(), mat->Ka.z());
-		shader.setVec3("Ks", mat->Ks.x(), mat->Ks.y(), mat->Ks.x());
+		shader.setVec3("Ks", mat->Ks.x(), mat->Ks.y(), mat->Ks.z());
 		shader.setfloat("Ni", mat->Ni);
 		shader.setInt("Ns", mat->Ns);
 		shader.setInt("illum", mat->illum);
 		shader.setfloat("d", mat->d);
 		shader.setInt("hasMtl", 1);
+		shader.setVec3("lightColor", 1.0f, 0.0f, 1.0f);
+		shader.setVec3("lightDir", -0.5f, -1.0f, -0.3f);
 
 		int texSlot = 1; //incremente par bindTexture
 		bindTexture(texSlot, shader.getUniformLocation("map_Ka"), shader.getUniformLocation("isMap_Ka"), mat->map_KaGPU);
@@ -144,9 +176,23 @@ void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat) {
 
 };
 
+void Renderer::draw(SubMesh& mesh) {
+	glBindVertexArray(mesh.VAO);
+	if (mesh.material && mesh.material->doubleSided)
+		glDisable(GL_CULL_FACE);
+	else
+		glEnable(GL_CULL_FACE);
+	if (!mesh.EBO)
+		glDrawArrays(GL_TRIANGLES, 0, mesh.vertices.size());
+	else {
+		glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, 0);
+	}
+	glBindVertexArray(0);
+};
 
 
-void Renderer::rendering(Matrix<float>& mvp, MeshData& obj, Matrix<float> model, Camera& camera, float deltaTime) {
+
+void Renderer::rendering(Matrix<float>& mvp, MeshData& obj, Matrix<float> model, Camera& camera) {
 	for (auto& mesh : obj.submeshes) {
 		const Mat* mat = mesh.material;
 
@@ -157,67 +203,6 @@ void Renderer::rendering(Matrix<float>& mvp, MeshData& obj, Matrix<float> model,
 		sendMaterialUniforms(shader, mat);
 		draw(mesh);
 	}
-
-	glUniform3f(loc.lightColor, 1.0f, 0.0f, 1.0f); //couleur de la lumiere;
-	glUniform3f(loc.lightDir, -0.5f, -1.0f, -0.3f); //direction de la lumiere
-
-	glActiveTexture(GL_TEXTURE0);
-	glUniform1i(loc.scopTexture, 0);
-	ScopTexture.bind();
-	glUniform1i(loc.useTexture, (useTexture || isTransitionning()) ? 1 : 0);
-
-	for (auto& mesh : obj.submeshes) {
-		// if (mesh.material)
-		// {
-			// Vector<float> Kd = mesh.mat->getKd();
-			// Vector<float> Ka = mesh.mat->getKa();
-			// Vector<float> Ks = mesh.mat->getKs();
-			// glUniform1i(loc.hasMtl, 1);
-			// glUniform3f(loc.Kd, Kd.x(), Kd.y(), Kd.z());
-			// glUniform3f(loc.Ka, Ka.x(), Ka.y(), Ka.z());
-			// glUniform3f(loc.Ks, Ks.x(), Ks.y(), Ks.z());
-			// glUniform1f(loc.Ns, mesh.mat->getNs());
-			// glUniform1f(loc.Ni, mesh.mat->getNi());
-			// glUniform1f(loc.d, mesh.mat->getd());
-			// glUniform1i(loc.illum, mesh.mat->getIllum());
-			// bindTexture(texSlot, loc.map_Ka, loc.isMap_Ka, mesh.mat->getMapKa());
-			// bindTexture(texSlot, loc.map_Kd, loc.isMap_Kd, mesh.mat->getMapKd());
-			// bindTexture(texSlot, loc.map_Ks, loc.isMap_Ks, mesh.mat->getMapKs());
-			// bindTexture(texSlot, loc.map_Ns, loc.isMap_Ns, mesh.mat->getMapNs());
-			// bindTexture(texSlot, loc.map_d, loc.isMap_d, mesh.mat->getMapd());
-			// bindTexture(texSlot, loc.bump, loc.isBump, mesh.mat->getMapBump());
-			// std::cout << "material detected" << std::endl;
-		// }
-		// else
-		// {
-			glUniform3f(loc.Kd, 0.8, 0.8, 0.8);
-			glUniform3f(loc.Ka, 0.1, 0.1, 0.1);
-			glUniform3f(loc.Ks, 0.2, 0.2, 0.2);
-			glUniform1f(loc.Ni, 1.0);
-			glUniform1f(loc.Ns, 32);
-			glUniform1i(loc.illum, 0);
-			glUniform1f(loc.d,1.0);
-			glUniform1i(loc.hasMtl, 0);
-			glUniform1i(loc.isMap_Ka, 0); //wrong variables ?
-			glUniform1i(loc.isMap_Kd, 0);
-			glUniform1i(loc.isMap_Ks, 0);
-			glUniform1i(loc.isMap_Ns, 0);
-			glUniform1i(loc.isMap_d, 0);
-			glUniform1i(loc.isBump, 0);
-		// }
-		glBindVertexArray(mesh.VAO);
-		GLenum err = glGetError();
-
-		
-		if (!mesh.EBO)
-			glDrawArrays(GL_TRIANGLES, 0, mesh.vertices.size());
-		else {
-			// std::cout << mesh.indices.size() << std::endl;
-			glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, 0);
-		}
-		err = glGetError();
-		glBindVertexArray(0);
-	}
 };
 
 void Renderer::cleanup(MeshData& obj) {
@@ -226,7 +211,15 @@ void Renderer::cleanup(MeshData& obj) {
 			glDeleteVertexArrays(1, &mesh.VAO);
 		if (mesh.VBO)
 			glDeleteBuffers(1, &mesh.VBO);
+		if (mesh.EBO)
+			glDeleteBuffers(1, &mesh.EBO);
+			mesh.VAO = 0;
+			mesh.VBO = 0;
+			mesh.EBO = 0;
 		}
-	if (this->shaderProgram) //A CHANGER
-		glDeleteProgram(this->shaderProgram);
+
+	if (this->gltfShader.getId())
+		glDeleteProgram(this->gltfShader.getId());
+	if (this->objShader.getId())
+		glDeleteProgram(this->objShader.getId());
 };

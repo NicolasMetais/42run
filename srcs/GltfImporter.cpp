@@ -21,10 +21,6 @@ MeshData GltfImporter::buildMeshData(const GltfModel& model) {
         for (size_t i = 0; i < posAccessor.count; ++i) {
             Vector<float> pos = posAccessor.getVector3(i);
             Vector<float> norm = normAccessor ? normAccessor->getVector3(i) : Vector<float>{0,0,0};
-
-            std::cout << "    Vertex[" << i << "] ";
-            std::cout << "pos: (" << pos[0] << ", " << pos[1] << ", " << pos[2] << ") ";
-            std::cout << "norm: (" << norm[0] << ", " << norm[1] << ", " << norm[2] << ")\n";
         }
     }
 }
@@ -48,14 +44,19 @@ MeshData GltfImporter::buildMeshData(const GltfModel& model) {
 			if (primitive.positionAccessor < 0) continue;
 
 			const auto& posAccessor = model.accessors[primitive.positionAccessor];
+			SubMesh.hasPos = true;
 
 			const AccessorView* normAccessor = nullptr;
-			if (primitive.normalAccessor >= 0)
+			if (primitive.normalAccessor >= 0) {
 				normAccessor = &model.accessors[primitive.normalAccessor];
+				SubMesh.hasNormal = true;
+			}
 
 			const AccessorView* tangentAccessor = nullptr;
-			if (primitive.tangentAccessor >= 0)
+			if (primitive.tangentAccessor >= 0) {
 				tangentAccessor = &model.accessors[primitive.tangentAccessor];
+				SubMesh.hasTangent = true;
+			}
 			// const auto& normAccessor = model.accessors[primitive.normalAccessor];
 			// const auto& tangentAccessor = model.accessors[primitive.tangentAccessor];
 
@@ -89,12 +90,8 @@ MeshData GltfImporter::buildMeshData(const GltfModel& model) {
 				}
 				//normal
 				if (normAccessor && normAccessor->type == ValueType::VEC3) {
-						v.normal = normAccessor->getVector3(i);
+					v.normal = normAccessor->getVector3(i);
 					v.normal = v.normal.normalize();
-					// std::cout << "normal: ("
-					// << v.normal[0] << ", "
-					// << v.normal[1] << ", "
-					// << v.normal[2] << ")\n";
 				} else
 					v.normal = {0.0f, 0.0f, 0.0f};
  
@@ -105,19 +102,25 @@ MeshData GltfImporter::buildMeshData(const GltfModel& model) {
 					v.tangent = {0.0f, 0.0f, 0.0f}; //a gerer
 
 				//uv
-				v.uv.resize(primitive.texcoords.size());
-				size_t uvIndex = 0;
-				for (auto& [key, index] : primitive.texcoords)
-					v.uv[uvIndex++] = model.accessors[index].type == ValueType::VEC2 ? model.accessors[index].getVector2(i) : Vector<float>{0,0};
+				if (!primitive.texcoords.empty()) {
+					SubMesh.hasTexCoord = true;
+					SubMesh.texCoordCount = primitive.texcoords.size();
+				}
+				for (auto& [setIndex, accessorIndex] : primitive.texcoords)
+					v.uv[setIndex] = model.accessors[accessorIndex].type == ValueType::VEC2 ? model.accessors[accessorIndex].getVector2(i) : Vector<float>{0,0};
 
 				//color
+				if (!primitive.colors.empty()) {
+					SubMesh.hasColor = true;
+					SubMesh.colorCount = primitive.colors.size();
+				}
 				v.color.clear();
-				for (auto& [key, index] : primitive.colors) {
-					Vector<float> c = model.accessors[index].type == ValueType::VEC3 ? model.accessors[index].getVector3(i) : Vector<float>{1,1,1};
+				for (auto& [setIndex, accessorIndex] : primitive.colors) {
+					Vector<float> c = model.accessors[accessorIndex].type == ValueType::VEC3 ? model.accessors[accessorIndex].getVector3(i) : Vector<float>{1,1,1};
 					v.color.insert(v.color.end(), c.data.begin(), c.data.end()); //ignorance de l'alpha pour le moment
 				}
 
-				// joints, weights a faire en pluus
+				// joints, weights a faire en pluus sur le meme format que uv et color parce que hashmap
 			}
 			meshData.submeshes.push_back(std::move(SubMesh));
 		}

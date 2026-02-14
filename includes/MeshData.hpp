@@ -29,6 +29,24 @@ struct SubMesh { //un submesh par material pour render le mesh par type de mater
 	GLuint VBO = 0;
 	GLuint EBO = 0;
 	const Mat* material = nullptr; //IL FAUT ADAPTER CETTE STRUCTURE A MON OBJIMPORTER
+
+	//checker pour building d'attributes modulable openGL
+	bool hasPos = false;
+	bool hasNormal = false;
+	bool hasUv = false;
+	bool hasTangent = false;
+
+	bool hasTexCoord = false;
+	size_t texCoordCount = 0;
+
+	bool hasColor = false;
+	size_t colorCount = 0;
+
+	bool hasJoints = false;
+	size_t jointCount = 0;
+
+	bool hasWeights = false;
+	size_t weightCount = 0;
 };
 
 struct MeshData {

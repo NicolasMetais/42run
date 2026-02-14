@@ -19,6 +19,7 @@ SRCS =	srcs/main.cpp \
 		srcs/Renderer.cpp \
 		srcs/Transform.cpp \
 		srcs/Texture.cpp \
+		srcs/TextureManager.cpp \
 		srcs/Event.cpp \
 		srcs/utils.cpp \
 		loader/src/glad.c \

@@ -9,29 +9,34 @@
 #include <Window.hpp>
 #include <Camera.hpp>
 
+struct VertexAttribute { //description d'un attribut pour gestion dynamique
+	GLuint index;
+	GLuint size;
+	GLenum type;
+	bool normalized;
+	size_t offset;
+};
+
+struct VertexLayout {
+	std::vector<VertexAttribute> attributes;
+	GLsizei stride;
+};
+
 class Renderer {
 	private:
-		// GLuint shaderProgram;
-		// bool transitionning = false;
-		// bool transitionDir = true;
-
         Shader gltfShader;
         Shader objShader;
-        bool useTexture = false;
-		float transition = 0.0f;
-		float transitionTarget = 0.0f;
-		float transitionSpeed = 0.5f;
-
-		Texture ScopTexture;
         TextureManager cache;
-	public:
-		Renderer();
-		void rendering(Matrix<float>& mvp, MeshData& obj, Matrix<float> model, Camera& camera, float deltaTime);
-		void InitObj(MeshData& obj);
-		void cleanup(MeshData& obj);
-		void bindTexture(int& texSlot, GLuint loc, GLuint , const Texture* texture);
-		bool isTransitionning() const { return std::abs(transition - transitionTarget) > 0.001f; };
-        void toggleTexture();
+
 		void sendCommonUniforms(Shader& shader, Matrix<float>& mvp, Matrix<float>& model, Camera& camera);
 		void sendMaterialUniforms(Shader& shader, const Mat* mat);
+		void draw(SubMesh& mesh);
+	public:
+		Renderer();
+		void rendering(Matrix<float>& mvp, MeshData& obj, Matrix<float> model, Camera& camera);
+		void InitMesh(SubMesh& subMesh);
+		void cleanup(MeshData& obj);
+		void bindTexture(int& texSlot, GLuint loc, GLuint , const Texture* texture);
+
+
 };

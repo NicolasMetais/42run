@@ -11,12 +11,13 @@ class Shader {
 		std::string readShaderFile(const std::string& path);
 	
 	public:
+		Shader() : id(0) {};
 		Shader(const std::string& vertexSrc, const std::string& fragmentSrc);
 		Shader(const Shader&) = delete;
 		Shader& operator=(const Shader&) = delete;
 		~Shader() { glDeleteProgram(this->id); };
 
-		void bind() const;
+		void bind() const; //PROTEGER POUR NE APS LANCER UN SHADER INVALIDE ET EVITER SEGFAULT
 		void unbind() const;
 
 		void setMatrix4(const std::string& name, const float* value) const;
@@ -24,6 +25,8 @@ class Shader {
 		void setInt(const std::string& name, const int value) const;
 		void setfloat(const std::string& name, const float value) const;
 		GLint getUniformLocation(const std::string& name) const;
+		GLuint getId() const { return this->id; };
+
 
 
 };

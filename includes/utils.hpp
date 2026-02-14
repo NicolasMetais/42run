@@ -4,8 +4,6 @@
 #include <MeshData.hpp>
 #include <TextureManager.hpp>
 
-
-
 namespace utils {
 	Matrix<float> rotationX(float x);
 	Matrix<float> rotationY(float y);

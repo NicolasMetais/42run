@@ -10,6 +10,6 @@ class Keyboard {
 		uint16_t moveFlags = 0;
 	public:
 		~Keyboard() {};
-		void processEvent(SDL_Event& e, bool& running, Renderer& render, Camera& cam, float& fps, bool& lockCam);
+		void processEvent(SDL_Event& e, bool& running, Camera& cam, float& fps, bool& lockCam);
 		void applyMovement(Camera& camera, Transform& transform, float deltaTime);
 };

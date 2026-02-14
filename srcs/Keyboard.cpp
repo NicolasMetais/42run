@@ -16,16 +16,12 @@
 #define KEY_D 0x1
 
 
-void Keyboard::processEvent(SDL_Event& e, bool& running, Renderer& render, Camera& cam, float& fps, bool& lockCam) {
+void Keyboard::processEvent(SDL_Event& e, bool& running, Camera& cam, float& fps, bool& lockCam) {
 switch (e.type) {
 	case SDL_KEYDOWN:
 	case SDL_KEYUP:
 		bool pressed = (e.type == SDL_KEYDOWN);
 		switch (e.key.keysym.sym) {
-			case SDLK_t:
-				if (pressed)
-					render.toggleTexture();
-			break;
 			case SDLK_EQUALS:
 			case SDLK_KP_PLUS:
 				if (pressed)

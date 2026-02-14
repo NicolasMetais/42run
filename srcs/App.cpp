@@ -110,20 +110,12 @@ App::App(int width, int height) : window(width, height), renderer(), mesh()
 			this->data = this->gltf.buildMeshData(model);
 			printMeshData(this->data);
 
-			this->renderer.InitObj(this->data);
+            for (auto& submesh : data.submeshes)
+                this->renderer.InitMesh(submesh);
 			this->transform.setScale(2.0f);
 			Vector<float> cent(3);
-			std::cout << "max: " << data.max << " min: " << data.min << std::endl;
 			cent = (data.max + data.min) * 0.5f;
-			std::cout << "center: " << cent << std::endl;
 			this->transform.setPosition(-cent.x(), -cent.y(), -cent.z());
-
-			glEnable(GL_DEPTH_TEST);
-			glDisable(GL_CULL_FACE);
-			glDepthFunc(GL_LESS);
-			glDepthMask(GL_TRUE);
-			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
 };
 
 App::~App(){};
@@ -133,7 +125,7 @@ void App::processEvents() {
 	while (SDL_PollEvent(&e)) {
 		event(e, this->camera, this->running); //resize window + cross
 		mouse.processEvent(e);//mouse events
-		keyboard.processEvent(e, this->running, this->renderer, this->camera, this->fps, this->mouselock); //keyboard events
+		keyboard.processEvent(e, this->running, this->camera, this->fps, this->mouselock); //keyboard events
 	}
 	mouse.applyRotation(this->transform, this->camera); //mouse rotation
 	keyboard.applyMovement(this->camera, this->transform, this->deltaTime); //keyboard movement
@@ -150,7 +142,7 @@ void App::render() {
 	Matrix<float> projection = this->camera.buildProjection();
 	Matrix<float> MVP = projection * view * model;
 
-	this->renderer.rendering(MVP, this->data, model, this->camera, this->deltaTime);
+	this->renderer.rendering(MVP, this->data, model, this->camera);
 	this->skybox.draw(this->camera.buildViewNoTranslation(), projection);
 	SDL_GL_SwapWindow(this->window.getWin());
 };

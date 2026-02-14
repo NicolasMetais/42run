@@ -8,8 +8,8 @@ Texture& TextureManager::getOrLoad(const std::string& uri) {
 	Texture tex;
 	tex.loadTexture(uri);
 	tex.openGl2DTextureGen();
-	auto [it, inserted] = cache.emplace(uri, std::move(tex));
-	return it->second;
+	auto [itt, inserted] = cache.emplace(uri, tex);
+	return itt->second;
 };
 
 void TextureManager::clear() {

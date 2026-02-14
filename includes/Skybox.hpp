@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <include/glad/glad.h>
 #include <Window.hpp>
+#include <Shader.hpp>
 #include <Texture.hpp>
 #include <Camera.hpp>
 
@@ -20,6 +21,7 @@ class Skybox {
 		GLuint cubeMaptexture;
 		std::vector<SkyboxFace> TextureList;
 		std::vector<float> skyboxVertices;
+		Shader shaders;
 		public:
 		Skybox();
 		void draw(Matrix<float> view, Matrix<float>& projection);
