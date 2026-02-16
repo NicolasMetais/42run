@@ -1,8 +1,12 @@
 #include <Renderer.hpp>
+#include <VertexAttrib.hpp>
+
 
 Renderer::Renderer() : gltfShader(), objShader() {
 	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
     	throw std::runtime_error("Failed to initialize GLAD");
+	printf("OpenGL version: %s\n", glGetString(GL_VERSION));
+	printf("GLSL version: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
 	new (&gltfShader) Shader("srcs/gltf.fs", "srcs/gltf.vs");
 	new (&objShader) Shader("srcs/obj.fs", "srcs/obj.vs");
 	glEnable(GL_DEPTH_TEST);
@@ -27,30 +31,18 @@ std::vector<float> flattenVertexData(SubMesh& subMesh) {
 		if (subMesh.hasNormal)
 			for (size_t i = 0; i < 3; ++i) flat.push_back(v.normal[i]);
 
-		if (subMesh.hasTangent) {
+		if (subMesh.hasTangent)
 			for (int i = 0; i < 4; ++i) flat.push_back(v.tangent[i]);
-		} else {
-			// std::cout << "PAS DE TANGENT WESH" << std::endl;
-			flat.push_back(1.0f); flat.push_back(0.0f); flat.push_back(0.0f); flat.push_back(0.0f);
-		}
 
 		if (subMesh.hasTexCoord) {
 			for (size_t i = 0; i < subMesh.texCoordCount; ++i) {
 				flat.push_back(v.uv[i][0]);
 				flat.push_back(v.uv[i][1]);
 			}
-		} else {
-			flat.push_back(0.0f);
-			flat.push_back(0.0f);
 		}
 		if (subMesh.hasColor) {
 			for (auto f : v.color)
 				flat.push_back(f);
-		} else {
-			// std::cout << "color empty" << std::endl;
-			flat.push_back(1.0f);
-			flat.push_back(1.0f);
-			flat.push_back(1.0f);
 		}
 	}
 	return flat;
@@ -116,7 +108,7 @@ void Renderer::bindTexture(int& texSlot, GLuint loc, GLuint flagLoc, const Textu
 	if (texture) {
 		glActiveTexture(GL_TEXTURE0 + texSlot);
 		glUniform1i(loc, texSlot);
-		glUniform1i(flagLoc, texSlot);
+		glUniform1i(flagLoc, 1);
 		texture->bind();
 		texSlot++;
 	} else
@@ -131,7 +123,9 @@ void Renderer::sendCommonUniforms(Shader& shader, Matrix<float>& mvp, Matrix<flo
 	shader.setVec3("viewPos", cam.x(), cam.y(), cam.z()); //pos de la camera
 };
 
-void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat) {
+void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mesh) {
+	int texSlot = 0; //incremente par bindTexture
+
 	if (!mat) {
 		shader.setVec3("Kd", 0.8f, 0.8f, 0.8f);
 		shader.setVec3("Ka", 0.1f, 0.1f, 0.1f);
@@ -163,7 +157,7 @@ void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat) {
 		shader.setVec3("lightColor", 1.0f, 0.0f, 1.0f);
 		shader.setVec3("lightDir", -0.5f, -1.0f, -0.3f);
 
-		int texSlot = 1; //incremente par bindTexture
+
 		bindTexture(texSlot, shader.getUniformLocation("map_Ka"), shader.getUniformLocation("isMap_Ka"), mat->map_KaGPU);
 		bindTexture(texSlot, shader.getUniformLocation("map_Kd"), shader.getUniformLocation("isMap_Kd"), mat->map_KdGPU);
 		bindTexture(texSlot, shader.getUniformLocation("map_Ks"), shader.getUniformLocation("isMap_Ks"), mat->map_KsGPU);
@@ -171,7 +165,35 @@ void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat) {
 		bindTexture(texSlot, shader.getUniformLocation("map_d"), shader.getUniformLocation("isMap_d"), mat->map_dGPU);
 		bindTexture(texSlot, shader.getUniformLocation("bump"), shader.getUniformLocation("isBump"), mat->bumpGPU);
 	} else {
-		//gltf uniforms
+		auto& pbr = mat->pbrMetallicRoughness;
+
+		float metallic = (pbr.metallicFactor < 0.0f) ? 1.0f : pbr.metallicFactor;
+		float roughness = (pbr.roughnessFactor < 0.0f) ? 1.0f : pbr.roughnessFactor;
+
+		shader.setVec4("BaseColorFactor", pbr.baseColorFactor[0], pbr.baseColorFactor[1], pbr.baseColorFactor[2], pbr.baseColorFactor[3]);
+		shader.setfloat("MetallicFactor", metallic);
+		shader.setfloat("RoughnessFactor", roughness);
+
+		shader.setVec3("EmissiveFactor", mat->emissiveFactor[0], mat->emissiveFactor[1], mat->emissiveFactor[2]);
+
+		shader.setfloat("NormalScale", mat->normalTextureScale);
+		shader.setfloat("OcclusionStrength", mat->occlusionStrength);
+		shader.setfloat("AlphaCutOff", mat->alphaCutoff);
+
+		//Alphamode
+		int alphaMode = 0;
+		if (mat->alphaMode == "MASK") alphaMode = 1;
+		if (mat->alphaMode == "BLEND") alphaMode = 2;
+		shader.setInt("AlphaMode", alphaMode);
+		bindTexture(texSlot, shader.getUniformLocation("BaseColorTex"), shader.getUniformLocation("hasBaseColorTexture"), mat->baseColorTextureGPU);
+		bindTexture(texSlot, shader.getUniformLocation("MetallicRougnessTex"), shader.getUniformLocation("hasMetallicRougnessTexture"), mat->metallicRoughnessTextureGPU);
+		bindTexture(texSlot, shader.getUniformLocation("NormalMap"), shader.getUniformLocation("hasNormalMap"), mat->normalTextureGPU);
+		bindTexture(texSlot, shader.getUniformLocation("OcclusionTex"), shader.getUniformLocation("hasOcclusionTexture"), mat->occlusionTextureGPU);
+		bindTexture(texSlot, shader.getUniformLocation("EmissiveTex"), shader.getUniformLocation("hasEmissiveTexture"), mat->emissiveTextureGPU);
+
+		shader.setInt("hasTangent", mesh.hasTangent);
+		shader.setInt("hasVertexColor", mesh.hasColor);
+
 	}
 
 };
@@ -200,7 +222,7 @@ void Renderer::rendering(Matrix<float>& mvp, MeshData& obj, Matrix<float> model,
 		shader.bind();
 
 		sendCommonUniforms(shader, mvp, model, camera);
-		sendMaterialUniforms(shader, mat);
+		sendMaterialUniforms(shader, mat, mesh);
 		draw(mesh);
 	}
 };

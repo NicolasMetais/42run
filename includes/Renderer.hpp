@@ -29,7 +29,7 @@ class Renderer {
         TextureManager cache;
 
 		void sendCommonUniforms(Shader& shader, Matrix<float>& mvp, Matrix<float>& model, Camera& camera);
-		void sendMaterialUniforms(Shader& shader, const Mat* mat);
+		void sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mesh);
 		void draw(SubMesh& mesh);
 	public:
 		Renderer();

@@ -22,6 +22,7 @@ class Shader {
 
 		void setMatrix4(const std::string& name, const float* value) const;
 		void setVec3(const std::string& name, const float x, const float y, const float z) const;
+		void setVec4(const std::string& name, const float x, const float y, const float z, const float w) const;
 		void setInt(const std::string& name, const int value) const;
 		void setfloat(const std::string& name, const float value) const;
 		GLint getUniformLocation(const std::string& name) const;
