@@ -1,5 +1,6 @@
 .vscode
-obj/loader/*.o
-obj/loader/*.d
+42Run
+obj/loader/src/*.o
+obj/loader/src/*.d
 obj/srcs/*.o
 obj/srcs/*.d
