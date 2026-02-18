@@ -1,3 +1,5 @@
 .vscode
-/obj/
-*.o
+obj/loader/*.o
+obj/loader/*.d
+obj/srcs/*.o
+obj/srcs/*.d

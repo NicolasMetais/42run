@@ -5,8 +5,6 @@
 Renderer::Renderer() : gltfShader(), objShader() {
 	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
     	throw std::runtime_error("Failed to initialize GLAD");
-	printf("OpenGL version: %s\n", glGetString(GL_VERSION));
-	printf("GLSL version: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
 	gltfShader = Shader("srcs/gltf.vs", "srcs/gltf.fs");
 	objShader = Shader("srcs/obj.vs", "srcs/obj.fs");
 	glEnable(GL_DEPTH_TEST);
