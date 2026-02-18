@@ -1,4 +1,7 @@
 #pragma once
+
+struct GltfModel;
+
 #include <vector>
 #include <cstddef>
 #include <cstring>
@@ -8,7 +11,6 @@
 #include <BufferView.hpp>
 #include <Buffer.hpp>
 #include <Matrix/Matrix.hpp>
-
 #include <GltfUtils.hpp>
 #include <json.hpp>
 #include <cstdint>
@@ -31,19 +33,18 @@ struct AccessorView {
     std::unordered_map<std::string, nlohmann::json> extensions; // pas implementer gestion d'addon/plugin
 	std::unordered_map<std::string, nlohmann::json> extras; //flag d'annotation. Parse et stocker mais pas utiliser par le programme intentionnelement
 
-    Vector<float> getVector(size_t index, size_t components) const;
-    Vector<float> getVector2(size_t i) const;
-    Vector<float> getVector3(size_t i) const;
-    Vector<float> getVector4(size_t i) const;
+    Vector<float> getVector(size_t index, size_t components, const uint8_t* basePtr) const;
+    Vector<float> getVector2(size_t i,  const uint8_t* basePtr) const;
+    Vector<float> getVector3(size_t i, const uint8_t* basePtr) const;
+    Vector<float> getVector4(size_t i, const uint8_t* basePtr) const;
     float readComponentAsFloat(const uint8_t* ptr) const;
 
     template<typename T>
-    T getScalar(size_t index) const {
+    T getScalar(size_t index, const uint8_t* basePtr) const {
 
         size_t stride = bufferView->byteStride != 0 ? bufferView->byteStride : componentSize(component);
 
-
-        const uint8_t* ptr = bufferView->base + byteOffset + index * stride;
+        const uint8_t* ptr = basePtr + bufferView->byteOffset + byteOffset + index * stride;
 
         if constexpr (std::is_same_v<T, float>) { //constexpr = le if est gere a la compilation et supprime le code qui ne va pas etre use
             return readComponentAsFloat(ptr);

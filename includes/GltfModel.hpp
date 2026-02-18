@@ -1,9 +1,7 @@
 #pragma once
 #include <iostream>
 #include <fstream>
-
 #include <vector>
-#include <AccessorView.hpp>
 #include <Mesh.hpp>
 #include <json.hpp>
 #include <Buffer.hpp>
@@ -16,6 +14,7 @@
 #include <Sampler.hpp>
 #include <Animation.hpp>
 #include <Skin.hpp>
+#include <AccessorView.hpp>
 
 
 struct GltfModel {
@@ -44,7 +43,7 @@ struct GltfModel {
 	void parseBuffer(const nlohmann::json& gltf);
 	void parseScenes(const nlohmann::json& gltf);
 	void printData() const;
-	void linkBufferViewToBinary();
+	// void linkBufferViewToBinary(); // not anymore
 	// constexpr uint32_t componentCount(ValueType t);
 	size_t accesorByteSize(const AccessorView& a);
 	// size_t componentSize(ComponentType c);

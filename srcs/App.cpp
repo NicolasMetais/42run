@@ -104,11 +104,10 @@ App::App(int width, int height) : window(width, height), renderer(), mesh()
 		, camera(static_cast<float>(width), static_cast<float>(height), Vector<float>{5, 0, 0}, Vector<float>{0,0,0}, Vector<float>{0,1,0})
 		, transform(), skybox(), timer(), running(true) {
 
-			GltfModel model;
 			model.parseJson("resources/TwoSidedPlane.gltf");
 			// model.printData();
 			this->data = this->gltf.buildMeshData(model);
-			printMeshData(this->data);
+			// printMeshData(this->data);
 
             for (auto& submesh : data.submeshes)
                 this->renderer.InitMesh(submesh);

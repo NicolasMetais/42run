@@ -24,6 +24,7 @@ class App {
 		Keyboard keyboard;
 		Mouse mouse;
 		GltfImporter gltf;
+		GltfModel model;
 		MeshData data; //temporaire
 		bool running;
 		bool mouselock = true;

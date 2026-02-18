@@ -13,5 +13,5 @@ struct BufferView {
 	std::unordered_map<std::string, nlohmann::json> extensions;
 	std::unordered_map<std::string, nlohmann::json> extras;
 
-	uint8_t* base = nullptr;
+	uint8_t * base = nullptr;
 };

@@ -1,6 +1,8 @@
 #include <GltfImporter.hpp>
 
 MeshData GltfImporter::buildMeshData(const GltfModel& model) {
+	const uint8_t* basePtr = model.binaryData.data();
+
 	for (size_t meshIdx = 0; meshIdx < model.meshes.size(); ++meshIdx) {
     const auto& mesh = model.meshes[meshIdx];
     std::cout << "Mesh #" << meshIdx << ":\n";
@@ -11,7 +13,7 @@ MeshData GltfImporter::buildMeshData(const GltfModel& model) {
 
         // Accesseur de positions
         if (prim.positionAccessor < 0) continue;
-        const auto& posAccessor = model.accessors[prim.positionAccessor];
+        	const auto& posAccessor = model.accessors[prim.positionAccessor];
 
         // Accesseur de normales
         const AccessorView* normAccessor = nullptr;
@@ -19,8 +21,9 @@ MeshData GltfImporter::buildMeshData(const GltfModel& model) {
             normAccessor = &model.accessors[prim.normalAccessor];
 
         for (size_t i = 0; i < posAccessor.count; ++i) {
-            Vector<float> pos = posAccessor.getVector3(i);
-            Vector<float> norm = normAccessor ? normAccessor->getVector3(i) : Vector<float>{0,0,0};
+
+            Vector<float> pos = posAccessor.getVector3(i, basePtr);
+            Vector<float> norm = normAccessor ? normAccessor->getVector3(i, basePtr) : Vector<float>{0,0,0};
         }
     }
 }
@@ -67,7 +70,7 @@ MeshData GltfImporter::buildMeshData(const GltfModel& model) {
 
 				SubMesh.indices.resize(indexCount);
 				for (size_t i = 0; i < indexCount; ++i) {
-					SubMesh.indices[i] = indexAccessor.getScalar<uint16_t>(i);
+					SubMesh.indices[i] = indexAccessor.getScalar<uint16_t>(i, basePtr);
 				}
 			}
 
@@ -78,8 +81,10 @@ MeshData GltfImporter::buildMeshData(const GltfModel& model) {
 				auto& v = SubMesh.vertices[i];
 
 				//pos
-				if (posAccessor.type == ValueType::VEC3)
-					v.position = posAccessor.getVector3(i);
+				if (posAccessor.type == ValueType::VEC3) {
+
+					v.position = posAccessor.getVector3(i, basePtr);
+				}
 				else
 					throw std::runtime_error("position can only be a vec3");
 				
@@ -90,14 +95,15 @@ MeshData GltfImporter::buildMeshData(const GltfModel& model) {
 				}
 				//normal
 				if (normAccessor && normAccessor->type == ValueType::VEC3) {
-					v.normal = normAccessor->getVector3(i);
+					v.normal = normAccessor->getVector3(i, basePtr);
 					v.normal = v.normal.normalize();
 				} else
 					v.normal = {0.0f, 0.0f, 0.0f};
  
 				//tangent
-				if (tangentAccessor && tangentAccessor->type == ValueType::VEC3)
-					v.tangent = tangentAccessor->getVector3(i);
+				if (tangentAccessor && tangentAccessor->type == ValueType::VEC4) {
+					v.tangent = tangentAccessor->getVector4(i, basePtr);
+				}
 				else
 					v.tangent = {0.0f, 0.0f, 0.0f}; //a gerer
 
@@ -106,17 +112,18 @@ MeshData GltfImporter::buildMeshData(const GltfModel& model) {
 					SubMesh.hasTexCoord = true;
 					SubMesh.texCoordCount = primitive.texcoords.size();
 				}
-				for (auto& [setIndex, accessorIndex] : primitive.texcoords)
-					v.uv[setIndex] = model.accessors[accessorIndex].type == ValueType::VEC2 ? model.accessors[accessorIndex].getVector2(i) : Vector<float>{0,0};
-
+				for (auto& [setIndex, accessorIndex] : primitive.texcoords) {
+					v.uv.resize(SubMesh.texCoordCount);
+					v.uv[setIndex] = model.accessors[accessorIndex].type == ValueType::VEC2 ? model.accessors[accessorIndex].getVector2(i, basePtr) : Vector<float>{0,0};
+				}
 				//color
 				if (!primitive.colors.empty()) {
 					SubMesh.hasColor = true;
 					SubMesh.colorCount = primitive.colors.size();
 				}
-				v.color.clear();
 				for (auto& [setIndex, accessorIndex] : primitive.colors) {
-					Vector<float> c = model.accessors[accessorIndex].type == ValueType::VEC3 ? model.accessors[accessorIndex].getVector3(i) : Vector<float>{1,1,1};
+					Vector<float> c = model.accessors[accessorIndex].type == ValueType::VEC3 ? model.accessors[accessorIndex].getVector3(i, basePtr) : Vector<float>{1,1,1};
+					v.color.clear();
 					v.color.insert(v.color.end(), c.data.begin(), c.data.end()); //ignorance de l'alpha pour le moment
 				}
 

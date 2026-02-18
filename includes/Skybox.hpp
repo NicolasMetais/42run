@@ -17,7 +17,6 @@ struct SkyboxFace {
 class Skybox {
 	private:
 		GLuint skyboxVAO, skyboxVBO;
-		GLuint shaderID;
 		GLuint cubeMaptexture;
 		std::vector<SkyboxFace> TextureList;
 		std::vector<float> skyboxVertices;

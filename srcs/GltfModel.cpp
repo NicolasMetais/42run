@@ -36,7 +36,7 @@ void GltfModel::parseJson(std::string fileName) {
 	parseNodes(gltf);
 	parseBuffer(gltf);
 	loadBinaryBuffer("resources/" + gltf["buffers"][0]["uri"].get<std::string>());
-	linkBufferViewToBinary();
+	// linkBufferViewToBinary();
 };
 
 void GltfModel::BufferViewValidation() {
@@ -54,19 +54,19 @@ void GltfModel::BufferViewValidation() {
 	}
 };
 
-void GltfModel::linkBufferViewToBinary() {
-	if (binaryData.empty())
-		throw std::runtime_error("BinaryData is empty");
+// void GltfModel::linkBufferViewToBinary() {
+// 	if (binaryData.empty())
+// 		throw std::runtime_error("BinaryData is empty");
 	
-	for (auto& bv : bufferViews) {
-		Buffer& buf = buffers[bv.buffer];
+// 	for (auto& bv : bufferViews) {
+// 		Buffer& buf = buffers[bv.buffer];
 
-		if (bv.byteOffset + bv.byteLength > buf.byteLength)
-			throw std::runtime_error("BufferView exceeds buffer size");
+// 		if (bv.byteOffset + bv.byteLength > buf.byteLength)
+// 			throw std::runtime_error("BufferView exceeds buffer size");
 
-		bv.base = binaryData.data() + bv.byteOffset;
-	}
-};
+// 		bv.base = binaryData.data() + bv.byteOffset;
+// 	}
+// };
 
 void GltfModel::parseBuffer(const nlohmann::json& gltf) {
 	if (!gltf.contains("buffers") || gltf["buffers"].empty())

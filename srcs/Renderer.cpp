@@ -7,8 +7,8 @@ Renderer::Renderer() : gltfShader(), objShader() {
     	throw std::runtime_error("Failed to initialize GLAD");
 	printf("OpenGL version: %s\n", glGetString(GL_VERSION));
 	printf("GLSL version: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
-	new (&gltfShader) Shader("srcs/gltf.fs", "srcs/gltf.vs");
-	new (&objShader) Shader("srcs/obj.fs", "srcs/obj.vs");
+	gltfShader = Shader("srcs/gltf.vs", "srcs/gltf.fs");
+	objShader = Shader("srcs/obj.vs", "srcs/obj.fs");
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glDepthMask(GL_TRUE);

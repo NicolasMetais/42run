@@ -94,7 +94,8 @@ void Skybox::draw(Matrix<float> view, Matrix<float>& projection) {
 
 	glDepthFunc(GL_LEQUAL);
 	glDepthMask(GL_FALSE);
-	glUseProgram(this->shaderID);
+	shaders.bind();
+	// glUseProgram(this->shaderID);
 
 	shaders.setMatrix4("view", view.datal());
 	shaders.setMatrix4("projection", projection.datal());
@@ -115,6 +116,5 @@ Skybox::~Skybox() {
 	glDeleteVertexArrays(1, &this->skyboxVAO);
     glDeleteBuffers(1, &this->skyboxVBO);
     glDeleteTextures(1, &this->cubeMaptexture);
-    glDeleteProgram(this->shaderID);
 };
 

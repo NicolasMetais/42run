@@ -13,8 +13,8 @@ class Shader {
 	public:
 		Shader() : id(0) {};
 		Shader(const std::string& vertexSrc, const std::string& fragmentSrc);
-		Shader(const Shader&) = delete;
-		Shader& operator=(const Shader&) = delete;
+		// Shader(const Shader&) = delete;
+		// Shader& operator=(const Shader&) = delete;
 		~Shader() { glDeleteProgram(this->id); };
 
 		void bind() const; //PROTEGER POUR NE APS LANCER UN SHADER INVALIDE ET EVITER SEGFAULT

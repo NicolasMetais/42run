@@ -1,6 +1,7 @@
 #include <AccessorView.hpp>
+#include <GltfModel.hpp>
 
-Vector<float> AccessorView::getVector(size_t index, size_t components) const {
+Vector<float> AccessorView::getVector(size_t index, size_t components, const uint8_t* basePtr) const {
     size_t stride = bufferView->byteStride;
     // size_t maxOffset = bufferView->byteOffset + bufferView->byteLength;
     // size_t actualOffset = bufferView->byteOffset + byteOffset + index * stride;
@@ -10,27 +11,27 @@ Vector<float> AccessorView::getVector(size_t index, size_t components) const {
     if (stride == 0)
         stride = componentCount(type) * componentSize(component);
 
-    const uint8_t* ptr = bufferView->base + bufferView->byteOffset + byteOffset + index * stride;
-
+    const uint8_t* ptr = basePtr + bufferView->byteOffset + byteOffset + index * stride;
+    
     Vector<float> v(components);
     for (size_t i = 0; i < components; ++i)
         v[i] = readComponentAsFloat(ptr + i * componentSize(component));
     return v;
 }
 
-Vector<float> AccessorView::getVector2(size_t i) const {
+Vector<float> AccessorView::getVector2(size_t i, const uint8_t* basePtr) const {
     assert(type == ValueType::VEC2);
-        return getVector(i, 2);
+        return getVector(i, 2, basePtr);
     }
 
-Vector<float> AccessorView::getVector3(size_t i) const {
+Vector<float> AccessorView::getVector3(size_t i, const uint8_t* basePtr) const {
     assert(type == ValueType::VEC3);
-        return getVector(i, 3);
+        return getVector(i, 3, basePtr);
 }
 
-Vector<float>AccessorView:: getVector4(size_t i) const {
+Vector<float>AccessorView:: getVector4(size_t i, const uint8_t* basePtr) const {
     assert(type == ValueType::VEC4);
-        return getVector(i, 4);
+        return getVector(i, 4, basePtr);
 }
 
 float AccessorView::readComponentAsFloat(const uint8_t* ptr) const {
