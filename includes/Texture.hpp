@@ -22,6 +22,28 @@ class Texture {
 		void loadJPEG(const std::string& path);
 	public:
 		Texture(): id(0), width(0), height(0) {};
+		    Texture(Texture&& other) noexcept
+        : id(other.id), width(other.width), height(other.height),
+          inputFormat(other.inputFormat), bpp(other.bpp), data(std::move(other.data))
+		{
+			other.id = 0; // éviter double suppression
+		}
+
+		Texture& operator=(Texture&& other) noexcept {
+			if (this != &other) {
+				if (id) glDeleteTextures(1, &id); // on supprime l'ancienne texture
+
+				id = other.id;
+				width = other.width;
+				height = other.height;
+				inputFormat = other.inputFormat;
+				bpp = other.bpp;
+				data = std::move(other.data);
+
+				other.id = 0;
+			}
+			return *this;
+		}
 		~Texture() { if (id) glDeleteTextures(1, &id); };
 		GLuint getId() const { return this->id; };
 		u_int32_t getwidth() const { return this->width; };

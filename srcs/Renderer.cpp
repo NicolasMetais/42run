@@ -1,13 +1,9 @@
 #include <Renderer.hpp>
 #include <VertexAttrib.hpp>
 
-
-Renderer::Renderer() : gltfShader(), objShader() {
-	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress))
-    	throw std::runtime_error("Failed to initialize GLAD");
-	gltfShader = Shader("srcs/gltf.vs", "srcs/gltf.fs");
-	objShader = Shader("srcs/obj.vs", "srcs/obj.fs");
+Renderer::Renderer() : gltfShader("srcs/gltf.vs", "srcs/gltf.fs"), objShader("srcs/obj.vs", "srcs/obj.fs"), debug("srcs/debug.vs", "srcs/debug.fs") {
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
 	glDepthFunc(GL_LESS);
 	glDepthMask(GL_TRUE);
 
@@ -56,66 +52,73 @@ void Renderer::InitMesh(SubMesh& subMesh) {
 	glBindBuffer(GL_ARRAY_BUFFER , subMesh.VBO);
 
 	std::vector<float> flatData = flattenVertexData(subMesh);
+
 	glBufferData(GL_ARRAY_BUFFER, flatData.size() * sizeof(float), flatData.data(), GL_STATIC_DRAW);
 	if (!subMesh.indices.empty()) {
 		glGenBuffers(1, &subMesh.EBO);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, subMesh.EBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, subMesh.indices.size() * sizeof(uint32_t), subMesh.indices.data(), GL_STATIC_DRAW);
 	}
+	 glBindBuffer(GL_ARRAY_BUFFER, subMesh.VBO);
 
 	VertexLayout layout;
 	size_t offset = 0;
 	GLuint attribIndex = 0;
-	
+
 	if (subMesh.hasPos) {
+		// std::cout << "Pos" << std::endl;
 		layout.attributes.push_back({attribIndex++, 3, GL_FLOAT, false, offset});
 		offset += 3 * sizeof(float);
 	}
 	if (subMesh.hasNormal) {
+		// std::cout << "Normal" << std::endl;
 		layout.attributes.push_back({attribIndex++, 3, GL_FLOAT, false, offset});
 		offset += 3 * sizeof(float);
 	}
 	if (subMesh.hasTangent) {
+		// std::cout << "Tangent" << std::endl;
 		layout.attributes.push_back({attribIndex++, 4, GL_FLOAT, false, offset});
 		offset += 4 * sizeof(float);
 	}
 	if (subMesh.hasTexCoord) {
 		for (size_t i = 0; i < subMesh.texCoordCount; ++i) {
+			// std::cout << "TexCoord" << std::endl;
 			layout.attributes.push_back({attribIndex++, 2, GL_FLOAT, false, offset});
 			offset += 2 * sizeof(float);
 		}
 	}
-	if (subMesh.hasColor) {
+	if (subMesh.hasColor) { //la couleur peux etre un vec4 donc offset de 4 a GERER
 		for (size_t i = 0; i < subMesh.colorCount; ++i) {
+			// std::cout << "Color" << std::endl;
 			layout.attributes.push_back({attribIndex++, 3, GL_FLOAT, false, offset});
 			offset += 3 * sizeof(float);
 		}
 	}
 
 	layout.stride = offset;
-
 	for (const auto& attr : layout.attributes) {
 		glVertexAttribPointer(attr.index, attr.size, attr.type, attr.normalized, layout.stride, (void*)attr.offset);
 		glEnableVertexAttribArray(attr.index);
 	}
-	glBindVertexArray(0);
 };
 
 void Renderer::bindTexture(int& texSlot, GLuint loc, GLuint flagLoc, const Texture* texture)  {
-
 	if (texture) {
 		glActiveTexture(GL_TEXTURE0 + texSlot);
 		glUniform1i(loc, texSlot);
 		glUniform1i(flagLoc, 1);
 		texture->bind();
 		texSlot++;
-	} else
+	} else {
+		glUniform1i(loc, 0);
 		glUniform1i(flagLoc, 0);
+	}
 }
 
 void Renderer::sendCommonUniforms(Shader& shader, Matrix<float>& mvp, Matrix<float>& model, Camera& camera) {
-	shader.setMatrix4("MVP", mvp.datal());
-	shader.setMatrix4("model", model.datal());
+	// std::cout << "Sending common uniforms to shader" << std::endl;
+	shader.setMatrix4_true("MVP", mvp.datal());
+	shader.setMatrix4_true("model", model.datal());
 
 	Vector<float> cam = camera.getCameraPos();
 	shader.setVec3("viewPos", cam.x(), cam.y(), cam.z()); //pos de la camera
@@ -168,27 +171,28 @@ void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mes
 		float metallic = (pbr.metallicFactor < 0.0f) ? 1.0f : pbr.metallicFactor;
 		float roughness = (pbr.roughnessFactor < 0.0f) ? 1.0f : pbr.roughnessFactor;
 
-		shader.setVec4("BaseColorFactor", pbr.baseColorFactor[0], pbr.baseColorFactor[1], pbr.baseColorFactor[2], pbr.baseColorFactor[3]);
-		shader.setfloat("MetallicFactor", metallic);
-		shader.setfloat("RoughnessFactor", roughness);
+		shader.setVec4("baseColorFactor", pbr.baseColorFactor[0], pbr.baseColorFactor[1], pbr.baseColorFactor[2], pbr.baseColorFactor[3]);
+		shader.setfloat("metallicFactor", metallic);
+		shader.setfloat("roughnessFactor", roughness);
 
-		shader.setVec3("EmissiveFactor", mat->emissiveFactor[0], mat->emissiveFactor[1], mat->emissiveFactor[2]);
+		shader.setVec3("emissiveFactor", mat->emissiveFactor[0], mat->emissiveFactor[1], mat->emissiveFactor[2]);
 
-		shader.setfloat("NormalScale", mat->normalTextureScale);
-		shader.setfloat("OcclusionStrength", mat->occlusionStrength);
-		shader.setfloat("AlphaCutOff", mat->alphaCutoff);
+		shader.setfloat("normalScale", mat->normalTextureScale);
+		shader.setfloat("occlusionStrength", mat->occlusionStrength);
+		shader.setfloat("alphaCutOff", mat->alphaCutoff);
 
 		//Alphamode
 		int alphaMode = 0;
 		if (mat->alphaMode == "MASK") alphaMode = 1;
 		if (mat->alphaMode == "BLEND") alphaMode = 2;
-		shader.setInt("AlphaMode", alphaMode);
-		bindTexture(texSlot, shader.getUniformLocation("BaseColorTex"), shader.getUniformLocation("hasBaseColorTexture"), mat->baseColorTextureGPU);
-		bindTexture(texSlot, shader.getUniformLocation("MetallicRougnessTex"), shader.getUniformLocation("hasMetallicRougnessTexture"), mat->metallicRoughnessTextureGPU);
-		bindTexture(texSlot, shader.getUniformLocation("NormalMap"), shader.getUniformLocation("hasNormalMap"), mat->normalTextureGPU);
-		bindTexture(texSlot, shader.getUniformLocation("OcclusionTex"), shader.getUniformLocation("hasOcclusionTexture"), mat->occlusionTextureGPU);
-		bindTexture(texSlot, shader.getUniformLocation("EmissiveTex"), shader.getUniformLocation("hasEmissiveTexture"), mat->emissiveTextureGPU);
+		shader.setInt("alphaMode", alphaMode);
 
+		bindTexture(texSlot, shader.getUniformLocation("baseColorTex"), shader.getUniformLocation("hasBaseColorTexture"), mat->baseColorTextureGPU);
+		bindTexture(texSlot, shader.getUniformLocation("metallicRougnessTex"), shader.getUniformLocation("hasMetallicRougnessTexture"), mat->metallicRoughnessTextureGPU);
+		bindTexture(texSlot, shader.getUniformLocation("normalMap"), shader.getUniformLocation("hasNormalMap"), mat->normalTextureGPU);
+		bindTexture(texSlot, shader.getUniformLocation("occlusionTex"), shader.getUniformLocation("hasOcclusionTexture"), mat->occlusionTextureGPU);
+		bindTexture(texSlot, shader.getUniformLocation("emissiveTex"), shader.getUniformLocation("hasEmissiveTexture"), mat->emissiveTextureGPU);
+		// shader.setInt("hasBaseColorTexture", 1); //forcing pour tester
 		shader.setInt("hasTangent", mesh.hasTangent);
 		shader.setInt("hasVertexColor", mesh.hasColor);
 
@@ -197,28 +201,40 @@ void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mes
 };
 
 void Renderer::draw(SubMesh& mesh) {
-	glBindVertexArray(mesh.VAO);
-	if (mesh.material && mesh.material->doubleSided)
-		glDisable(GL_CULL_FACE);
-	else
-		glEnable(GL_CULL_FACE);
-	if (!mesh.EBO)
-		glDrawArrays(GL_TRIANGLES, 0, mesh.vertices.size());
-	else {
-		glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, 0);
-	}
-	glBindVertexArray(0);
+    // std::cout << "Drawing mesh. EBO: " << mesh.EBO << ", indices: " << mesh.indices.size() << std::endl;
+    glBindVertexArray(mesh.VAO);
+	GLenum err = glGetError();
+    if (err != GL_NO_ERROR) std::cerr << "GL Error after bind: " << err << std::endl;
+    if (mesh.material && mesh.material->doubleSided)
+        glDisable(GL_CULL_FACE);
+    else
+        glEnable(GL_CULL_FACE);
+	// std::cout << "VAO=" << mesh.VAO 
+    //       << " indexType=" << mesh.indexType 
+    //       << " count=" << mesh.indices.size() << std::endl;
+	// GLint currentVAO;
+	// glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &currentVAO);
+	// std::cout << "GL_VERTEX_ARRAY_BINDING=" << currentVAO << std::endl;
+    if (!mesh.EBO) {
+        // std::cout << "Using glDrawArrays" << std::endl;
+        glDrawArrays(GL_TRIANGLES, 0, mesh.vertices.size());
+    } else {
+        // std::cout << "Using glDrawElements with " << mesh.indices.size() << " indices" << std::endl;
+        glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, 0);
+    }
+	// glDrawArrays(GL_TRIANGLES, 0, 3);
+	err = glGetError();
+    if (err != GL_NO_ERROR) std::cerr << "GL Error after draw: " << err << std::endl;
+    glBindVertexArray(0);
 };
-
-
 
 void Renderer::rendering(Matrix<float>& mvp, MeshData& obj, Matrix<float> model, Camera& camera) {
 	for (auto& mesh : obj.submeshes) {
 		const Mat* mat = mesh.material;
 
 		Shader& shader = (mat && mat->type == MaterialType::PBR) ? this->gltfShader : this->objShader;
+		// Shader& shader = this->debug; //shader simple de debug
 		shader.bind();
-
 		sendCommonUniforms(shader, mvp, model, camera);
 		sendMaterialUniforms(shader, mat, mesh);
 		draw(mesh);
@@ -233,9 +249,9 @@ void Renderer::cleanup(MeshData& obj) {
 			glDeleteBuffers(1, &mesh.VBO);
 		if (mesh.EBO)
 			glDeleteBuffers(1, &mesh.EBO);
-			mesh.VAO = 0;
-			mesh.VBO = 0;
-			mesh.EBO = 0;
+		mesh.VAO = 0;
+		mesh.VBO = 0;
+		mesh.EBO = 0;
 		}
 
 	if (this->gltfShader.getId())

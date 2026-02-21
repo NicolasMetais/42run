@@ -6,9 +6,9 @@ Texture& TextureManager::getOrLoad(const std::string& uri) {
 		return it->second;
 	
 	Texture tex;
-	tex.loadTexture(uri);
+	tex.loadTexture("resources/" + uri);
 	tex.openGl2DTextureGen();
-	auto [itt, inserted] = cache.emplace(uri, tex);
+	auto [itt, inserted] = cache.emplace(uri, std::move(tex));
 	return itt->second;
 };
 

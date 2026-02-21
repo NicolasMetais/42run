@@ -17,7 +17,7 @@ Camera::Camera(float w, float h, Vector<float> pos) : cameraPos(3), target(3), u
 	cameraUpdate();
 };
 
-Camera::Camera(float w, float h, Vector<float> pos, Vector<float> target,Vector<float> up) : cameraPos(2), target(3), up(3), U(3), V(3), N(3), mousePos(2){
+Camera::Camera(float w, float h, Vector<float> pos, Vector<float> target,Vector<float> up) : cameraPos(3), target(3), up(3), U(3), V(3), N(3), mousePos(2){
 	this->winWidth = w;
 	this->winHeight = h;
 	this->cameraPos = pos;
@@ -61,7 +61,7 @@ void Camera::cameraUpdate() {
     target.x() = cos(utils::ToRad(angleV)) * cos(utils::ToRad(angleH));
     target.y() = sin(utils::ToRad(angleV));
     target.z() = cos(utils::ToRad(angleV)) * sin(utils::ToRad(angleH));
-    target.normalize();
+    target = target.normalize();
     
     U = cross_product(Yaxis, target);
     U.normalize();

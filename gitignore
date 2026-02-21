@@ -4,3 +4,5 @@ obj/loader/src/*.o
 obj/loader/src/*.d
 obj/srcs/*.o
 obj/srcs/*.d
+*.d
+*.o

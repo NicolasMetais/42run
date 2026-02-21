@@ -10,6 +10,7 @@
 #include <Event.hpp>
 #include <Keyboard.hpp>
 #include <GltfImporter.hpp>
+#include <TextureManager.hpp>
 #include <Mouse.hpp>
 
 class App {
@@ -25,6 +26,7 @@ class App {
 		Mouse mouse;
 		GltfImporter gltf;
 		GltfModel model;
+		TextureManager textureManager;
 		MeshData data; //temporaire
 		bool running;
 		bool mouselock = true;

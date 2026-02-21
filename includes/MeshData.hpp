@@ -28,6 +28,8 @@ struct SubMesh { //un submesh par material pour render le mesh par type de mater
 	GLuint VAO = 0;
 	GLuint VBO = 0;
 	GLuint EBO = 0;
+
+	GLenum indexType = GL_UNSIGNED_INT;
 	const Mat* material = nullptr; //IL FAUT ADAPTER CETTE STRUCTURE A MON OBJIMPORTER
 
 	//checker pour building d'attributes modulable openGL

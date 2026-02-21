@@ -13,14 +13,13 @@ class Shader {
 	public:
 		Shader() : id(0) {};
 		Shader(const std::string& vertexSrc, const std::string& fragmentSrc);
-		// Shader(const Shader&) = delete;
-		// Shader& operator=(const Shader&) = delete;
 		~Shader() { glDeleteProgram(this->id); };
 
 		void bind() const; //PROTEGER POUR NE APS LANCER UN SHADER INVALIDE ET EVITER SEGFAULT
 		void unbind() const;
 
-		void setMatrix4(const std::string& name, const float* value) const;
+		void setMatrix4_true(const std::string& name, const float* value) const;
+		void setMatrix4_false(const std::string& name, const float* value) const;
 		void setVec3(const std::string& name, const float x, const float y, const float z) const;
 		void setVec4(const std::string& name, const float x, const float y, const float z, const float w) const;
 		void setInt(const std::string& name, const int value) const;

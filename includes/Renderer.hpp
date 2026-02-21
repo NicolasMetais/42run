@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <include/glad/glad.h>
 #include <Window.hpp>
+#include <utils.hpp>
 #include <Camera.hpp>
 
 struct VertexAttribute { //description d'un attribut pour gestion dynamique
@@ -26,7 +27,7 @@ class Renderer {
 	private:
         Shader gltfShader;
         Shader objShader;
-        TextureManager cache;
+        Shader debug;
 
 		void sendCommonUniforms(Shader& shader, Matrix<float>& mvp, Matrix<float>& model, Camera& camera);
 		void sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mesh);

@@ -5,11 +5,9 @@ MeshData GltfImporter::buildMeshData(const GltfModel& model) {
 
 	for (size_t meshIdx = 0; meshIdx < model.meshes.size(); ++meshIdx) {
     const auto& mesh = model.meshes[meshIdx];
-    std::cout << "Mesh #" << meshIdx << ":\n";
 
     for (size_t primIdx = 0; primIdx < mesh.primitives.size(); ++primIdx) {
         const auto& prim = mesh.primitives[primIdx];
-        std::cout << "  Primitive #" << primIdx << ":\n";
 
         // Accesseur de positions
         if (prim.positionAccessor < 0) continue;
@@ -41,7 +39,7 @@ MeshData GltfImporter::buildMeshData(const GltfModel& model) {
 
 			//materials
 			if (primitive.materialIndex >= 0 && primitive.materialIndex < (int)model.materials.size())
-				SubMesh.material = &model.materials[primitive.materialIndex];
+				SubMesh.material = &meshData.materials[primitive.materialIndex];
 
 			//Vertices
 			if (primitive.positionAccessor < 0) continue;
@@ -57,6 +55,7 @@ MeshData GltfImporter::buildMeshData(const GltfModel& model) {
 
 			const AccessorView* tangentAccessor = nullptr;
 			if (primitive.tangentAccessor >= 0) {
+				// std::cout << "tangent detecte GLTF IMPORTER" << std::endl;
 				tangentAccessor = &model.accessors[primitive.tangentAccessor];
 				SubMesh.hasTangent = true;
 			}
@@ -69,10 +68,21 @@ MeshData GltfImporter::buildMeshData(const GltfModel& model) {
 				size_t indexCount = indexAccessor.count;
 
 				SubMesh.indices.resize(indexCount);
-				for (size_t i = 0; i < indexCount; ++i) {
-					SubMesh.indices[i] = indexAccessor.getScalar<uint16_t>(i, basePtr);
-				}
-			}
+
+				if ((int)indexAccessor.component == 5123) {
+					SubMesh.indexType = GL_UNSIGNED_INT;
+					for (size_t i = 0; i < indexCount; ++i) {
+						SubMesh.indices[i] = indexAccessor.getScalar<uint16_t>(i, basePtr);
+					}
+				} else if ((int)indexAccessor.component == 5125) {
+					SubMesh.indexType = GL_UNSIGNED_INT;
+					for (size_t i = 0; i < indexCount; ++i) {
+						SubMesh.indices[i] = indexAccessor.getScalar<uint32_t>(i, basePtr);
+					}
+				} else 
+				throw std::runtime_error("Bad index type");
+			} else
+				SubMesh.indexType = GL_NONE;
 
 			size_t vertexCount = posAccessor.count;
 			SubMesh.vertices.resize(vertexCount);
@@ -105,7 +115,7 @@ MeshData GltfImporter::buildMeshData(const GltfModel& model) {
 					v.tangent = tangentAccessor->getVector4(i, basePtr);
 				}
 				else
-					v.tangent = {0.0f, 0.0f, 0.0f}; //a gerer
+					v.tangent = {0.0f, 0.0f, 0.0f, 0.0f};
 
 				//uv
 				if (!primitive.texcoords.empty()) {

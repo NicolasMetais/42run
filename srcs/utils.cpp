@@ -166,6 +166,7 @@ void utils::prepareMats(MeshData& meshdata, TextureManager& texMng) {
 		if (mat.pbrMetallicRoughness.baseColorTexture.index >= 0) {
 			std::string uri = resolveUri(meshdata, mat.pbrMetallicRoughness.baseColorTexture.index);
 			mat.baseColorTextureGPU = &texMng.getOrLoad(uri);
+			// std::cout << mat.baseColorTextureGPU << std::endl;
 		}
 
 		//metallic roughness
@@ -184,6 +185,7 @@ void utils::prepareMats(MeshData& meshdata, TextureManager& texMng) {
 		if (mat.occlusionTexture.index >= 0) {
 			std::string uri = resolveUri(meshdata, mat.occlusionTexture.index);
 			mat.occlusionTextureGPU = &texMng.getOrLoad(uri);
+			// std::cout << mat.occlusionTextureGPU << std::endl;
 		}
 
 		// emissive
@@ -193,27 +195,27 @@ void utils::prepareMats(MeshData& meshdata, TextureManager& texMng) {
 		}
 
 		//Ka
-		if (mat.map_Ka.c_str())
+		if (!mat.map_Ka.empty())
 			mat.map_KaGPU = &texMng.getOrLoad(mat.map_Ka);
 
 		//Kd
-		if (mat.map_Kd.c_str())
+		if (!mat.map_Kd.empty())
 			mat.map_KdGPU = &texMng.getOrLoad(mat.map_Kd);
 
 		//Ks
-		if (mat.map_Ks.c_str())
+		if (!mat.map_Ks.empty())
 			mat.map_KsGPU = &texMng.getOrLoad(mat.map_Ks);
 
 		//Ns
-		if (mat.map_Ns.c_str())
+		if (!mat.map_Ns.empty())
 			mat.map_NsGPU = &texMng.getOrLoad(mat.map_Ns);
 
 		//d
-		if (mat.map_d.c_str())
+		if (!mat.map_d.empty())
 			mat.map_dGPU = &texMng.getOrLoad(mat.map_d);
 
 		//bump
-		if (mat.bump.c_str())
+		if (!mat.bump.empty())
 			mat.bumpGPU = &texMng.getOrLoad(mat.bump);
 
 	}

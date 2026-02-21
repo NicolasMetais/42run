@@ -12,7 +12,7 @@ out vec4 FragColor;
 uniform sampler2D normalMap;
 uniform sampler2D baseColorTex;
 
-uniform bool hasNormal;
+uniform bool hasNormalMap;
 uniform bool hasBaseColorTexture;
 uniform bool hasVertexColor;
 
@@ -21,7 +21,7 @@ uniform vec4 baseColorFactor;
 void main() {
 	vec3 N = normalize(Normal);
 
-	if (hasNormal)
+	if (hasNormalMap)
 	{
 		vec3 normalTex = texture(normalMap, TexCoord).rgb;
 		normalTex = normalTex * 2.0 - 1.0;

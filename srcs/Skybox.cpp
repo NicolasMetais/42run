@@ -94,11 +94,14 @@ void Skybox::draw(Matrix<float> view, Matrix<float>& projection) {
 
 	glDepthFunc(GL_LEQUAL);
 	glDepthMask(GL_FALSE);
+	glDisable(GL_CULL_FACE);
+	glDisable(GL_BLEND);
+
 	shaders.bind();
 	// glUseProgram(this->shaderID);
 
-	shaders.setMatrix4("view", view.datal());
-	shaders.setMatrix4("projection", projection.datal());
+	shaders.setMatrix4_true("view", view.datal());
+	shaders.setMatrix4_true("projection", projection.datal());
 	// glUniformMatrix4fv(glGetUniformLocation(shaderID, "view"), 1, GL_TRUE, view.datal());
 	// glUniformMatrix4fv(glGetUniformLocation(shaderID, "projection"), 1, GL_TRUE, projection.datal());
 
@@ -108,6 +111,9 @@ void Skybox::draw(Matrix<float> view, Matrix<float>& projection) {
 	glBindVertexArray(0);
 	glDepthMask(GL_TRUE);
 	glDepthFunc(GL_LESS);
+	glEnable(GL_CULL_FACE);
+	glEnable(GL_BLEND);
+
 };
 
 

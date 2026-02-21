@@ -15,7 +15,6 @@ void Texture::loadTexture(const std::string& path) {
 void Texture::loadPNG(const std::string& path) {
     FILE* fp = fopen(path.c_str(), "rb");
     if (!fp) throw std::runtime_error("Cannot open PNG file");
-
     png_byte header[8];
     fread(header, 1, 8, fp);
     if (png_sig_cmp(header, 0, 8)) {
@@ -156,7 +155,7 @@ void Texture::openGl2DTextureGen() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	GLenum internalFormat = (bpp == 4) ? GL_RGBA8 : GL_RGB8;
-	GLenum dataFormat = inputFormat;
+	GLenum dataFormat = (bpp == 4) ? GL_RGBA : GL_RGB;
 
 	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat,
              width, height, 0, dataFormat, GL_UNSIGNED_BYTE, this->data.data());

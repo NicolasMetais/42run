@@ -64,7 +64,11 @@ void Shader::unbind() const {
 
 //A FAIRE: unordered map de uniformLocation pour opti les appel toutes les frame.
 
-void Shader::setMatrix4(const std::string& name, const float* value) const {
+void Shader::setMatrix4_false(const std::string& name, const float* value) const {
+    glUniformMatrix4fv( glGetUniformLocation(this->id, name.c_str()), 1, GL_FALSE, value);
+};
+
+void Shader::setMatrix4_true(const std::string& name, const float* value) const {
     glUniformMatrix4fv( glGetUniformLocation(this->id, name.c_str()), 1, GL_TRUE, value);
 };
 

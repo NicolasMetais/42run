@@ -13,6 +13,12 @@ void printVector(const Vector<float>& v, const std::string& name)
 		std::cout << name << ": ("
 				<< v.x() << ", "
 				<< v.y() << ")\n";
+	} else if (v.size() == 4) {
+		std::cout << name << ": ("
+				<< v.x() << ", "
+				<< v.y() << ", "
+				<< v.z() <<  ", "
+                << v.w() << ")\n";
 	}
 }
 
@@ -23,6 +29,7 @@ void printVertex(const Vertex& v)
 
     printVector(v.position, "  position");
     printVector(v.normal, "  normal");
+    std::cout << "tangent.size() = " << v.tangent.size() << std::endl;
     printVector(v.tangent, "  tangent");
 
     // UVs
@@ -74,9 +81,9 @@ void printSubMesh(const SubMesh& sm)
     }
 
     std::cout << "  Indices: ";
-    for (size_t i = 0; i < 1; ++i)
+    for (size_t i = 0; i < sm.indices.size(); ++i)
     {
-        std::cout << sm.indices[0] << " ";
+        std::cout << sm.indices[i] << " ";
     }
     std::cout << "\n";
 }
@@ -101,20 +108,24 @@ void printMeshData(const MeshData& mesh)
 }
 
 App::App(int width, int height) : window(width, height), renderer(), mesh()
-		, camera(static_cast<float>(width), static_cast<float>(height), Vector<float>{5, 0, 0}, Vector<float>{0,0,0}, Vector<float>{0,1,0})
+		, camera(static_cast<float>(width), static_cast<float>(height), Vector<float>{0, 1, 3}, Vector<float>{0,0,0}, Vector<float>{0,1,0})
 		, transform(), skybox(), timer(), running(true) {
 
+            // mesh.loadObj("resources/spaceship.obj");
 			model.parseJson("resources/TwoSidedPlane.gltf");
-			// model.printData();
+            // model.printData();
 			this->data = this->gltf.buildMeshData(model);
-			// printMeshData(this->data);
+            // printMeshData(this->data);
 
+            utils::prepareMats(this->data, this->textureManager);
             for (auto& submesh : data.submeshes)
                 this->renderer.InitMesh(submesh);
-			this->transform.setScale(2.0f);
+            glBindVertexArray(0);
+			this->transform.setScale(1.0f);
 			Vector<float> cent(3);
 			cent = (data.max + data.min) * 0.5f;
 			this->transform.setPosition(-cent.x(), -cent.y(), -cent.z());
+            // transform.setPosition(0, 0, 0);
 };
 
 App::~App(){};
@@ -140,24 +151,30 @@ void App::render() {
 	Matrix<float> view = this->camera.buildView();
 	Matrix<float> projection = this->camera.buildProjection();
 	Matrix<float> MVP = projection * view * model;
-
 	this->renderer.rendering(MVP, this->data, model, this->camera);
 	this->skybox.draw(this->camera.buildViewNoTranslation(), projection);
 	SDL_GL_SwapWindow(this->window.getWin());
 };
 
 void App::run(){
-	SDL_GL_SetSwapInterval(0); //Debloquer le lock a 60fps max
+    SDL_GL_SetSwapInterval(0);
 
-	while(this->running)
-	{
-		this->deltaTime = timer.tick(); //timer de milisecondes
-		processEvents(); //event handler
-		update(); //updater
-		render(); //render stuff
-		FPScalculator(); //FPShandler
-	}
-	this->renderer.cleanup(this->data);
+    int frameCount = 0;
+    while(this->running)
+    {
+        this->deltaTime = timer.tick();
+        processEvents();
+        update();
+        render();
+        FPScalculator();
+        
+        frameCount++;
+        // if (frameCount >= 1) {
+        //     std::cout << "=== Exiting after 1 frame ===" << std::endl;
+        //     break;
+        // }
+    }
+    this->renderer.cleanup(this->data);
 };
 
 void App::FPScalculator() {
