@@ -7,6 +7,7 @@ Renderer::Renderer() : gltfShader("srcs/gltf.vs", "srcs/gltf.fs"), objShader("sr
 	glDepthFunc(GL_LESS);
 	glDepthMask(GL_TRUE);
 
+	// glEnable(GL_MULTISAMPLE); //Antialiasing mais faut coder des trucs
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -122,9 +123,12 @@ void Renderer::sendCommonUniforms(Shader& shader, Matrix<float>& mvp, Matrix<flo
 
 	Vector<float> cam = camera.getCameraPos();
 	shader.setVec3("viewPos", cam.x(), cam.y(), cam.z()); //pos de la camera
+	Vector<float> ligthDir{-0.5f, -1.0f, -0.3f};
+	ligthDir = ligthDir.normalize();
+	shader.setVec3("lightDir", ligthDir.x(), ligthDir.y(), ligthDir.z());
 };
 
-void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mesh) {
+void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mesh, GLuint skyboxId) {
 	int texSlot = 0; //incremente par bindTexture
 
 	if (!mat) {
@@ -144,7 +148,6 @@ void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mes
 		shader.setInt("isMap_d", 0);
 		shader.setInt("isBump", 0);
 		shader.setVec3("lightColor", 1.0f, 0.0f, 1.0f);
-		shader.setVec3("lightDir", -0.5f, -1.0f, -0.3f);
 		return ;
 	} else if (mat->type == MaterialType::PHONG) {
 		shader.setVec3("Kd", mat->Kd.x(), mat->Kd.y(), mat->Kd.z());
@@ -156,7 +159,6 @@ void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mes
 		shader.setfloat("d", mat->d);
 		shader.setInt("hasMtl", 1);
 		shader.setVec3("lightColor", 1.0f, 0.0f, 1.0f);
-		shader.setVec3("lightDir", -0.5f, -1.0f, -0.3f);
 
 
 		bindTexture(texSlot, shader.getUniformLocation("map_Ka"), shader.getUniformLocation("isMap_Ka"), mat->map_KaGPU);
@@ -195,7 +197,10 @@ void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mes
 		// shader.setInt("hasBaseColorTexture", 1); //forcing pour tester
 		shader.setInt("hasTangent", mesh.hasTangent);
 		shader.setInt("hasVertexColor", mesh.hasColor);
-
+		shader.setfloat("lightIntensity", 1.0f);
+		glActiveTexture(GL_TEXTURE20);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxId);
+		shader.setInt("irradianceMap", 20);
 	}
 
 };
@@ -204,7 +209,7 @@ void Renderer::draw(SubMesh& mesh) {
     // std::cout << "Drawing mesh. EBO: " << mesh.EBO << ", indices: " << mesh.indices.size() << std::endl;
     glBindVertexArray(mesh.VAO);
 	GLenum err = glGetError();
-    if (err != GL_NO_ERROR) std::cerr << "GL Error after bind: " << err << std::endl;
+    // if (err != GL_NO_ERROR) std::cerr << "GL Error after bind: " << err << std::endl;
     if (mesh.material && mesh.material->doubleSided)
         glDisable(GL_CULL_FACE);
     else
@@ -228,7 +233,7 @@ void Renderer::draw(SubMesh& mesh) {
     glBindVertexArray(0);
 };
 
-void Renderer::rendering(Matrix<float>& mvp, MeshData& obj, Matrix<float> model, Camera& camera) {
+void Renderer::rendering(Matrix<float>& mvp, MeshData& obj, Matrix<float> model, Camera& camera, GLuint skyboxId) {
 	for (auto& mesh : obj.submeshes) {
 		const Mat* mat = mesh.material;
 
@@ -236,7 +241,7 @@ void Renderer::rendering(Matrix<float>& mvp, MeshData& obj, Matrix<float> model,
 		// Shader& shader = this->debug; //shader simple de debug
 		shader.bind();
 		sendCommonUniforms(shader, mvp, model, camera);
-		sendMaterialUniforms(shader, mat, mesh);
+		sendMaterialUniforms(shader, mat, mesh, skyboxId);
 		draw(mesh);
 	}
 };

@@ -4,7 +4,7 @@
 Window::Window(int w, int h) {
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
 		throw SDLException(SDL_GetError());
-	win = SDL_CreateWindow("scop", 0, 0, w, h, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+	win = SDL_CreateWindow("42Run", 0, 0, w, h, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 	if (!win)
 		throw SDLException(SDL_GetError());
 	context = SDL_GL_CreateContext(win);

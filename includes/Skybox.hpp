@@ -25,6 +25,6 @@ class Skybox {
 		Skybox();
 		void draw(Matrix<float> view, Matrix<float>& projection);
 		~Skybox();
-
-
+	public:
+		GLuint getSkyboxId() { return this->cubeMaptexture; };
 };

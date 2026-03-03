@@ -1,6 +1,6 @@
 NAME = 42Run
-CC = c++
-CFLAGS = -Wall -Wextra -Werror -Iincludes -Iloader -std=c++17 -g3 $(shell sdl2-config --cflags) -fPIE 
+CXX = c++
+CXXFLAGS = -Wall -Wextra -Werror -Iincludes -Iloader -std=c++17 -g3 $(shell sdl2-config --cflags) -fPIE 
 LDFLAGS = $(shell sdl2-config --libs) -lGL -lz -lpng -ljpeg -fPIE
 
 SRCS =	srcs/main.cpp \
@@ -32,11 +32,11 @@ OBJS = $(patsubst %.cpp, $(OBJ_DIR)/%.o, $(filter %.cpp, $(SRCS))) \
 all: $(NAME)
 
 $(NAME): $(OBJS)
-	$(CC) $(OBJS) -o $(NAME) $(LDFLAGS)
+	$(CXX) $(OBJS) -o $(NAME) $(LDFLAGS)
 
 $(OBJ_DIR)/%.o: %.cpp
 	mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -MMD -MP -c $< -o  $@
+	$(CXX) $(CXXFLAGS) -MMD -MP -c $< -o  $@
 
 $(OBJ_DIR)/%.o: %.c
 	mkdir -p $(dir $@)
