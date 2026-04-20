@@ -1,0 +1,6 @@
+.vscode
+42Run
+out
+obj
+*.d
+*.o
