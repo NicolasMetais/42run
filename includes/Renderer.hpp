@@ -5,7 +5,7 @@
 #include <TextureManager.hpp>
 #include <Shader.hpp>
 #include <algorithm>
-#include <include/glad/glad.h>
+#include <glad/glad.h>
 #include <Window.hpp>
 #include <utils.hpp>
 #include <Camera.hpp>

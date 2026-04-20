@@ -107,7 +107,7 @@ MeshData GltfImporter::buildMeshData(const GltfModel& model) {
 				if (normAccessor && normAccessor->type == ValueType::VEC3) {
 					v.normal = normAccessor->getVector3(i, basePtr);
 					v.normal = v.normal.normalize();
-					std::cout << v.normal << std::endl;
+					std::cout << "normale :" << v.normal << std::endl;
 				} else
 					v.normal = {0.0f, 0.0f, 0.0f};
  

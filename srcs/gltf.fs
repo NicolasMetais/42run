@@ -59,7 +59,7 @@ void main() {
 
 	vec3 Lo = diffuse * 0.1 * vec3(lightIntensity) * NdotL + ambient; //Outgoing radiance
 
-	// FragColor = vec4(Lo, baseColor.a);
+	FragColor = vec4(Lo, baseColor.a);
 	// FragColor = vec4(TBN[2] * 0.5 + 0.5, 1.0); // visualise T
 
 }

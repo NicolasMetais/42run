@@ -3,7 +3,7 @@
 #include <Matrix/Matrix.hpp>
 #include <ObjImporter.hpp>
 #include <algorithm>
-#include <include/glad/glad.h>
+#include <glad/glad.h>
 #include <Window.hpp>
 #include <Shader.hpp>
 #include <Texture.hpp>

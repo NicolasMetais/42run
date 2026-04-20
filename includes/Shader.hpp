@@ -2,7 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <include/glad/glad.h>
+#include <glad/glad.h>
 
 class Shader {
 	private:

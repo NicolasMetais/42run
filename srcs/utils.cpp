@@ -165,19 +165,22 @@ void utils::prepareMats(MeshData& meshdata, TextureManager& texMng) {
 		//baseColor
 		if (mat.pbrMetallicRoughness.baseColorTexture.index >= 0) {
 			std::string uri = resolveUri(meshdata, mat.pbrMetallicRoughness.baseColorTexture.index);
+			std::cout << "load d'une texture basique" << std::endl;
 			mat.baseColorTextureGPU = &texMng.getOrLoad(uri);
 			// std::cout << mat.baseColorTextureGPU << std::endl;
 		}
 
 		//metallic roughness
-		if (mat.pbrMetallicRoughness.metallicRoughnessTexture.index >= 0) {
-			std::string uri = resolveUri(meshdata, mat.pbrMetallicRoughness.metallicRoughnessTexture.index);
-			mat.metallicRoughnessTextureGPU = &texMng.getOrLoad(uri);
-		}
+		// if (mat.pbrMetallicRoughness.metallicRoughnessTexture.index >= 0) {
+		// 	std::string uri = resolveUri(meshdata, mat.pbrMetallicRoughness.metallicRoughnessTexture.index);
+		// 	std::cout << "load une texture metallic" << std::endl;
+		// 	mat.metallicRoughnessTextureGPU = &texMng.getOrLoad(uri);
+		// }
 
 		//normal
 		if (mat.normalTexture.index >= 0) {
 			std::string uri = resolveUri(meshdata, mat.normalTexture.index);
+			std::cout << "load d'une texture de normale" << std::endl;
 			mat.normalTextureGPU = &texMng.getOrLoad(uri);
 		}
 

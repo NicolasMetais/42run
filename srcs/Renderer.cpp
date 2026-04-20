@@ -198,7 +198,7 @@ void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mes
 		// shader.setInt("hasBaseColorTexture", 1); //forcing pour tester
 		shader.setInt("hasTangent", mesh.hasTangent);
 		shader.setInt("hasVertexColor", mesh.hasColor);
-		shader.setfloat("lightIntensity", 0.0f);
+		shader.setfloat("lightIntensity", 1.0f);
 		glActiveTexture(GL_TEXTURE20);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxId);
 		shader.setInt("irradianceMap", 20);
