@@ -22,19 +22,20 @@ uniform bool hasBaseColorTexture;
 uniform bool hasOcclusionTexture;
 uniform bool hasEmissiveTexture;
 uniform bool hasMetallicRoughnessTexture;
-
 uniform bool hasVertexColor;
 
 uniform vec4 baseColorFactor;
 
 uniform float lightIntensity;
 
-uniform float mettalicFactor;
+uniform float metallicFactor;
 uniform float roughnessFactor;
-uniform float emmisiveFactor;
+uniform vec3 emissiveFactor;
 uniform float occlusionStrength;
 
 uniform vec3 lightDir;
+
+uniform vec3 viewPos;
 
 void main() {
 	mat3 tbn = TBN;
@@ -71,23 +72,47 @@ void main() {
 	vec3 L = normalize(-lightDir);
 	float NdotL = max(dot(N, L), 0.0);
 
-	// vec3 radiance = vec3(lightIntensity); // radiance
-	vec3 irradiance = texture(irradianceMap, N).rgb;
+	// vec3 irradiance = texture(irradianceMap, N).rgb; //irradiance normale avec couleur de la skybox
+	vec3 irradiance = vec3(1.0); //irradiance blanche pour tester
 	
 	vec3 ambient = irradiance * baseColor.rgb;
-
+	float metallic = 1.0;
+	float roughness = 1.0;
 	if (hasMetallicRoughnessTexture) {
-		float metallic = texture(metallicRougnessTex, TexCoord).b;
-		float roughness = texture(metallicRougnessTex, TexCoord).g;
-		float ao = 1.0;
+		metallic = texture(metallicRougnessTex, TexCoord).b;
+		roughness = texture(metallicRougnessTex, TexCoord).g;
+		float ao = 1.0; //ambiant occlusion
 		if (hasOcclusionTexture)
 			ao = texture(occlusionTex, TexCoord).r;
 		ambient = irradiance * baseColor.rgb * ao;
 	}
 
+	vec3 V = normalize(viewPos - FragPos);
+	vec3 H = normalize(L + V);
+
+	float alpha = roughness * roughness;
+	float alpha2 = alpha * alpha;
+	float NdotH = max(dot(N, H), 0.0);
+	float denom = NdotH * NdotH * (alpha2 - 1.0) + 1.0;
+	float D = max(0.001, alpha2 / (3.141592 * denom * denom));
+
+	vec3 F0 = mix(vec3(0.04), baseColor.rgb, metallic);
+	vec3 F = F0 + (1.0 - F0) * pow(1.0 - max(dot(H, V), 0.0), 5.0);
+
+	float k = (roughness + 1.0)	* (roughness + 1.0) / 8.0;
+	float NdotV = max(dot(N, V), 0.001);
+	float NdotL_val = max(dot(N, L), 0.001);
+
+	float ggx1 = NdotV / (NdotV * (1.0 - k) + k);
+	float ggx2 = NdotL_val / (NdotL_val * (1.0 - k) + k);
+	float G = ggx1 * ggx2;
+
+	vec3 emissive = texture(emissiveTex, TexCoord).rgb * emissiveFactor;
+
+	vec3 specular = (F * D * G) / (4.0 * NdotV * NdotL_val + 0.001);
 	vec3 diffuse = baseColor.rgb / 3.141592;
 
-	vec3 Lo = diffuse * vec3(lightIntensity) * NdotL + ambient; //Outgoing radiance
+	vec3 Lo = (diffuse + specular) * vec3(lightIntensity) * NdotL  + ambient + emissive; //Outgoing radiance
 
 	FragColor = vec4(Lo, baseColor.a);
 	// FragColor = vec4(TBN[2] * 0.5 + 0.5, 1.0); // visualise T

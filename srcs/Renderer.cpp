@@ -187,6 +187,7 @@ void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mes
 		shader.setfloat("roughnessFactor", roughness);
 
 		shader.setVec3("emissiveFactor", mat->emissiveFactor[0], mat->emissiveFactor[1], mat->emissiveFactor[2]);
+		std::cout << "Emissive Factor: " << mat->emissiveFactor[0] << ", " << mat->emissiveFactor[1] << ", " << mat->emissiveFactor[2] << std::endl;
 
 		shader.setfloat("normalScale", mat->normalTextureScale);
 		shader.setfloat("occlusionStrength", mat->occlusionStrength);
