@@ -75,13 +75,19 @@ void Renderer::InitMesh(SubMesh& subMesh) {
 		// std::cout << "Normal" << std::endl;
 		layout.attributes.push_back({attribIndex++, 3, GL_FLOAT, false, offset});
 		offset += 3 * sizeof(float);
+	} else {
+		attribIndex++;  // Skip normal slot even if not present
 	}
+
 	if (subMesh.hasTangent) {
 		// std::cout << "Tangent" << std::endl;
 		layout.attributes.push_back({attribIndex++, 4, GL_FLOAT, false, offset});
 		offset += 4 * sizeof(float);
+	} else {
+		attribIndex++;  // Skip tangent slot even if not present
 	}
 	if (subMesh.hasTexCoord) {
+		std::cerr << "[DEBUG LAYOUT] hasTexCoord=true, texCoordCount=" << subMesh.texCoordCount << ", attribIndex=" << (int)attribIndex << ", offset=" << offset << std::endl;
 		for (size_t i = 0; i < subMesh.texCoordCount; ++i) {
 			// std::cout << "TexCoord" << std::endl;
 			layout.attributes.push_back({attribIndex++, 2, GL_FLOAT, false, offset});
@@ -105,12 +111,14 @@ void Renderer::InitMesh(SubMesh& subMesh) {
 
 void Renderer::bindTexture(int& texSlot, GLuint loc, GLuint flagLoc, const Texture* texture)  {
 	if (texture) {
+		// std::cerr << "[DEBUG bindTexture] Binding texture at slot " << texSlot << " loc=" << loc << std::endl;
 		glActiveTexture(GL_TEXTURE0 + texSlot);
 		glUniform1i(loc, texSlot);
 		glUniform1i(flagLoc, 1);
 		texture->bind();
 		texSlot++;
 	} else {
+		std::cerr << "[DEBUG bindTexture] Texture is nullptr!" << std::endl;
 		glUniform1i(loc, 0);
 		glUniform1i(flagLoc, 0);
 	}
@@ -169,7 +177,7 @@ void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mes
 		bindTexture(texSlot, shader.getUniformLocation("map_d"), shader.getUniformLocation("isMap_d"), mat->map_dGPU);
 		bindTexture(texSlot, shader.getUniformLocation("bump"), shader.getUniformLocation("isBump"), mat->bumpGPU);
 	} else {
-		auto& pbr = mat->pbrMetallicRoughness;
+		auto& pbr = mat->MetallicRoughness;
 
 		float metallic = (pbr.metallicFactor < 0.0f) ? 1.0f : pbr.metallicFactor;
 		float roughness = (pbr.roughnessFactor < 0.0f) ? 1.0f : pbr.roughnessFactor;
@@ -191,7 +199,7 @@ void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mes
 		shader.setInt("alphaMode", alphaMode);
 
 		bindTexture(texSlot, shader.getUniformLocation("baseColorTex"), shader.getUniformLocation("hasBaseColorTexture"), mat->baseColorTextureGPU);
-		bindTexture(texSlot, shader.getUniformLocation("metallicRougnessTex"), shader.getUniformLocation("hasMetallicRougnessTexture"), mat->metallicRoughnessTextureGPU);
+		bindTexture(texSlot, shader.getUniformLocation("metallicRougnessTex"), shader.getUniformLocation("hasMetallicRoughnessTexture"), mat->metallicRoughnessTextureGPU);
 		bindTexture(texSlot, shader.getUniformLocation("normalMap"), shader.getUniformLocation("hasNormalMap"), mat->normalTextureGPU);
 		bindTexture(texSlot, shader.getUniformLocation("occlusionTex"), shader.getUniformLocation("hasOcclusionTexture"), mat->occlusionTextureGPU);
 		bindTexture(texSlot, shader.getUniformLocation("emissiveTex"), shader.getUniformLocation("hasEmissiveTexture"), mat->emissiveTextureGPU);

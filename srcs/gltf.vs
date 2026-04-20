@@ -26,9 +26,9 @@ void main() {
     FragPos = vec3(model * vec4(aPos, 1.0));
 
     mat3 normalMatrix = mat3(transpose(inverse(model)));
-    Normal = normalize(normalMatrix * aNormal);
-    vec3 N = Normal;
-
+    vec3 N = normalize(normalMatrix * aNormal);
+    Normal = N;
+    
     if (hasVertexColor)
         VertexColor = aColor0;
     else
@@ -37,9 +37,13 @@ void main() {
     if (hasTangent) {
         vec3 T = normalize(normalMatrix * aTangent.xyz);
         T = normalize(T - N * dot(N, T));
-        vec3 B = normalize(cross(N, T)) * aTangent.w;
+        vec3 B = normalize(cross(T, N)) * aTangent.w;
         TBN = mat3(T,B,N);
     }
     else
-        TBN = mat3(1.0); //fallback
+        TBN = mat3(
+            1,0,0,
+            0,1,0,
+            0,0,1
+        );
 }

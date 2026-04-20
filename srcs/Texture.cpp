@@ -100,9 +100,14 @@ void Texture::loadBMP(const std::string& path) {
 };
 
 void Texture::loadJPEG(const std::string& path) {
+	std::cerr << "[DEBUG] Loading JPG: " << path << std::endl;
 	FILE* fp = fopen(path.c_str(), "rb");
-    if (!fp) throw std::runtime_error("Cannot open JPG file");
-	
+    if (!fp) {
+		std::cerr << "[ERROR] Cannot open JPG file: " << path << std::endl;
+		throw std::runtime_error("Cannot open JPG file");
+	}
+
+	std::cerr << "[DEBUG] File opened, starting JPEG decompress" << std::endl;
 	jpeg_decompress_struct cinfo;
 	jpeg_error_mgr jerr;
 
@@ -115,6 +120,7 @@ void Texture::loadJPEG(const std::string& path) {
 	width = cinfo.output_width;
 	height = cinfo.output_height;
 	int channels = cinfo.output_components;
+	std::cerr << "[DEBUG] JPG loaded: " << width << "x" << height << " channels=" << channels << std::endl;
 
 	std::vector<unsigned char> tmpData(width * height * channels);
 	while (cinfo.output_scanline < height) {
@@ -124,11 +130,10 @@ void Texture::loadJPEG(const std::string& path) {
 
 	std::vector<unsigned char> rgbaData(width * height * 4);
 	for(int i = 0; i < (int)width * (int)height; ++i) {
-		rgbaData[i * 4 + 0] = tmpData[i * 3 + 0];
-		rgbaData[i * 4 + 1] = tmpData[i * 3 + 1];
-		rgbaData[i * 4 + 2] = tmpData[i * 3 + 2];
-		rgbaData[i * 4 + 3] = 255;
-
+		rgbaData[i * 4 + 0] = (channels > 0) ? tmpData[i * channels + 0] : 0;
+		rgbaData[i * 4 + 1] = (channels > 1) ? tmpData[i * channels + 1] : tmpData[i * channels + 0];
+		rgbaData[i * 4 + 2] = (channels > 2) ? tmpData[i * channels + 2] : tmpData[i * channels + 0];
+		rgbaData[i * 4 + 3] = (channels > 3) ? tmpData[i * channels + 3] : 255;
 	}
 	data = std::move(rgbaData);
 	bpp = 4;
@@ -140,13 +145,16 @@ void Texture::loadJPEG(const std::string& path) {
 }
 
 void Texture::openGl2DTextureGen() {
+	std::cerr << "[DEBUG OpenGL] Creating texture: " << width << "x" << height << " bpp=" << bpp
+	          << " data.size()=" << this->data.size() << std::endl;
+
 	glGenTextures(1, &this->id);
 
 	glBindTexture(GL_TEXTURE_2D, this->id);
 
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-	//sert a repeter la texture plusieurs fois 
+	//sert a repeter la texture plusieurs fois
 	//si elle est trop petite par rapport au model
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);

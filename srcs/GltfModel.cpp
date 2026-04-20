@@ -91,8 +91,8 @@ void GltfModel::parseBuffer(const nlohmann::json& gltf) {
 			throw std::runtime_error("Cannot open buffer file");
 		if ((int)bytelength > (int)f.tellg())
 			throw std::runtime_error("Buffer byteLength larger than actual file size");
-		if (bytelength < 0)
-			throw std::runtime_error("bytelength has a ridiculous size");
+		// if (bytelength < 0)
+		// 	throw std::runtime_error("bytelength has a ridiculous size");
 		f.close();
 		newBuffer.byteLength = bytelength;
 
@@ -243,11 +243,11 @@ void GltfModel::parseMaterials(const nlohmann::json& gltf) {
 
 			//baseColorTexture
 			if (pbr.contains("baseColorTexture"))
-				newMaterial.pbrMetallicRoughness.baseColorTexture = parseTextureInfo(pbr["baseColorTexture"], gltf);
+				newMaterial.MetallicRoughness.baseColorTexture = parseTextureInfo(pbr["baseColorTexture"], gltf);
 
 			//baseColorFactor
 			if (pbr.contains("baseColorFactor")) {
-				newMaterial.pbrMetallicRoughness.baseColorFactor =pbr["baseColorFactor"].get<std::vector<float>>();
+				newMaterial.MetallicRoughness.baseColorFactor =pbr["baseColorFactor"].get<std::vector<float>>();
 			}
 
 			//metallicFactor
@@ -255,7 +255,7 @@ void GltfModel::parseMaterials(const nlohmann::json& gltf) {
 				float metallicFactor = pbr["metallicFactor"].get<float>();
 				if (metallicFactor < 0 || metallicFactor > 1)
 					throw std::runtime_error("MetallicFactor corrupted");
-				newMaterial.pbrMetallicRoughness.metallicFactor = metallicFactor;
+				newMaterial.MetallicRoughness.metallicFactor = metallicFactor;
 			}
 
 			//roughnessFactor
@@ -263,12 +263,12 @@ void GltfModel::parseMaterials(const nlohmann::json& gltf) {
 				float roughnessFactor = pbr["roughnessFactor"].get<float>();
 				if (roughnessFactor < 0 || roughnessFactor > 1)
 					throw std::runtime_error("roughnessFactor corrupted");
-				newMaterial.pbrMetallicRoughness.roughnessFactor = roughnessFactor;
+				newMaterial.MetallicRoughness.roughnessFactor = roughnessFactor;
 			}
 
 			//metallicRoughnessTexture
 			if (pbr.contains("metallicRoughnessTexture"))
-				newMaterial.pbrMetallicRoughness.metallicRoughnessTexture = parseTextureInfo(pbr["metallicRoughnessTexture"], gltf);
+				newMaterial.MetallicRoughness.metallicRoughnessTexture = parseTextureInfo(pbr["metallicRoughnessTexture"], gltf);
 		}
 
 		//name
@@ -754,8 +754,8 @@ void GltfModel::printData() const {
     std::cout << "\n=== Materials ===\n";
     for (size_t i = 0; i < materials.size(); ++i) {
         std::cout << "Material[" << i << "]: name=" << materials[i].name
-                  << ", baseColorTexture=" << (materials[i].pbrMetallicRoughness.baseColorTexture.index)
-                  << ", metallicRoughnessTexture=" << (materials[i].pbrMetallicRoughness.metallicRoughnessTexture.index)
+                  << ", baseColorTexture=" << (materials[i].MetallicRoughness.baseColorTexture.index)
+                  << ", metallicRoughnessTexture=" << (materials[i].MetallicRoughness.metallicRoughnessTexture.index)
                   << ", normalTexture=" << (materials[i].normalTexture.index)
                   << ", emissiveTexture=" << (materials[i].emissiveTexture.index)
                   << ", occlusionTexture=" << (materials[i].occlusionTexture.index)

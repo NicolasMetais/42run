@@ -312,6 +312,7 @@ static inline std::size_t hash_tuple(int a, int b, int c) {
 void ObjImporter::normalsHandler()
 {
     bool hasNormals = true;
+	(void) hasNormals;
     for (auto &face : this->f) {
         for (auto &fv : face.fvertices) {
             if (fv.vn == -1)

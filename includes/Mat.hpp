@@ -30,7 +30,7 @@ struct Mat {
 	std::string name;
 
 	//GLTF
-	pbrMetallicRoughness pbrMetallicRoughness;
+	pbrMetallicRoughness MetallicRoughness;
 	TextureInfo normalTexture;
 	float normalTextureScale = 1.0f;
 	TextureInfo occlusionTexture;

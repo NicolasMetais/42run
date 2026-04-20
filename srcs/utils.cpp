@@ -163,19 +163,19 @@ void utils::prepareMats(MeshData& meshdata, TextureManager& texMng) {
 	for (auto& mat : meshdata.materials) {
 
 		//baseColor
-		if (mat.pbrMetallicRoughness.baseColorTexture.index >= 0) {
-			std::string uri = resolveUri(meshdata, mat.pbrMetallicRoughness.baseColorTexture.index);
+		if (mat.MetallicRoughness.baseColorTexture.index >= 0) {
+			std::string uri = resolveUri(meshdata, mat.MetallicRoughness.baseColorTexture.index);
 			std::cout << "load d'une texture basique" << std::endl;
 			mat.baseColorTextureGPU = &texMng.getOrLoad(uri);
 			// std::cout << mat.baseColorTextureGPU << std::endl;
 		}
 
 		//metallic roughness
-		// if (mat.pbrMetallicRoughness.metallicRoughnessTexture.index >= 0) {
-		// 	std::string uri = resolveUri(meshdata, mat.pbrMetallicRoughness.metallicRoughnessTexture.index);
-		// 	std::cout << "load une texture metallic" << std::endl;
-		// 	mat.metallicRoughnessTextureGPU = &texMng.getOrLoad(uri);
-		// }
+		if (mat.MetallicRoughness.metallicRoughnessTexture.index >= 0) {
+			std::string uri = resolveUri(meshdata, mat.MetallicRoughness.metallicRoughnessTexture.index);
+			std::cout << "load une texture metallic" << std::endl;
+			mat.metallicRoughnessTextureGPU = &texMng.getOrLoad(uri);
+		}
 
 		//normal
 		if (mat.normalTexture.index >= 0) {
@@ -187,13 +187,14 @@ void utils::prepareMats(MeshData& meshdata, TextureManager& texMng) {
 		//occlusion
 		if (mat.occlusionTexture.index >= 0) {
 			std::string uri = resolveUri(meshdata, mat.occlusionTexture.index);
+			std::cout << "load d'une texture d'occlusion" << std::endl;
 			mat.occlusionTextureGPU = &texMng.getOrLoad(uri);
-			// std::cout << mat.occlusionTextureGPU << std::endl;
 		}
 
 		// emissive
 		if (mat.emissiveTexture.index >= 0) {
 			std::string uri = resolveUri(meshdata, mat.emissiveTexture.index);
+			std::cout << "load d'une texture d'emission" << std::endl;
 			mat.emissiveTextureGPU = &texMng.getOrLoad(uri);
 		}
 

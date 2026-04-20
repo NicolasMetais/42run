@@ -1,6 +1,6 @@
 #include <Mouse.hpp>
 
-#define SENSITIVITY 0.01f
+#define SENSITIVITY 0.005f
 
 void Mouse::processEvent(SDL_Event& e) {
 	switch (e.type) {

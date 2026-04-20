@@ -21,62 +21,62 @@ switch (e.type) {
 	case SDL_KEYDOWN:
 	case SDL_KEYUP:
 		bool pressed = (e.type == SDL_KEYDOWN);
-		switch (e.key.keysym.sym) {
-			case SDLK_EQUALS:
-			case SDLK_KP_PLUS:
+		switch (e.key.keysym.scancode) {
+			case SDL_SCANCODE_EQUALS:
+			case SDL_SCANCODE_KP_PLUS:
 				if (pressed)
 					cam.speedUp();
 			break;
-			case SDLK_MINUS:
-			case SDLK_KP_MINUS:
+			case SDL_SCANCODE_MINUS:
+			case SDL_SCANCODE_KP_MINUS:
 				if (pressed)
 					cam.speedDown();
 			break;
-			case SDLK_ESCAPE:
+			case SDL_SCANCODE_ESCAPE:
 				if (pressed) running = false;
 			break ;
-			case SDLK_w:
+			case SDL_SCANCODE_W:
 				pressed ? moveFlags |= KEY_W : moveFlags &= ~KEY_W;
 			break ;
-			case SDLK_a:
+			case SDL_SCANCODE_A:
 				pressed ? moveFlags |= KEY_A : moveFlags &= ~KEY_A;
 			break ;
-			case SDLK_s:
+			case SDL_SCANCODE_S:
 				pressed ? moveFlags |= KEY_S : moveFlags &= ~KEY_S;
 			break ;
-			case SDLK_d:
+			case SDL_SCANCODE_D:
 				pressed ? moveFlags |= KEY_D : moveFlags &= ~KEY_D;
 			break ;
-			case SDLK_LSHIFT: 
-			case SDLK_SPACE:
+			case SDL_SCANCODE_LSHIFT: 
+			case SDL_SCANCODE_SPACE:
 				pressed ? moveFlags |= KEY_UP : moveFlags &= ~KEY_UP;
 			break ;
-			case SDLK_LCTRL:
+			case SDL_SCANCODE_LCTRL:
 				pressed ? moveFlags |= KEY_DOWN : moveFlags &= ~KEY_DOWN;
 			break ;
-			case SDLK_UP:
+			case SDL_SCANCODE_UP:
 				pressed ? moveFlags |= MOVE_MESH_UP : moveFlags &= ~MOVE_MESH_UP;
 			break ;
-			case SDLK_DOWN:
+			case SDL_SCANCODE_DOWN:
 				pressed ? moveFlags |= MOVE_MESH_DOWN : moveFlags &= ~MOVE_MESH_DOWN;
 			break ;
-			case SDLK_LEFT:
+			case SDL_SCANCODE_LEFT:
 				pressed ? moveFlags |= MOVE_MESH_LEFT : moveFlags &= ~MOVE_MESH_LEFT;
 			break ;
-			case SDLK_RIGHT:
+			case SDL_SCANCODE_RIGHT:
 				pressed ? moveFlags |= MOVE_MESH_RIGHT : moveFlags &= ~MOVE_MESH_RIGHT;
 			break ;
-			case SDLK_PAGEUP:
+			case SDL_SCANCODE_PAGEUP:
 				pressed ? moveFlags |= MOVE_MESH_FORWARD : moveFlags &= ~MOVE_MESH_FORWARD;
 			break ;
-			case SDLK_PAGEDOWN:
+			case SDL_SCANCODE_PAGEDOWN:
 				pressed ? moveFlags |= MOVE_MESH_BACKWARD : moveFlags &= ~MOVE_MESH_BACKWARD;
 			break ;
-			case SDLK_f:
+			case SDL_SCANCODE_F:
 				if (pressed)
 					std::cout << "FPS: " << fps << std::endl;
 				break ;
-			case SDLK_q:
+			case SDL_SCANCODE_Q:
 				if (pressed)
 				{
 					if (lockCam) {
@@ -89,7 +89,9 @@ switch (e.type) {
 					}
 					lockCam = !lockCam;
 				}
-			break ;
+				break ;
+			default:
+				break ;
 		}
 	}
 };

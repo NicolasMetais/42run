@@ -113,7 +113,7 @@ App::App(int width, int height) : window(width, height), renderer(), mesh()
     this->skybox.generateIrradianceMap();
     glViewport(0, 0, width, height);
     // mesh.loadObj("resources/spaceship.obj");
-	model.parseJson("resources/TwoSidedPlane.gltf");
+	model.parseJson("resources/DamagedHelmet.gltf");
     // model.printData();
 	this->data = this->gltf.buildMeshData(model);
     // printMeshData(this->data)
