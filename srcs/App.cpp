@@ -110,22 +110,21 @@ void printMeshData(const MeshData& mesh)
 App::App(int width, int height) : window(width, height), renderer(), mesh()
 		, camera(static_cast<float>(width), static_cast<float>(height), Vector<float>{0, 1, 3}, Vector<float>{0,0,0}, Vector<float>{0,1,0})
 		, transform(), skybox(), timer(), running(true) {
-
-            // mesh.loadObj("resources/spaceship.obj");
-			model.parseJson("resources/TwoSidedPlane.gltf");
-            // model.printData();
-			this->data = this->gltf.buildMeshData(model);
-            // printMeshData(this->data);
-
-            utils::prepareMats(this->data, this->textureManager);
-            for (auto& submesh : data.submeshes)
-                this->renderer.InitMesh(submesh);
-            glBindVertexArray(0);
-			this->transform.setScale(1.0f);
-			Vector<float> cent(3);
-			cent = (data.max + data.min) * 0.5f;
-			this->transform.setPosition(-cent.x(), -cent.y(), -cent.z());
-            // transform.setPosition(0, 0, 0);
+    this->skybox.generateIrradianceMap();
+    glViewport(0, 0, width, height);
+    // mesh.loadObj("resources/spaceship.obj");
+	model.parseJson("resources/TwoSidedPlane.gltf");
+    // model.printData();
+	this->data = this->gltf.buildMeshData(model);
+    // printMeshData(this->data)
+    utils::prepareMats(this->data, this->textureManager);
+    for (auto& submesh : data.submeshes)
+        this->renderer.InitMesh(submesh);
+    glBindVertexArray(0);
+	this->transform.setScale(1.0f);
+	Vector<float> cent(3);
+	cent = (data.max + data.min) * 0.5f;
+	this->transform.setPosition(-cent.x(), -cent.y(), -cent.z());
 };
 
 App::~App(){};
@@ -151,7 +150,7 @@ void App::render() {
 	Matrix<float> view = this->camera.buildView();
 	Matrix<float> projection = this->camera.buildProjection();
 	Matrix<float> MVP = projection * view * model;
-	this->renderer.rendering(MVP, this->data, model, this->camera, this->skybox.getSkyboxId());
+	this->renderer.rendering(MVP, this->data, model, this->camera, this->skybox.getIrradianceMapId());
 	this->skybox.draw(this->camera.buildViewNoTranslation(), projection);
 	SDL_GL_SwapWindow(this->window.getWin());
 };

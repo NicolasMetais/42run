@@ -47,7 +47,7 @@ void Texture::loadPNG(const std::string& path) {
     if (bit_depth == 16) png_set_strip_16(png_ptr);
     if (color_type == PNG_COLOR_TYPE_PALETTE) png_set_palette_to_rgb(png_ptr);
     if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8) png_set_expand_gray_1_2_4_to_8(png_ptr);
-    if (png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS)) png_set_tRNS_to_alpha(png_ptr);
+    if (png_get_valid(png_ptr,  info_ptr, PNG_INFO_tRNS)) png_set_tRNS_to_alpha(png_ptr);
     if (color_type == PNG_COLOR_TYPE_RGB || color_type == PNG_COLOR_TYPE_GRAY) png_set_filler(png_ptr, 0xFF, PNG_FILLER_AFTER);
     if (color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_GRAY_ALPHA) png_set_gray_to_rgb(png_ptr);
 
@@ -56,10 +56,10 @@ void Texture::loadPNG(const std::string& path) {
     bpp = 4;
     inputFormat = GL_RGBA;
 	png_size_t rowbytes = png_get_rowbytes(png_ptr, info_ptr);
-    data.resize(rowbytes * height * 4);
+    data.resize(rowbytes * height);
     std::vector<png_bytep> row_pointers(height);
     for (int y = 0; y < (int)height; y++)
-        row_pointers[y] = data.data() + y * width * 4;
+        row_pointers[y] = data.data() + y * rowbytes;
 
     png_read_image(png_ptr, row_pointers.data());
     png_destroy_read_struct(&png_ptr, &info_ptr, nullptr);

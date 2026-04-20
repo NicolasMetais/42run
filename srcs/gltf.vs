@@ -5,8 +5,8 @@ layout(location = 1) in vec3 aNormal;
 layout(location = 2) in vec4 aTangent;
 layout(location = 3) in vec2 aTexCoord0;
 layout(location = 4) in vec2 aTexCoord1;
-layout(location = 5) in vec4 aColor0; //vec4, si pas d'alpha openGL mettraa 1.0 alpha tout seul
-layout(location = 6) in vec3 aColor1;
+layout(location = 5) in vec4 aColor0; //vec4, si pas d'alpha openGL mettra 1.0 alpha tout seul
+layout(location = 6) in vec4 aColor1;
 
 
 out vec2 TexCoord;
@@ -37,7 +37,7 @@ void main() {
     if (hasTangent) {
         vec3 T = normalize(normalMatrix * aTangent.xyz);
         T = normalize(T - N * dot(N, T));
-        vec3 B = cross(N, T) * aTangent.w;
+        vec3 B = normalize(cross(N, T)) * aTangent.w;
         TBN = mat3(T,B,N);
     }
     else

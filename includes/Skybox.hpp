@@ -7,6 +7,7 @@
 #include <Window.hpp>
 #include <Shader.hpp>
 #include <Texture.hpp>
+#include <utils.hpp>
 #include <Camera.hpp>
 
 struct SkyboxFace {
@@ -18,6 +19,7 @@ class Skybox {
 	private:
 		GLuint skyboxVAO, skyboxVBO;
 		GLuint cubeMaptexture;
+		GLuint irradianceMapId;
 		std::vector<SkyboxFace> TextureList;
 		std::vector<float> skyboxVertices;
 		Shader shaders;
@@ -27,4 +29,7 @@ class Skybox {
 		~Skybox();
 	public:
 		GLuint getSkyboxId() { return this->cubeMaptexture; };
+		GLuint getIrradianceMapId() { return this->irradianceMapId; };
+
+		void generateIrradianceMap();
 };

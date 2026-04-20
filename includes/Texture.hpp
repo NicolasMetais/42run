@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 #include <fstream>
-#include <include/glad/glad.h>
+#include <glad/glad.h>
 #include <zlib.h>
 #include <png.h>
 #include <jpeglib.h>

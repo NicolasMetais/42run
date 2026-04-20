@@ -123,7 +123,8 @@ void Renderer::sendCommonUniforms(Shader& shader, Matrix<float>& mvp, Matrix<flo
 
 	Vector<float> cam = camera.getCameraPos();
 	shader.setVec3("viewPos", cam.x(), cam.y(), cam.z()); //pos de la camera
-	Vector<float> ligthDir{-0.5f, -1.0f, -0.3f};
+	// Vector<float> ligthDir{-0.5f, -1.0f, -0.3f};
+	Vector<float> ligthDir{-1.0f, -0.3f, 0.0f};
 	ligthDir = ligthDir.normalize();
 	shader.setVec3("lightDir", ligthDir.x(), ligthDir.y(), ligthDir.z());
 };
@@ -197,7 +198,7 @@ void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mes
 		// shader.setInt("hasBaseColorTexture", 1); //forcing pour tester
 		shader.setInt("hasTangent", mesh.hasTangent);
 		shader.setInt("hasVertexColor", mesh.hasColor);
-		shader.setfloat("lightIntensity", 1.0f);
+		shader.setfloat("lightIntensity", 0.0f);
 		glActiveTexture(GL_TEXTURE20);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxId);
 		shader.setInt("irradianceMap", 20);

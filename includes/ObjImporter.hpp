@@ -6,7 +6,7 @@
 #include <algorithm>
 #include "Matrix/Matrix.hpp"
 #include <array>
-#include <include/glad/glad.h>
+#include <glad/glad.h>
 #include <Mat.hpp>
 #include <Texture.hpp>
 #include <MeshData.hpp>
