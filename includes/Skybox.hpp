@@ -20,6 +20,7 @@ class Skybox {
 		GLuint skyboxVAO, skyboxVBO;
 		GLuint cubeMaptexture;
 		GLuint irradianceMapId;
+		GLuint prefilterMapId;
 		std::vector<SkyboxFace> TextureList;
 		std::vector<float> skyboxVertices;
 		Shader shaders;
@@ -30,6 +31,10 @@ class Skybox {
 	public:
 		GLuint getSkyboxId() { return this->cubeMaptexture; };
 		GLuint getIrradianceMapId() { return this->irradianceMapId; };
+		GLuint getPrefilterMapId() { return this->prefilterMapId; };
 
 		void generateIrradianceMap();
+		void generatePrefilterMap();
+
+
 };

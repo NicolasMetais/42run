@@ -30,11 +30,11 @@ class Renderer {
         Shader debug;
 
 		void sendCommonUniforms(Shader& shader, Matrix<float>& mvp, Matrix<float>& model, Camera& camera);
-		void sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mesh, GLuint skyboxId);
+		void sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mesh, GLuint skyboxId, GLuint prefilterMapId);
 		void draw(SubMesh& mesh);
 	public:
 		Renderer();
-		void rendering(Matrix<float>& mvp, MeshData& obj, Matrix<float> model, Camera& camera, GLuint skyboxId);
+		void rendering(Matrix<float>& mvp, MeshData& obj, Matrix<float> model, Camera& camera, GLuint skyboxId, GLuint prefilterMapId);
 		void InitMesh(SubMesh& subMesh);
 		void cleanup(MeshData& obj);
 		void bindTexture(int& texSlot, GLuint loc, GLuint , const Texture* texture);

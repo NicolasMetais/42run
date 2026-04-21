@@ -37,13 +37,14 @@ void main() {
     if (hasTangent) {
         vec3 T = normalize(normalMatrix * aTangent.xyz);
         T = normalize(T - N * dot(N, T));
-        vec3 B = normalize(cross(T, N)) * aTangent.w;
-        TBN = mat3(T,B,N);
+        vec3 B = normalize(cross(N, T)) * aTangent.w;
+        TBN = mat3(T, B, N);
     }
-    else
-        TBN = mat3(
-            1,0,0,
-            0,1,0,
-            0,0,1
-        );
+    else {
+        // No tangent data: build a fallback TBN so tbn[2] = actual surface normal
+        vec3 up = abs(N.y) < 0.999 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0);
+        vec3 T2 = normalize(cross(up, N));
+        vec3 B2 = cross(N, T2);
+        TBN = mat3(T2, B2, N);
+    }
 }

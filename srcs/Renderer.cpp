@@ -97,7 +97,7 @@ void Renderer::InitMesh(SubMesh& subMesh) {
 		for (size_t i = 0; i < subMesh.colorCount; ++i) {
 			// std::cout << "Color" << std::endl;
 			layout.attributes.push_back({attribIndex++, 3, GL_FLOAT, false, offset});
-			offset += 3 * sizeof(float);
+			offset += 4 * sizeof(float);
 		}
 	}
 
@@ -129,12 +129,12 @@ void Renderer::sendCommonUniforms(Shader& shader, Matrix<float>& mvp, Matrix<flo
 	Vector<float> cam = camera.getCameraPos();
 	shader.setVec3("viewPos", cam.x(), cam.y(), cam.z()); //pos de la camera
 	// Vector<float> ligthDir{-0.5f, -1.0f, -0.3f};
-	Vector<float> ligthDir{-1.0f, -0.3f, 0.0f};
+	Vector<float> ligthDir{-1.0f, -0.3f, -1.0f};
 	ligthDir = ligthDir.normalize();
 	shader.setVec3("lightDir", ligthDir.x(), ligthDir.y(), ligthDir.z());
 };
 
-void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mesh, GLuint skyboxId) {
+void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mesh, GLuint skyboxId, GLuint prefilterMapId) {
 	int texSlot = 0; //incremente par bindTexture
 
 	if (!mat) {
@@ -185,7 +185,7 @@ void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mes
 
 		shader.setVec3("emissiveFactor", mat->emissiveFactor[0], mat->emissiveFactor[1], mat->emissiveFactor[2]);
 
-		shader.setfloat("normalScale", mat->normalTextureScale);
+		shader.setfloat("normalScale", mat->normalTextureScale * 5.0f);
 		shader.setfloat("occlusionStrength", mat->occlusionStrength);
 		shader.setfloat("alphaCutOff", mat->alphaCutoff);
 
@@ -207,6 +207,10 @@ void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mes
 		glActiveTexture(GL_TEXTURE20);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxId);
 		shader.setInt("irradianceMap", 20);
+		glActiveTexture(GL_TEXTURE21);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterMapId);
+		shader.setInt("prefilterMap", 21);
+
 	}
 
 };
@@ -239,7 +243,7 @@ void Renderer::draw(SubMesh& mesh) {
     glBindVertexArray(0);
 };
 
-void Renderer::rendering(Matrix<float>& mvp, MeshData& obj, Matrix<float> model, Camera& camera, GLuint skyboxId) {
+void Renderer::rendering(Matrix<float>& mvp, MeshData& obj, Matrix<float> model, Camera& camera, GLuint skyboxId, GLuint prefilterMapId) {
 	for (auto& mesh : obj.submeshes) {
 		const Mat* mat = mesh.material;
 
@@ -247,7 +251,7 @@ void Renderer::rendering(Matrix<float>& mvp, MeshData& obj, Matrix<float> model,
 		// Shader& shader = this->debug; //shader simple de debug
 		shader.bind();
 		sendCommonUniforms(shader, mvp, model, camera);
-		sendMaterialUniforms(shader, mat, mesh, skyboxId);
+		sendMaterialUniforms(shader, mat, mesh, skyboxId, prefilterMapId);
 		draw(mesh);
 	}
 };

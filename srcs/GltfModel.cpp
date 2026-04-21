@@ -275,16 +275,10 @@ void GltfModel::parseMaterials(const nlohmann::json& gltf) {
 		if (jsonMaterial.contains("name"))
 			newMaterial.name = jsonMaterial["name"].get<std::string>();
 		
-		//normalTexture
-		if (jsonMaterial.contains("normalTexture"))
+		//normalTexture (scale is inside the normalTexture object per glTF spec)
+		if (jsonMaterial.contains("normalTexture")) {
 			newMaterial.normalTexture = parseTextureInfo(jsonMaterial["normalTexture"], gltf);
-
-		//normalTextureScale
-		if (jsonMaterial.contains("normalTextureScale")) {
-			float normalTextureScale = jsonMaterial["normalTextureScale"].get<float>();
-			if (normalTextureScale < 0)
-				throw std::runtime_error("negativ textureScale");
-			newMaterial.normalTextureScale = normalTextureScale;
+			newMaterial.normalTextureScale = newMaterial.normalTexture.scale;
 		}
 
 		//occlusionTexture

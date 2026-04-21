@@ -22,9 +22,9 @@ MeshData GltfImporter::buildMeshData(const GltfModel& model) {
 
             Vector<float> pos = posAccessor.getVector3(i, basePtr);
             Vector<float> norm = normAccessor ? normAccessor->getVector3(i, basePtr) : Vector<float>{0,0,0};
-        }
-    }
-}
+        	}
+    	}
+	}
 	MeshData meshData;
 	meshData.materials = model.materials; //je stock tout les materials
 	meshData.images = model.images;
@@ -140,6 +140,64 @@ MeshData GltfImporter::buildMeshData(const GltfModel& model) {
 
 				// joints, weights a faire en pluus sur le meme format que uv et color parce que hashmap
 			}
+			// Generate tangents from UV when the model doesn't provide them
+			if (!SubMesh.hasTangent && SubMesh.hasTexCoord && !SubMesh.indices.empty()) {
+				size_t vCount = SubMesh.vertices.size();
+				std::vector<Vector<float>> tanT(vCount, Vector<float>{0.f, 0.f, 0.f});
+				std::vector<Vector<float>> tanB(vCount, Vector<float>{0.f, 0.f, 0.f});
+
+				for (size_t idx = 0; idx + 2 < SubMesh.indices.size(); idx += 3) {
+					uint32_t i0 = SubMesh.indices[idx];
+					uint32_t i1 = SubMesh.indices[idx + 1];
+					uint32_t i2 = SubMesh.indices[idx + 2];
+					if (i0 >= vCount || i1 >= vCount || i2 >= vCount) continue;
+
+					const auto& v0 = SubMesh.vertices[i0];
+					const auto& v1 = SubMesh.vertices[i1];
+					const auto& v2 = SubMesh.vertices[i2];
+
+					Vector<float> e1 = v1.position - v0.position;
+					Vector<float> e2 = v2.position - v0.position;
+
+					float du1 = v1.uv[0][0] - v0.uv[0][0];
+					float dv1 = v1.uv[0][1] - v0.uv[0][1];
+					float du2 = v2.uv[0][0] - v0.uv[0][0];
+					float dv2 = v2.uv[0][1] - v0.uv[0][1];
+
+					float denom = du1 * dv2 - du2 * dv1;
+					if (std::abs(denom) < 1e-8f) continue;
+					float r = 1.0f / denom;
+
+					Vector<float> T{
+						r * (dv2 * e1[0] - dv1 * e2[0]),
+						r * (dv2 * e1[1] - dv1 * e2[1]),
+						r * (dv2 * e1[2] - dv1 * e2[2])
+					};
+					Vector<float> B{
+						r * (-du2 * e1[0] + du1 * e2[0]),
+						r * (-du2 * e1[1] + du1 * e2[1]),
+						r * (-du2 * e1[2] + du1 * e2[2])
+					};
+
+					tanT[i0] += T; tanT[i1] += T; tanT[i2] += T;
+					tanB[i0] += B; tanB[i1] += B; tanB[i2] += B;
+				}
+
+				for (size_t i = 0; i < vCount; ++i) {
+					auto& v = SubMesh.vertices[i];
+					const Vector<float>& N = v.normal;
+					Vector<float> T_orth = tanT[i] - N * N.dot(tanT[i]);
+					if (T_orth.lengthSquared() < 1e-8f) {
+						v.tangent = {1.f, 0.f, 0.f, 1.f};
+						continue;
+					}
+					T_orth = T_orth.normalize();
+					float w = (cross_product(N, T_orth).dot(tanB[i]) < 0.0f) ? -1.0f : 1.0f;
+					v.tangent = {T_orth[0], T_orth[1], T_orth[2], w};
+				}
+				SubMesh.hasTangent = true;
+			}
+
 			meshData.submeshes.push_back(std::move(SubMesh));
 		}
 	}

@@ -148,6 +148,84 @@ void Skybox::generateIrradianceMap() {
 	glDeleteRenderbuffers(1, &rbo);
 };
 
+void Skybox::generatePrefilterMap() {
+	glGenTextures(1, &this->prefilterMapId);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, this->prefilterMapId);
+
+	int resolution = 256;
+	for (size_t mip = 0; mip < 5; ++mip) {
+		int mipSize = resolution >> mip;
+
+		for (size_t face = 0; face < 6; ++face)
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, mip, GL_RGB16F, mipSize, mipSize, 0, GL_RGB, GL_FLOAT, nullptr);
+	}
+
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 4);
+
+	GLuint fbo, rbo;
+	glGenFramebuffers(1, &fbo);
+	glGenRenderbuffers(1, &rbo);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, resolution, resolution);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo);
+	Matrix<float> captureProjection = utils::perspective(90.0f * (3.1415926f / 180.0f), 1.0f, 0.1f, 10.0f);
+	
+	Vector<float> origin = Vector<float>{0.0f, 0.0f, 0.0f};
+	Matrix<float> captureViews[6] = {
+		utils::view(origin, Vector<float>{1, 0, 0}, Vector<float>{0, -1, 0}),
+		utils::view(origin, Vector<float>{-1, 0, 0}, Vector<float>{0, -1, 0}),
+		utils::view(origin, Vector<float>{0, 1, 0}, Vector<float>{0, 0, 1}),
+		utils::view(origin, Vector<float>{0, -1, 0}, Vector<float>{0, 0, -1}),
+		utils::view(origin, Vector<float>{0, 0, 1}, Vector<float>{0, -1, 0}),
+		utils::view(origin, Vector<float>{0, 0, -1}, Vector<float>{0, -1, 0}),
+	};
+
+	Shader prefilterShader("srcs/prefilter.vs", "srcs/prefilter.fs");
+	prefilterShader.bind();
+	prefilterShader.setInt("environmentMap", 0);
+	prefilterShader.setMatrix4_true("projection", captureProjection.datal());
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, this->cubeMaptexture);
+	
+	for (size_t mip = 0; mip < 5; ++mip) {
+		size_t mipWidth = resolution >> mip;
+		size_t mipHeight = resolution >> mip;
+
+		glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
+		glViewport(0, 0, mipWidth, mipHeight);
+
+		float roughness = (float)mip / 4.0f;
+		prefilterShader.setfloat("roughness", roughness);
+
+		for (size_t i = 0; i < 6; ++i) {
+			prefilterShader.setMatrix4_true("view", captureViews[i].datal());
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, this->prefilterMapId, mip);
+
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			glBindVertexArray(this->skyboxVAO);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+			glBindVertexArray(0);
+		}
+	}
+
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glDeleteFramebuffers(1, &fbo);
+	glDeleteRenderbuffers(1, &rbo);
+};
+
+
 
 void Skybox::draw(Matrix<float> view, Matrix<float>& projection) {
 
@@ -170,8 +248,6 @@ void Skybox::draw(Matrix<float> view, Matrix<float>& projection) {
 	glEnable(GL_BLEND);
 
 };
-
-
 
 Skybox::~Skybox() {
 	glDeleteVertexArrays(1, &this->skyboxVAO);

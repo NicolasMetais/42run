@@ -111,6 +111,8 @@ App::App(int width, int height) : window(width, height), renderer(), mesh()
 		, camera(static_cast<float>(width), static_cast<float>(height), Vector<float>{0, 1, 3}, Vector<float>{0,0,0}, Vector<float>{0,1,0})
 		, transform(), skybox(), timer(), running(true) {
     this->skybox.generateIrradianceMap();
+    this->skybox.generatePrefilterMap();
+
     glViewport(0, 0, width, height);
     // mesh.loadObj("resources/spaceship.obj");
 	model.parseJson("resources/DamagedHelmet.gltf");
@@ -150,7 +152,7 @@ void App::render() {
 	Matrix<float> view = this->camera.buildView();
 	Matrix<float> projection = this->camera.buildProjection();
 	Matrix<float> MVP = projection * view * model;
-	this->renderer.rendering(MVP, this->data, model, this->camera, this->skybox.getIrradianceMapId());
+	this->renderer.rendering(MVP, this->data, model, this->camera, this->skybox.getIrradianceMapId(), this->skybox.getPrefilterMapId());
 	this->skybox.draw(this->camera.buildViewNoTranslation(), projection);
 	SDL_GL_SwapWindow(this->window.getWin());
 };

@@ -12,6 +12,7 @@ out vec4 FragColor;
 uniform sampler2D normalMap;
 uniform sampler2D baseColorTex;
 uniform samplerCube irradianceMap; //CUBEMAP LIGHTNING
+uniform samplerCube prefilterMap; //CUBEMAP PREFILTER
 uniform sampler2D metallicRougnessTex;
 uniform sampler2D occlusionTex;
 uniform sampler2D emissiveTex;
@@ -34,16 +35,15 @@ uniform vec3 emissiveFactor;
 uniform float occlusionStrength;
 
 uniform vec3 lightDir;
+uniform float normalScale;
 
 uniform vec3 viewPos;
 
 void main() {
 	mat3 tbn = TBN;
 
-	if (!gl_FrontFacing) {
+	if (!gl_FrontFacing)
 		tbn[2] = -tbn[2];
-		tbn[1] = -tbn[1];
-	}
 
 	vec3 Nbase = normalize(tbn[2]);
 	vec3 N = Nbase;
@@ -51,12 +51,8 @@ void main() {
 	if (hasNormalMap)
 	{
 		vec3 normalTex = texture(normalMap, TexCoord).rgb * 2.0 - 1.0;
-		N = normalize(tbn * normalTex);
-
-		// float NdotNbase = dot(N, Nbase);
-		// if (NdotNbase < 0.0) N = normalize(N - NdotNbase * Nbase);
-	// FragColor = vec4(normalTex, 1.0); // affiche la normal map brute sans transformation
-
+		normalTex.xy *= normalScale;
+		N = normalize(tbn * normalize(normalTex));
 	}
 
 	vec4 baseColor = vec4(1.0);
@@ -72,23 +68,26 @@ void main() {
 	vec3 L = normalize(-lightDir);
 	float NdotL = max(dot(N, L), 0.0);
 
-	// vec3 irradiance = texture(irradianceMap, N).rgb; //irradiance normale avec couleur de la skybox
-	vec3 irradiance = vec3(1.0); //irradiance blanche pour tester
+	vec3 irradiance = max(texture(irradianceMap, N).rgb, vec3(0.08)); //irradiance avec plancher minimum
+	// vec3 irradiance = vec3(1.0); //irradiance blanche pour tester
 	
-	vec3 ambient = irradiance * baseColor.rgb;
-	float metallic = 1.0;
-	float roughness = 1.0;
+	float metallic = metallicFactor;
+	float roughness = roughnessFactor;
+	float ao = 1.0; //ambiant occlusion
+	if (hasOcclusionTexture)
+		ao = 1.0 + occlusionStrength * (texture(occlusionTex, TexCoord).r - 1.0);
 	if (hasMetallicRoughnessTexture) {
-		metallic = texture(metallicRougnessTex, TexCoord).b;
-		roughness = texture(metallicRougnessTex, TexCoord).g;
-		float ao = 1.0; //ambiant occlusion
-		if (hasOcclusionTexture)
-			ao = texture(occlusionTex, TexCoord).r;
-		ambient = irradiance * baseColor.rgb * ao;
+		metallic = texture(metallicRougnessTex, TexCoord).b * metallicFactor;
+		roughness = texture(metallicRougnessTex, TexCoord).g * roughnessFactor;
 	}
 
 	vec3 V = normalize(viewPos - FragPos);
 	vec3 H = normalize(L + V);
+
+	vec3 R = reflect(-V, N);
+	float MAX_MIP_LEVEL = 4.0;
+
+	vec3 prefilteredColor = textureLod(prefilterMap, R, roughness * MAX_MIP_LEVEL).rgb;
 
 	float alpha = roughness * roughness;
 	float alpha2 = alpha * alpha;
@@ -100,6 +99,7 @@ void main() {
 	vec3 F = F0 + (1.0 - F0) * pow(1.0 - max(dot(H, V), 0.0), 5.0);
 
 	float k = (roughness + 1.0)	* (roughness + 1.0) / 8.0;
+
 	float NdotV = max(dot(N, V), 0.001);
 	float NdotL_val = max(dot(N, L), 0.001);
 
@@ -107,10 +107,22 @@ void main() {
 	float ggx2 = NdotL_val / (NdotL_val * (1.0 - k) + k);
 	float G = ggx1 * ggx2;
 
-	vec3 emissive = texture(emissiveTex, TexCoord).rgb * emissiveFactor;
-
 	vec3 specular = (F * D * G) / (4.0 * NdotV * NdotL_val + 0.001);
-	vec3 diffuse = baseColor.rgb / 3.141592;
+
+	vec3 kS = F;
+	vec3 kD = (1.0 - F) * (1.0 - metallic);
+
+	vec3 diffuse = kD * baseColor.rgb / 3.141592;
+
+	vec3 diffuseIBL = irradiance * baseColor.rgb;
+	vec3 specularIBL = prefilteredColor * F;
+
+	vec3 ambient = (diffuseIBL  * kD + specularIBL) * ao;
+
+	vec3 emissive = vec3(0.0);
+	if (hasEmissiveTexture)
+		emissive = texture(emissiveTex, TexCoord).rgb * emissiveFactor;
+
 
 	vec3 Lo = (diffuse + specular) * vec3(lightIntensity) * NdotL  + ambient + emissive; //Outgoing radiance
 
