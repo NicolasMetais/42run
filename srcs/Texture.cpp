@@ -100,14 +100,11 @@ void Texture::loadBMP(const std::string& path) {
 };
 
 void Texture::loadJPEG(const std::string& path) {
-	std::cerr << "[DEBUG] Loading JPG: " << path << std::endl;
 	FILE* fp = fopen(path.c_str(), "rb");
     if (!fp) {
-		std::cerr << "[ERROR] Cannot open JPG file: " << path << std::endl;
 		throw std::runtime_error("Cannot open JPG file");
 	}
 
-	std::cerr << "[DEBUG] File opened, starting JPEG decompress" << std::endl;
 	jpeg_decompress_struct cinfo;
 	jpeg_error_mgr jerr;
 
@@ -120,7 +117,6 @@ void Texture::loadJPEG(const std::string& path) {
 	width = cinfo.output_width;
 	height = cinfo.output_height;
 	int channels = cinfo.output_components;
-	std::cerr << "[DEBUG] JPG loaded: " << width << "x" << height << " channels=" << channels << std::endl;
 
 	std::vector<unsigned char> tmpData(width * height * channels);
 	while (cinfo.output_scanline < height) {
@@ -145,8 +141,6 @@ void Texture::loadJPEG(const std::string& path) {
 }
 
 void Texture::openGl2DTextureGen() {
-	std::cerr << "[DEBUG OpenGL] Creating texture: " << width << "x" << height << " bpp=" << bpp
-	          << " data.size()=" << this->data.size() << std::endl;
 
 	glGenTextures(1, &this->id);
 

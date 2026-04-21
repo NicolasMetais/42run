@@ -126,7 +126,6 @@ MeshData GltfImporter::buildMeshData(const GltfModel& model) {
 				for (auto& [setIndex, accessorIndex] : primitive.texcoords) {
 					v.uv.resize(SubMesh.texCoordCount);
 					v.uv[setIndex] = model.accessors[accessorIndex].type == ValueType::VEC2 ? model.accessors[accessorIndex].getVector2(i, basePtr) : Vector<float>{0,0};
-				if (i < 3) std::cerr << "[DEBUG UV] Vertex " << i << " setIndex=" << setIndex << " UV=(" << v.uv[setIndex][0] << ", " << v.uv[setIndex][1] << ")" << std::endl;
 				}
 				//color
 				if (!primitive.colors.empty()) {

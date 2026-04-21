@@ -53,8 +53,8 @@ void main() {
 		vec3 normalTex = texture(normalMap, TexCoord).rgb * 2.0 - 1.0;
 		N = normalize(tbn * normalTex);
 
-		float NdotNbase = dot(N, Nbase);
-		if (NdotNbase < 0.0) N = normalize(N - NdotNbase * Nbase);
+		// float NdotNbase = dot(N, Nbase);
+		// if (NdotNbase < 0.0) N = normalize(N - NdotNbase * Nbase);
 	// FragColor = vec4(normalTex, 1.0); // affiche la normal map brute sans transformation
 
 	}

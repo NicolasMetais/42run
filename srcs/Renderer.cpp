@@ -87,7 +87,6 @@ void Renderer::InitMesh(SubMesh& subMesh) {
 		attribIndex++;  // Skip tangent slot even if not present
 	}
 	if (subMesh.hasTexCoord) {
-		std::cerr << "[DEBUG LAYOUT] hasTexCoord=true, texCoordCount=" << subMesh.texCoordCount << ", attribIndex=" << (int)attribIndex << ", offset=" << offset << std::endl;
 		for (size_t i = 0; i < subMesh.texCoordCount; ++i) {
 			// std::cout << "TexCoord" << std::endl;
 			layout.attributes.push_back({attribIndex++, 2, GL_FLOAT, false, offset});
@@ -111,14 +110,12 @@ void Renderer::InitMesh(SubMesh& subMesh) {
 
 void Renderer::bindTexture(int& texSlot, GLuint loc, GLuint flagLoc, const Texture* texture)  {
 	if (texture) {
-		// std::cerr << "[DEBUG bindTexture] Binding texture at slot " << texSlot << " loc=" << loc << std::endl;
 		glActiveTexture(GL_TEXTURE0 + texSlot);
 		glUniform1i(loc, texSlot);
 		glUniform1i(flagLoc, 1);
 		texture->bind();
 		texSlot++;
 	} else {
-		std::cerr << "[DEBUG bindTexture] Texture is nullptr!" << std::endl;
 		glUniform1i(loc, 0);
 		glUniform1i(flagLoc, 0);
 	}
@@ -187,7 +184,6 @@ void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mes
 		shader.setfloat("roughnessFactor", roughness);
 
 		shader.setVec3("emissiveFactor", mat->emissiveFactor[0], mat->emissiveFactor[1], mat->emissiveFactor[2]);
-		std::cout << "Emissive Factor: " << mat->emissiveFactor[0] << ", " << mat->emissiveFactor[1] << ", " << mat->emissiveFactor[2] << std::endl;
 
 		shader.setfloat("normalScale", mat->normalTextureScale);
 		shader.setfloat("occlusionStrength", mat->occlusionStrength);
