@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 
-struct Sampler {
+struct TextureSampler {
 	int magFilter = 9729;
 	int minFilter = 9729;
 	int wrapS = 10497;

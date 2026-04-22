@@ -126,10 +126,10 @@ App::App(int width, int height) : window(width, height), renderer(), mesh()
     // printMeshData(this->data)
 
     glBindVertexArray(0);
-	this->transform.setScale(1.0f);
-	Vector<float> cent(3);
-	cent = (data.max + data.min) * 0.5f;
-	this->transform.setPosition(-cent.x(), -cent.y(), -cent.z());
+	// this->transform.setScale(1.0f);
+	// Vector<float> cent(3);
+	// cent = (data.max + data.min) * 0.5f;
+	// this->transform.setPosition(-cent.x(), -cent.y(), -cent.z());
 };
 
 App::~App(){};

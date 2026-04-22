@@ -65,7 +65,7 @@ void main() {
 	baseColor *= baseColorFactor;
 
 
-	vec3 L = normalize(-lightDir);
+	vec3 L = vec3(0.0); //normalize(-lightdir);
 	float NdotL = max(dot(N, L), 0.0);
 
 	vec3 irradiance = max(texture(irradianceMap, N).rgb, vec3(0.08)); //irradiance avec plancher minimum

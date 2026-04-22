@@ -28,12 +28,14 @@ void GltfModel::parseJson(std::string fileName) {
 	parseBufferViews(gltf);
 	parseAccessors(gltf);
 	BufferViewValidation();
-
 	parseImage(gltf);
-	parseSampler(gltf);
+	parseTextureSampler(gltf);
 	parseTexture(gltf);
 	parseMaterials(gltf);
 	parseNodes(gltf);
+	parseScenes(gltf);
+	parseAnimations(gltf);
+	parseSkins(gltf);
 	parseBuffer(gltf);
 	loadBinaryBuffer("resources/" + gltf["buffers"][0]["uri"].get<std::string>());
 	// linkBufferViewToBinary();
@@ -346,12 +348,12 @@ void GltfModel::parseMaterials(const nlohmann::json& gltf) {
 };
 
 
-void GltfModel::parseSampler(const nlohmann::json& gltf) {
+void GltfModel::parseTextureSampler(const nlohmann::json& gltf) {
 	if (!gltf.contains("samplers") || gltf["samplers"].empty())
 		return ;
 	
 	for (auto& jsonSampler : gltf["samplers"]) {
-		Sampler newSampler;
+		TextureSampler newSampler;
 
 		//magfilter
 		if (jsonSampler.contains("magFilter")) {
@@ -703,6 +705,101 @@ void GltfModel::parseMeshes(const nlohmann::json& gltf) {
 		}
 
 		meshes.push_back(newMesh);
+	}
+};
+
+void GltfModel::parseScenes(const nlohmann::json& gltf) {
+	if (!gltf.contains("scenes") || gltf["scenes"].empty())
+		throw std::runtime_error("Gltf file has no scenes");
+	
+	this->defaultScene = gltf["scene"].get<int>();
+	for (auto& sceneJson : gltf["scenes"]) {
+		Scene newScene;
+
+		newScene.name = sceneJson["name"].get<std::string>();
+		for (const auto& node : sceneJson["nodes"]) {
+			newScene.rootNodes.push_back(node.get<int>());
+		}
+		scenes.push_back(newScene);
+	}
+};
+
+static Path parsePath(const std::string& s) {
+	if (s == "translation") return Path::TRANSLATION;
+	if (s == "rotation") return Path::ROTATION;
+	if (s == "scale") return Path::SCALE;
+	if (s == "weights") return Path::WEIGHTS;
+
+	throw std::runtime_error("invalid animation path: " + s);
+};
+
+static Interpolation parseInterpolation(const std::string& s) {
+	if (s == "linear") return Interpolation::LINEAR;
+	if (s == "step") return Interpolation::STEP;
+	if (s == "cubicspline") return Interpolation::CUBICSPLINE;
+
+	throw std::runtime_error("invalid animation interpolation : " + s);
+};
+
+void GltfModel::parseAnimations(const nlohmann::json& gltf) {
+	if (!gltf.contains("animations") || gltf["animations"].empty())
+		throw std::runtime_error("Gltf file has no animation");
+	
+	for (const auto& animJson : gltf["animations"]) {
+		Animation newAnimation;
+		newAnimation.name = animJson.value("name", "");
+		for (const auto& channelJson : animJson["channels"]) {
+			Channel newChannel;
+			newChannel.samplerIndex = channelJson["sampler"].get<int>();
+			if (newChannel.samplerIndex < 0)
+				throw std::runtime_error("Invalid sampler index");
+			newChannel.target.node = channelJson["target"]["node"].get<int>();
+			newChannel.target.path = parsePath(channelJson["target"]["path"].get<std::string>());
+			newAnimation.channels.push_back(newChannel);
+		}
+		for (const auto& samplersJson : animJson["samplers"]) {
+			AnimationSampler newSampler;
+			newSampler.inputAccessor = samplersJson["input"].get<int>();
+			if (newSampler.inputAccessor < 0 || newSampler.inputAccessor >= (int)accessors.size())
+				throw std::runtime_error("Invalid inputAccessor index");
+			newSampler.outputAccessor = samplersJson["output"].get<int>();
+			if (newSampler.outputAccessor < 0 || newSampler.outputAccessor >= (int)accessors.size())
+				throw std::runtime_error("Invalid outputAccessor index");
+			if (samplersJson.contains("name"))
+				newSampler.name = samplersJson["name"].get<std::string>();
+			newSampler.interpolation = parseInterpolation(samplersJson["interpolation"].get<std::string>());
+			newAnimation.samplers.push_back(newSampler);
+		}
+		if (newAnimation.samplers.empty())
+			throw std::runtime_error("Animation has no samplers");
+		for (auto& c : newAnimation.channels) {
+		if (c.samplerIndex < 0 ||
+			c.samplerIndex >= (int)newAnimation.samplers.size())
+			throw std::runtime_error("Invalid samplerIndex in animation");
+		}
+		this->animations.push_back(newAnimation);
+	}
+};
+
+void GltfModel::parseSkins(const nlohmann::json& gltf) {
+	if (!gltf.contains("skins"))
+		return;
+
+	for (const auto& skinJson : gltf["skins"]) {
+		Skin skin;
+
+		for (int j : skinJson["joints"]) {
+			if (j < 0 || j >= (int)nodes.size())
+				throw std::runtime_error("Ivalid joint index");
+			skin.joints.push_back(j);
+		}
+
+		if (skinJson.contains("inverseBindMatrices"))
+			skin.inverseBindMatrixAccessor = skinJson["InverseBindMatrices"].get<int>();
+		
+		if (skinJson.contains("skeleton"))
+			skin.skeletonRoot = skinJson["skeleton"].get<int>();
+		skins.push_back(skin);
 	}
 };
 

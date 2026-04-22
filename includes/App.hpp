@@ -11,6 +11,7 @@
 #include <Keyboard.hpp>
 #include <GltfImporter.hpp>
 #include <TextureManager.hpp>
+#include <SceneManager.hpp>
 #include <Scene.hpp>
 #include <Mouse.hpp>
 
@@ -28,6 +29,7 @@ class App {
 		GltfImporter gltf;
 		GltfModel model;
 		TextureManager textureManager;
+		SceneManager sceneManager;
 		std::vector<MeshData> meshes;
 		std::vector<Scene> scenes;
 		std::vector<Node> nodes;
