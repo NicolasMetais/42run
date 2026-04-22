@@ -117,11 +117,14 @@ App::App(int width, int height) : window(width, height), renderer(), mesh()
     // mesh.loadObj("resources/spaceship.obj");
 	model.parseJson("resources/DamagedHelmet.gltf");
     // model.printData();
-	this->data = this->gltf.buildMeshData(model);
+    for (size_t i; i < model.meshes.size(); ++i) {
+        meshes.push_back(this->gltf.buildMeshData(model, model.meshes[i]));
+        utils::prepareMats(meshes[i], this->textureManager);
+        for (auto& submesh : meshes[i].submeshes)
+            this->renderer.InitMesh(submesh);
+    }
     // printMeshData(this->data)
-    utils::prepareMats(this->data, this->textureManager);
-    for (auto& submesh : data.submeshes)
-        this->renderer.InitMesh(submesh);
+
     glBindVertexArray(0);
 	this->transform.setScale(1.0f);
 	Vector<float> cent(3);

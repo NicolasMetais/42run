@@ -185,7 +185,7 @@ void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mes
 
 		shader.setVec3("emissiveFactor", mat->emissiveFactor[0], mat->emissiveFactor[1], mat->emissiveFactor[2]);
 
-		shader.setfloat("normalScale", mat->normalTextureScale * 5.0f);
+		shader.setfloat("normalScale", mat->normalTextureScale);
 		shader.setfloat("occlusionStrength", mat->occlusionStrength);
 		shader.setfloat("alphaCutOff", mat->alphaCutoff);
 

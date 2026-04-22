@@ -11,6 +11,7 @@
 #include <Keyboard.hpp>
 #include <GltfImporter.hpp>
 #include <TextureManager.hpp>
+#include <Scene.hpp>
 #include <Mouse.hpp>
 
 class App {
@@ -27,7 +28,9 @@ class App {
 		GltfImporter gltf;
 		GltfModel model;
 		TextureManager textureManager;
-		MeshData data; //temporaire
+		std::vector<MeshData> meshes;
+		std::vector<Scene> scenes;
+		std::vector<Node> nodes;
 		bool running;
 		bool mouselock = true;
 		float fps;

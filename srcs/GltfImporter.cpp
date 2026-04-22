@@ -1,10 +1,7 @@
 #include <GltfImporter.hpp>
 
-MeshData GltfImporter::buildMeshData(const GltfModel& model) {
+MeshData GltfImporter::buildMeshData(const GltfModel& model, Mesh mesh) {
 	const uint8_t* basePtr = model.binaryData.data();
-
-	for (size_t meshIdx = 0; meshIdx < model.meshes.size(); ++meshIdx) {
-    const auto& mesh = model.meshes[meshIdx];
 
     for (size_t primIdx = 0; primIdx < mesh.primitives.size(); ++primIdx) {
         const auto& prim = mesh.primitives[primIdx];
@@ -21,17 +18,14 @@ MeshData GltfImporter::buildMeshData(const GltfModel& model) {
         for (size_t i = 0; i < posAccessor.count; ++i) {
 
             Vector<float> pos = posAccessor.getVector3(i, basePtr);
-            Vector<float> norm = normAccessor ? normAccessor->getVector3(i, basePtr) : Vector<float>{0,0,0};
-        	}
-    	}
-	}
+    	    Vector<float> norm = normAccessor ? normAccessor->getVector3(i, basePtr) : Vector<float>{0,0,0};
+       	}
+    }
 	MeshData meshData;
 	meshData.materials = model.materials; //je stock tout les materials
 	meshData.images = model.images;
 	meshData.textures = model.textures;
 
-	//je me deplace dans tout les meshes
-	for (const auto& mesh : model.meshes) {
 		//je vais voir dans chaque primitives
 		for (const auto& primitive : mesh.primitives) {
 			//je construit tout les submesh, un submesh par materials different
@@ -200,7 +194,6 @@ MeshData GltfImporter::buildMeshData(const GltfModel& model) {
 
 			meshData.submeshes.push_back(std::move(SubMesh));
 		}
-	}
 	meshData.center = (meshData.min + meshData.max) * 0.5f;
 	float dist = 0.0f;
 	for (const auto& sub : meshData.submeshes) {
