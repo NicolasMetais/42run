@@ -5,6 +5,7 @@ struct Node {
 	std::string name;
 	int mesh = -1;
 	int camera = -1;
+	int skin = -1;
 	std::vector<int> children;
 
 	std::vector<float> translation = {0.0f, 0.0f, 0.0f};

@@ -134,6 +134,18 @@ void App::LoadNewModel(std::string filename) {
 
     sceneManager.setModel(&models[0]);
     sceneManager.loadScene(models[0].gltf.defaultScene);
+
+    Vector<float> globalMin = {FLT_MAX, FLT_MAX, FLT_MAX};
+    Vector<float> globalMax = {-FLT_MAX, -FLT_MAX, -FLT_MAX};
+    for (auto& m : models.back().meshes) {
+        for (int k = 0; k < 3; k++) {
+            if (m.min[k] < globalMin[k]) globalMin[k] = m.min[k];
+            if (m.max[k] > globalMax[k]) globalMax[k] = m.max[k];
+        }
+    }
+    Vector<float> center = (globalMin + globalMax) * 0.5f;
+    float radius = (globalMax - globalMin).length() * 0.5f;
+    camera.fitToScene(center, radius);
 };
 
 

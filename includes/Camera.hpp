@@ -44,6 +44,7 @@ class Camera {
 		void cameraInit();
 		void cameraUpdate();
 		void mouseActions();
+		void fitToScene(const Vector<float>& center, float radius);
 		Vector<float> getMousePos() const { return this->mousePos; };
 		Vector<float> getCameraPos() const { return this->cameraPos; };
 		const Vector<float>& getTarget() const { return this->target; };

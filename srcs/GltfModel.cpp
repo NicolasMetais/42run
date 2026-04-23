@@ -710,15 +710,17 @@ void GltfModel::parseMeshes(const nlohmann::json& gltf) {
 
 void GltfModel::parseScenes(const nlohmann::json& gltf) {
 	if (!gltf.contains("scenes") || gltf["scenes"].empty())
-		throw std::runtime_error("Gltf file has no scenes");
+		throw std::runtime_error("Gltf file has no scene");
 	
-	this->defaultScene = gltf["scene"].get<int>();
+	this->defaultScene = gltf.contains("scene") ? gltf["scene"].get<int>() : 0;
 	for (auto& sceneJson : gltf["scenes"]) {
 		Scene newScene;
 
-		newScene.name = sceneJson["name"].get<std::string>();
-		for (const auto& node : sceneJson["nodes"]) {
-			newScene.rootNodes.push_back(node.get<int>());
+		if (sceneJson.contains("name"))
+			newScene.name = sceneJson["name"].get<std::string>();
+		if (sceneJson.contains("nodes")) {
+			for (const auto& node : sceneJson["nodes"])
+				newScene.rootNodes.push_back(node.get<int>());
 		}
 		scenes.push_back(newScene);
 	}
@@ -734,9 +736,9 @@ static Path parsePath(const std::string& s) {
 };
 
 static Interpolation parseInterpolation(const std::string& s) {
-	if (s == "linear") return Interpolation::LINEAR;
-	if (s == "step") return Interpolation::STEP;
-	if (s == "cubicspline") return Interpolation::CUBICSPLINE;
+	if (s == "LINEAR") return Interpolation::LINEAR;
+	if (s == "STEP") return Interpolation::STEP;
+	if (s == "CUBICSPLINE") return Interpolation::CUBICSPLINE;
 
 	throw std::runtime_error("invalid animation interpolation : " + s);
 };
@@ -744,7 +746,7 @@ static Interpolation parseInterpolation(const std::string& s) {
 void GltfModel::parseAnimations(const nlohmann::json& gltf) {
 	if (!gltf.contains("animations"))
 		return;
-	
+	std::cout << "Avant crash" << std::endl;
 	for (const auto& animJson : gltf["animations"]) {
 		Animation newAnimation;
 		newAnimation.name = animJson.value("name", "");
@@ -753,8 +755,9 @@ void GltfModel::parseAnimations(const nlohmann::json& gltf) {
 			newChannel.samplerIndex = channelJson["sampler"].get<int>();
 			if (newChannel.samplerIndex < 0)
 				throw std::runtime_error("Invalid sampler index");
-			newChannel.target.node = channelJson["target"]["node"].get<int>();
-			newChannel.target.path = parsePath(channelJson["target"]["path"].get<std::string>());
+			const auto& target = channelJson["target"];
+			newChannel.target.node = target.contains("node") ? target["node"].get<int>() : -1;
+			newChannel.target.path = parsePath(target["path"].get<std::string>());
 			newAnimation.channels.push_back(newChannel);
 		}
 		for (const auto& samplersJson : animJson["samplers"]) {
@@ -767,7 +770,9 @@ void GltfModel::parseAnimations(const nlohmann::json& gltf) {
 				throw std::runtime_error("Invalid outputAccessor index");
 			if (samplersJson.contains("name"))
 				newSampler.name = samplersJson["name"].get<std::string>();
-			newSampler.interpolation = parseInterpolation(samplersJson["interpolation"].get<std::string>());
+			newSampler.interpolation = samplersJson.contains("interpolation")
+				? parseInterpolation(samplersJson["interpolation"].get<std::string>())
+				: Interpolation::LINEAR;
 			newAnimation.samplers.push_back(newSampler);
 		}
 		if (newAnimation.samplers.empty())
@@ -779,6 +784,8 @@ void GltfModel::parseAnimations(const nlohmann::json& gltf) {
 		}
 		this->animations.push_back(newAnimation);
 	}
+	std::cout << "Apres crash" << std::endl;
+
 };
 
 void GltfModel::parseSkins(const nlohmann::json& gltf) {
@@ -795,7 +802,7 @@ void GltfModel::parseSkins(const nlohmann::json& gltf) {
 		}
 
 		if (skinJson.contains("inverseBindMatrices"))
-			skin.inverseBindMatrixAccessor = skinJson["InverseBindMatrices"].get<int>();
+			skin.inverseBindMatrixAccessor = skinJson["inverseBindMatrices"].get<int>();
 		
 		if (skinJson.contains("skeleton"))
 			skin.skeletonRoot = skinJson["skeleton"].get<int>();

@@ -1,4 +1,5 @@
 #include <Camera.hpp>
+#include <algorithm>
 #include <Transform.hpp>
 #include <Matrix/Matrix.hpp>
 #include <utils.hpp>
@@ -10,7 +11,7 @@ Camera::Camera(float w, float h, Vector<float> pos) : cameraPos(3), target(3), u
 	this->fov = 80.0f * (3.1415926f / 180.0f);
 	this->cameraPos = pos;
 	this->aspect = w / h;
-	this->speed = 3.0f;
+	this->speed = 50.0f;
 	this->near = 0.1f;
 	this->far = 100.0f;
 	cameraInit();
@@ -26,7 +27,7 @@ Camera::Camera(float w, float h, Vector<float> pos, Vector<float> target,Vector<
 	this->up.normalize();
 	this->fov = 80.0f * (3.1415926f / 180.0f);
 	this->aspect = w / h;
-	this->speed = 3.0f;
+	this->speed = 50.0f;
 	this->near = 0.1f;
 	this->far = 100.0f;
 	cameraInit();
@@ -124,15 +125,23 @@ void Camera::moveRight(float deltaTime) {
 }
 
 void Camera::speedUp() {
-	this->speed += 0.1f;
-	if (this->speed > 5.0f)
-        this->speed = 5.0f;
+	this->speed *= 1.2f;
 	std::cout << "Speed changed to " << speed << std::endl;
 }
 
 void Camera::speedDown() {
-	this->speed -= 0.1f;
-	if (this->speed < 0.1f)
-		this->speed = 0.1f;
+	this->speed /= 1.2f;
+	if (this->speed < 0.01f)
+		this->speed = 0.01f;
 	std::cout << "Speed changed to " << speed << std::endl;
+}
+
+void Camera::fitToScene(const Vector<float>& center, float radius) {
+	this->cameraPos = center + Vector<float>{0.0f, 0.0f, radius * 2.0f};
+	this->speed = radius * 1.5f;
+	this->near = radius * 0.001f;
+	this->far = radius * 10000.0f;
+	this->angleH = -90.0f;
+	this->angleV = 0.0f;
+	cameraUpdate();
 }
