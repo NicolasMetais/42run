@@ -15,6 +15,7 @@
 #include <Scene.hpp>
 #include <Mouse.hpp>
 #include <LoadedModel.hpp>
+#include <AnimationManager.hpp>
 
 class App {
 	private:
@@ -30,6 +31,7 @@ class App {
 		GltfImporter gltf;
 		TextureManager textureManager;
 		SceneManager sceneManager;
+		AnimationManager animManager;
 		std::vector<LoadedModel> models;
 		bool running;
 		bool mouselock = true;

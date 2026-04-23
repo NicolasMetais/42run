@@ -39,6 +39,12 @@ std::vector<float> flattenVertexData(SubMesh& subMesh) {
 			for (auto f : v.color)
 				flat.push_back(f);
 		}
+		if (subMesh.hasJoints) {
+			for (int j : v.joints) flat.push_back((float)j);
+		}
+		if (subMesh.hasWeights) {
+			for (float w : v.weights) flat.push_back(w);
+		}
 	}
 	return flat;
 }
@@ -93,13 +99,23 @@ void Renderer::InitMesh(SubMesh& subMesh) {
 			offset += 2 * sizeof(float);
 		}
 	}
-	if (subMesh.hasColor) { //la couleur peux etre un vec4 donc offset de 4 a GERER
+	if (subMesh.hasColor) {
 		for (size_t i = 0; i < subMesh.colorCount; ++i) {
-			// std::cout << "Color" << std::endl;
 			layout.attributes.push_back({attribIndex++, 3, GL_FLOAT, false, offset});
 			offset += 4 * sizeof(float);
 		}
 	}
+	// Pad locations to 7 so joints/weights are always at fixed locations 7 and 8
+	attribIndex = 7;
+
+	if (subMesh.hasJoints) {
+		layout.attributes.push_back({attribIndex++, 4, GL_FLOAT, false, offset});
+		offset += 4 * sizeof(float);
+	} else attribIndex++;
+	if (subMesh.hasWeights) {
+		layout.attributes.push_back({attribIndex++, 4, GL_FLOAT, false, offset});
+		offset += 4 * sizeof(float);
+	} else attribIndex++;
 
 	layout.stride = offset;
 	for (const auto& attr : layout.attributes) {
@@ -243,15 +259,27 @@ void Renderer::draw(SubMesh& mesh) {
     glBindVertexArray(0);
 };
 
-void Renderer::rendering(Matrix<float>& mvp, MeshData& obj, Matrix<float> model, Camera& camera, GLuint skyboxId, GLuint prefilterMapId) {
+void Renderer::rendering(Matrix<float>& mvp, MeshData& obj, Matrix<float> model, Camera& camera, GLuint skyboxId, GLuint prefilterMapId, const std::vector<Matrix<float>>* jointMats) {
 	for (auto& mesh : obj.submeshes) {
 		const Mat* mat = mesh.material;
 
 		Shader& shader = (mat && mat->type == MaterialType::PBR) ? this->gltfShader : this->objShader;
-		// Shader& shader = this->debug; //shader simple de debug
 		shader.bind();
 		sendCommonUniforms(shader, mvp, model, camera);
 		sendMaterialUniforms(shader, mat, mesh, skyboxId, prefilterMapId);
+
+		if (jointMats && !jointMats->empty()) {
+			shader.setInt("hasSkin", 1);
+			std::vector<float> flat;
+			flat.reserve(jointMats->size() * 16);
+			for (const auto& m : *jointMats)
+				for (float f : m.data) flat.push_back(f);
+			GLint loc = glGetUniformLocation(shader.getId(), "jointMatrices");
+			glUniformMatrix4fv(loc, (GLsizei)jointMats->size(), GL_TRUE, flat.data());
+		} else {
+			shader.setInt("hasSkin", 0);
+		}
+
 		draw(mesh);
 	}
 };

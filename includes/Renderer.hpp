@@ -34,7 +34,7 @@ class Renderer {
 		void draw(SubMesh& mesh);
 	public:
 		Renderer();
-		void rendering(Matrix<float>& mvp, MeshData& obj, Matrix<float> model, Camera& camera, GLuint skyboxId, GLuint prefilterMapId);
+		void rendering(Matrix<float>& mvp, MeshData& obj, Matrix<float> model, Camera& camera, GLuint skyboxId, GLuint prefilterMapId, const std::vector<Matrix<float>>* jointMats = nullptr);
 		void InitMesh(SubMesh& subMesh);
 		void cleanup(MeshData& obj);
 		void bindTexture(int& texSlot, GLuint loc, GLuint , const Texture* texture);

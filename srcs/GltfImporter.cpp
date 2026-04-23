@@ -132,7 +132,32 @@ MeshData GltfImporter::buildMeshData(const GltfModel& model, Mesh mesh) {
 					v.color.insert(v.color.end(), c.data.begin(), c.data.end()); //ignorance de l'alpha pour le moment
 				}
 
-				// joints, weights a faire en pluus sur le meme format que uv et color parce que hashmap
+				// joints
+				if (!primitive.joints.empty()) {
+					SubMesh.hasJoints = true;
+					SubMesh.jointCount = primitive.joints.size();
+				}
+				for (auto& [setIndex, accessorIndex] : primitive.joints) {
+					(void)setIndex;
+					Vector<float> jv = model.accessors[accessorIndex].getVector4(i, basePtr);
+					v.joints[0] = (int)jv.x();
+					v.joints[1] = (int)jv.y();
+					v.joints[2] = (int)jv.z();
+					v.joints[3] = (int)jv.w();
+				}
+				// weights
+				if (!primitive.weights.empty()) {
+					SubMesh.hasWeights = true;
+					SubMesh.weightCount = primitive.weights.size();
+				}
+				for (auto& [setIndex, accessorIndex] : primitive.weights) {
+					(void)setIndex;
+					Vector<float> wv = model.accessors[accessorIndex].getVector4(i, basePtr);
+					v.weights[0] = wv.x();
+					v.weights[1] = wv.y();
+					v.weights[2] = wv.z();
+					v.weights[3] = wv.w();
+				}
 			}
 			// Generate tangents from UV when the model doesn't provide them
 			if (!SubMesh.hasTangent && SubMesh.hasTexCoord && !SubMesh.indices.empty()) {

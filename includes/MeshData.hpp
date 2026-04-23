@@ -17,8 +17,8 @@ struct Vertex {
 
 	std::vector<float> color;
 
-	std::array<int, 3> joints; //a coder plus tard
-	std::array<float, 4> weights; //a coder plus tard
+	std::array<int, 4>   joints  = {0, 0, 0, 0};
+	std::array<float, 4> weights = {0.f, 0.f, 0.f, 0.f};
 
 };
 

@@ -139,6 +139,14 @@ void GltfModel::parseNodes(const nlohmann::json& gltf) {
 			newNode.mesh = mesh;
 		}
 
+		//skin
+		if (jsonNode.contains("skin")) {
+			int skin = jsonNode["skin"].get<int>();
+			if (skin < 0 || skin >= (int)gltf["skins"].size())
+				throw std::runtime_error("Corrupted skin index in nodes");
+			newNode.skin = skin;
+		}
+
 		//camera
 		if(jsonNode.contains("camera")) {
 			int camera = jsonNode["cameras"].get<int>();
@@ -808,64 +816,6 @@ void GltfModel::parseSkins(const nlohmann::json& gltf) {
 			skin.skeletonRoot = skinJson["skeleton"].get<int>();
 		skins.push_back(skin);
 	}
-};
-
-void GltfModel::printData() const {
-    std::cout << "=== Buffers ===\n";
-    for (size_t i = 0; i < buffers.size(); ++i) {
-        std::cout << "Buffer[" << i << "]: uri=" << buffers[i].uri 
-                  << ", byteLength=" << buffers[i].byteLength << "\n";
-    }
-
-    std::cout << "\n=== BufferViews ===\n";
-    for (size_t i = 0; i < bufferViews.size(); ++i) {
-        std::cout << "BufferView[" << i << "]: buffer=" << bufferViews[i].buffer
-                  << ", offset=" << bufferViews[i].byteOffset
-                  << ", length=" << bufferViews[i].byteLength
-                  << ", stride=" << bufferViews[i].byteStride << "\n";
-    }
-
-    std::cout << "\n=== Accessors ===\n";
-    for (size_t i = 0; i < accessors.size(); ++i) {
-        std::cout << "Accessor[" << i << "]: bufferView=" << (accessors[i].bufferView ? std::to_string(accessors[i].bufferView - &bufferViews[0]) : "null")
-                  << ", count=" << accessors[i].count
-                  << ", type=" << static_cast<int>(accessors[i].type)
-                  << ", component=" << static_cast<int>(accessors[i].component)
-                  << ", byteOffset=" << accessors[i].byteOffset
-                  << "\n";
-    }
-
-    std::cout << "\n=== Meshes ===\n";
-    for (size_t i = 0; i < meshes.size(); ++i) {
-        std::cout << "Mesh[" << i << "]: " << meshes[i].primitives.size() << " primitives\n";
-        for (size_t j = 0; j < meshes[i].primitives.size(); ++j) {
-            const auto& prim = meshes[i].primitives[j];
-            std::cout << "  Primitive[" << j << "]: posAccessor=" << prim.positionAccessor
-                      << ", normalAccessor=" << prim.normalAccessor
-                      << ", tangentAccessor=" << prim.tangentAccessor
-                      << ", indicesAccessor=" << prim.indexAccessor
-                      << ", materialIndex=" << prim.materialIndex
-                      << ", texcoords=" << prim.texcoords.size() << "\n";
-        }
-    }
-
-    std::cout << "\n=== Materials ===\n";
-    for (size_t i = 0; i < materials.size(); ++i) {
-        std::cout << "Material[" << i << "]: name=" << materials[i].name
-                  << ", baseColorTexture=" << (materials[i].MetallicRoughness.baseColorTexture.index)
-                  << ", metallicRoughnessTexture=" << (materials[i].MetallicRoughness.metallicRoughnessTexture.index)
-                  << ", normalTexture=" << (materials[i].normalTexture.index)
-                  << ", emissiveTexture=" << (materials[i].emissiveTexture.index)
-                  << ", occlusionTexture=" << (materials[i].occlusionTexture.index)
-                  << "\n";
-    }
-
-    std::cout << "\n=== Nodes ===\n";
-    for (size_t i = 0; i < nodes.size(); ++i) {
-        std::cout << "Node[" << i << "]: name=" << nodes[i].name
-                  << ", mesh=" << nodes[i].mesh
-                  << ", children=" << nodes[i].children.size() << "\n";
-    }
 };
 
 

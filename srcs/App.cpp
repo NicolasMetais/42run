@@ -149,14 +149,25 @@ void App::LoadNewModel(std::string filename) {
 };
 
 
-void App::update() {};
+void App::update() {
+    for (auto& lm : models)
+        animManager.update(lm, deltaTime);
+};
 
 void App::processEvents() {
 	SDL_Event e;
 	while (SDL_PollEvent(&e)) {
-		event(e, this->camera, this->running); //resize window + cross
-		mouse.processEvent(e);//mouse events
-		keyboard.processEvent(e, this->running, this->camera, this->fps, this->mouselock); //keyboard events
+		event(e, this->camera, this->running);
+		mouse.processEvent(e);
+		keyboard.processEvent(e, this->running, this->camera, this->fps, this->mouselock);
+		if (e.type == SDL_KEYDOWN) {
+			SDL_Keycode sym = e.key.keysym.sym;
+			SDL_Scancode sc  = e.key.keysym.scancode;
+			std::cout << "key sc=" << sc << " sym=" << sym << " name=" << SDL_GetKeyName(sym) << std::endl;
+			if (sc == SDL_SCANCODE_1 || sym == SDLK_1 || sym == SDLK_KP_1) animManager.setAnimation(0);
+			if (sc == SDL_SCANCODE_2 || sym == SDLK_2 || sym == SDLK_KP_2 || sc == SDL_SCANCODE_E) animManager.setAnimation(1);
+			if (sc == SDL_SCANCODE_3 || sym == SDLK_3 || sym == SDLK_KP_3) animManager.setAnimation(2);
+		}
 	}
 	mouse.applyRotation(this->transform, this->camera); //mouse rotation
 	keyboard.applyMovement(this->camera, this->transform, this->deltaTime); //keyboard movement
@@ -168,8 +179,12 @@ void App::renderNode(LoadedModel& lm, int nodeIdx, const Matrix<float>& parentWo
 	Matrix<float> world = parentWorld * utils::nodeLocalMatrix(node);
 	Matrix<float> mvp = projection * view * world;
 
-	if (node.mesh >= 0 && node.mesh < (int)lm.meshes.size())
-		renderer.rendering(mvp, lm.meshes[node.mesh], world, camera, skybox.getIrradianceMapId(), skybox.getPrefilterMapId());
+	if (node.mesh >= 0 && node.mesh < (int)lm.meshes.size()) {
+		const std::vector<Matrix<float>>* jointMats = nullptr;
+		if (node.skin >= 0 && node.skin < (int)lm.jointMatrices.size())
+			jointMats = &lm.jointMatrices[node.skin];
+		renderer.rendering(mvp, lm.meshes[node.mesh], world, camera, skybox.getIrradianceMapId(), skybox.getPrefilterMapId(), jointMats);
+	}
 
 	for (int child : node.children)
 		renderNode(lm, child, world, view, projection);
@@ -205,10 +220,6 @@ void App::run(){
         FPScalculator();
         
         frameCount++;
-        // if (frameCount >= 1) {
-        //     std::cout << "=== Exiting after 1 frame ===" << std::endl;
-        //     break;
-        // }
     }
     for (auto& lm : models)
         for (auto& mesh : lm.meshes)
