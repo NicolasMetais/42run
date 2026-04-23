@@ -74,6 +74,37 @@ float utils::ToRad(float degres) {
 		return degres * (M_PI / 180.0f);
 	};
 
+Matrix<float> utils::nodeLocalMatrix(const Node& node) {
+	if (!node.matrix.empty()) {
+		Matrix<float> m;
+		m.rows = 4; m.cols = 4;
+		m.data.resize(16);
+		// GLTF stores column-major, transpose to row-major
+		for (int col = 0; col < 4; col++)
+			for (int row = 0; row < 4; row++)
+				m.data[row * 4 + col] = node.matrix[col * 4 + row];
+		return m;
+	}
+
+	Vector<float> t{node.translation[0], node.translation[1], node.translation[2]};
+	Matrix<float> T = utils::translation(t);
+
+	Matrix<float> S = identity<float>(4);
+	S[0][0] = node.scale[0];
+	S[1][1] = node.scale[1];
+	S[2][2] = node.scale[2];
+
+	float x = node.rotation[0], y = node.rotation[1], z = node.rotation[2], w = node.rotation[3];
+	float xx = x*x, yy = y*y, zz = z*z;
+	float xy = x*y, xz = x*z, yz = y*z, wx = w*x, wy = w*y, wz = w*z;
+	Matrix<float> R = identity<float>(4);
+	R[0][0] = 1-2*(yy+zz); R[0][1] = 2*(xy-wz);   R[0][2] = 2*(xz+wy);
+	R[1][0] = 2*(xy+wz);   R[1][1] = 1-2*(xx+zz); R[1][2] = 2*(yz-wx);
+	R[2][0] = 2*(xz-wy);   R[2][1] = 2*(yz+wx);   R[2][2] = 1-2*(xx+yy);
+
+	return T * R * S;
+};
+
 Vector<float> computeFaceNormal(const Vector<float>& p0, const Vector<float>& p1, const Vector<float>& p2) {
 	Vector<float> edge1 = p1 - p0;
 	Vector<float> edge2 = p2 - p0;

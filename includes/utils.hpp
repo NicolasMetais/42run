@@ -3,6 +3,7 @@
 #include <Matrix/Matrix.hpp>
 #include <MeshData.hpp>
 #include <TextureManager.hpp>
+#include <Node.hpp>
 
 namespace utils {
 	Matrix<float> rotationX(float x);
@@ -13,6 +14,8 @@ namespace utils {
 	Matrix<float> translation(const Vector<float>& position);
 	float Todegres(float rad);
 	float ToRad(float rad);
+
+	Matrix<float> nodeLocalMatrix(const Node& node);
 
 	void smoothNormals(MeshData& meshdata);
 	void prepareMats(MeshData& meshdata, TextureManager& texMng);

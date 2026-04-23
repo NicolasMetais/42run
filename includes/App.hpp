@@ -14,6 +14,7 @@
 #include <SceneManager.hpp>
 #include <Scene.hpp>
 #include <Mouse.hpp>
+#include <LoadedModel.hpp>
 
 class App {
 	private:
@@ -27,23 +28,21 @@ class App {
 		Keyboard keyboard;
 		Mouse mouse;
 		GltfImporter gltf;
-		GltfModel model;
 		TextureManager textureManager;
 		SceneManager sceneManager;
-		std::vector<MeshData> meshes;
-		std::vector<Scene> scenes;
-		std::vector<Node> nodes;
+		std::vector<LoadedModel> models;
 		bool running;
 		bool mouselock = true;
 		float fps;
 		float deltaTime;
-
 		void processEvents();
 		void update();
 		void render();
+		void renderNode(LoadedModel& lm, int nodeIdx, const Matrix<float>& parentWorld, const Matrix<float>& view, const Matrix<float>& projection);
 	public:
 		App(int width, int height);
 		~App();
+		void LoadNewModel(std::string filename);
 		void run();
 		void FPScalculator();
 };

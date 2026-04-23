@@ -108,24 +108,10 @@ void printMeshData(const MeshData& mesh)
 }
 
 App::App(int width, int height) : window(width, height), renderer(), mesh()
-		, camera(static_cast<float>(width), static_cast<float>(height), Vector<float>{0, 1, 3}, Vector<float>{0,0,0}, Vector<float>{0,1,0})
-		, transform(), skybox(), timer(), running(true) {
+		, camera(static_cast<float>(width), static_cast<float>(height), Vector<float>{0, 1, 3}, Vector<float>{0,0,0}, Vector<float>{0,1,0}), running(true) {
     this->skybox.generateIrradianceMap();
     this->skybox.generatePrefilterMap();
 
-    glViewport(0, 0, width, height);
-    // mesh.loadObj("resources/spaceship.obj");
-	model.parseJson("resources/DamagedHelmet.gltf");
-    // model.printData();
-    for (size_t i; i < model.meshes.size(); ++i) {
-        meshes.push_back(this->gltf.buildMeshData(model, model.meshes[i]));
-        utils::prepareMats(meshes[i], this->textureManager);
-        for (auto& submesh : meshes[i].submeshes)
-            this->renderer.InitMesh(submesh);
-    }
-    // printMeshData(this->data)
-
-    glBindVertexArray(0);
 	// this->transform.setScale(1.0f);
 	// Vector<float> cent(3);
 	// cent = (data.max + data.min) * 0.5f;
@@ -133,6 +119,25 @@ App::App(int width, int height) : window(width, height), renderer(), mesh()
 };
 
 App::~App(){};
+
+void App::LoadNewModel(std::string filename) {
+    LoadedModel lm;
+    lm.gltf.parseJson(filename);
+    lm.meshes.reserve(lm.gltf.meshes.size());
+    for (auto& mesh : lm.gltf.meshes) {
+        lm.meshes.push_back(gltf.buildMeshData(lm.gltf, mesh));
+        utils::prepareMats(lm.meshes.back(), textureManager);
+        for (auto& sub: lm.meshes.back().submeshes)
+            renderer.InitMesh(sub);
+    }
+    models.push_back(std::move(lm));
+
+    sceneManager.setModel(&models[0]);
+    sceneManager.loadScene(models[0].gltf.defaultScene);
+};
+
+
+void App::update() {};
 
 void App::processEvents() {
 	SDL_Event e;
@@ -145,19 +150,34 @@ void App::processEvents() {
 	keyboard.applyMovement(this->camera, this->transform, this->deltaTime); //keyboard movement
 };
 
-void App::update() {
+void App::renderNode(LoadedModel& lm, int nodeIdx, const Matrix<float>& parentWorld,
+                     const Matrix<float>& view, const Matrix<float>& projection) {
+	const Node& node = lm.gltf.nodes[nodeIdx];
+	Matrix<float> world = parentWorld * utils::nodeLocalMatrix(node);
+	Matrix<float> mvp = projection * view * world;
+
+	if (node.mesh >= 0 && node.mesh < (int)lm.meshes.size())
+		renderer.rendering(mvp, lm.meshes[node.mesh], world, camera, skybox.getIrradianceMapId(), skybox.getPrefilterMapId());
+
+	for (int child : node.children)
+		renderNode(lm, child, world, view, projection);
 };
 
 void App::render() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	Matrix<float> model = this->transform.getModelMatrix();
-	Matrix<float> view = this->camera.buildView();
-	Matrix<float> projection = this->camera.buildProjection();
-	Matrix<float> MVP = projection * view * model;
-	this->renderer.rendering(MVP, this->data, model, this->camera, this->skybox.getIrradianceMapId(), this->skybox.getPrefilterMapId());
-	this->skybox.draw(this->camera.buildViewNoTranslation(), projection);
-	SDL_GL_SwapWindow(this->window.getWin());
+	Matrix<float> view = camera.buildView();
+	Matrix<float> projection = camera.buildProjection();
+
+	for (auto& lm : models) {
+		const Scene& scene = sceneManager.getScene();
+		Matrix<float> modelMat = transform.getModelMatrix();
+		for (int rootIdx : scene.rootNodes)
+			renderNode(lm, rootIdx, modelMat, view, projection);
+	}
+
+	skybox.draw(camera.buildViewNoTranslation(), projection);
+	SDL_GL_SwapWindow(window.getWin());
 };
 
 void App::run(){
@@ -178,7 +198,9 @@ void App::run(){
         //     break;
         // }
     }
-    this->renderer.cleanup(this->data);
+    for (auto& lm : models)
+        for (auto& mesh : lm.meshes)
+            renderer.cleanup(mesh);
 };
 
 void App::FPScalculator() {

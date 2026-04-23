@@ -22,6 +22,7 @@ SRCS =	srcs/main.cpp \
 		srcs/TextureManager.cpp \
 		srcs/Event.cpp \
 		srcs/utils.cpp \
+		srcs/SceneManager.cpp \
 		loader/src/glad.c \
 
 OBJ_DIR = obj

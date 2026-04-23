@@ -742,8 +742,8 @@ static Interpolation parseInterpolation(const std::string& s) {
 };
 
 void GltfModel::parseAnimations(const nlohmann::json& gltf) {
-	if (!gltf.contains("animations") || gltf["animations"].empty())
-		throw std::runtime_error("Gltf file has no animation");
+	if (!gltf.contains("animations"))
+		return;
 	
 	for (const auto& animJson : gltf["animations"]) {
 		Animation newAnimation;
