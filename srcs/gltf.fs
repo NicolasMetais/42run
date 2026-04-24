@@ -38,6 +38,7 @@ uniform vec3 lightDir;
 uniform float normalScale;
 
 uniform vec3 viewPos;
+uniform bool debugMode;
 
 void main() {
 	mat3 tbn = TBN;
@@ -68,8 +69,7 @@ void main() {
 	vec3 L = vec3(0.0); //normalize(-lightdir);
 	float NdotL = max(dot(N, L), 0.0);
 
-	vec3 irradiance = max(texture(irradianceMap, N).rgb, vec3(0.08)); //irradiance avec plancher minimum
-	// vec3 irradiance = vec3(1.0); //irradiance blanche pour tester
+	vec3 irradiance = debugMode ? vec3(1.0) : max(texture(irradianceMap, N).rgb, vec3(0.08));
 	
 	float metallic = metallicFactor;
 	float roughness = roughnessFactor;

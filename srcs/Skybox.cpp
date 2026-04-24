@@ -1,5 +1,12 @@
 #include <Skybox.hpp>
 
+static const int DEBUG_MODE =
+#ifdef DEBUG_WHITE
+    1;
+#else
+    0;
+#endif
+
 Skybox::Skybox() : shaders("srcs/skybox.vs", "srcs/skybox.fs") {
 	this->skyboxVertices = {
     -1.0f,  1.0f, -1.0f,
@@ -237,6 +244,7 @@ void Skybox::draw(Matrix<float> view, Matrix<float>& projection) {
 	shaders.bind();
 	shaders.setMatrix4_true("view", view.datal());
 	shaders.setMatrix4_true("projection", projection.datal());
+	shaders.setInt("debugMode", DEBUG_MODE);
 
 	glBindVertexArray(this->skyboxVAO);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMaptexture);

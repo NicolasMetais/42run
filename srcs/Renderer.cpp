@@ -1,6 +1,13 @@
 #include <Renderer.hpp>
 #include <VertexAttrib.hpp>
 
+static const int DEBUG_MODE =
+#ifdef DEBUG_WHITE
+    1;
+#else
+    0;
+#endif
+
 Renderer::Renderer() : gltfShader("srcs/gltf.vs", "srcs/gltf.fs"), objShader("srcs/obj.vs", "srcs/obj.fs"), debug("srcs/debug.vs", "srcs/debug.fs") {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
@@ -141,6 +148,7 @@ void Renderer::sendCommonUniforms(Shader& shader, Matrix<float>& mvp, Matrix<flo
 	// std::cout << "Sending common uniforms to shader" << std::endl;
 	shader.setMatrix4_true("MVP", mvp.datal());
 	shader.setMatrix4_true("model", model.datal());
+	shader.setInt("debugMode", DEBUG_MODE);
 
 	Vector<float> cam = camera.getCameraPos();
 	shader.setVec3("viewPos", cam.x(), cam.y(), cam.z()); //pos de la camera

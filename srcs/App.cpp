@@ -163,7 +163,6 @@ void App::processEvents() {
 		if (e.type == SDL_KEYDOWN) {
 			SDL_Keycode sym = e.key.keysym.sym;
 			SDL_Scancode sc  = e.key.keysym.scancode;
-			std::cout << "key sc=" << sc << " sym=" << sym << " name=" << SDL_GetKeyName(sym) << std::endl;
 			if (sc == SDL_SCANCODE_1 || sym == SDLK_1 || sym == SDLK_KP_1) animManager.setAnimation(0);
 			if (sc == SDL_SCANCODE_2 || sym == SDLK_2 || sym == SDLK_KP_2 || sc == SDL_SCANCODE_E) animManager.setAnimation(1);
 			if (sc == SDL_SCANCODE_3 || sym == SDLK_3 || sym == SDLK_KP_3) animManager.setAnimation(2);
