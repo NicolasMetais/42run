@@ -3,6 +3,7 @@
 #include <cassert>
 #include <GltfTypes.hpp>
 
+/** @brief Returns the size in bytes of a single component of the given type. */
 inline size_t componentSize(ComponentType c) {
     switch (c) {
         case ComponentType::BYTE:
@@ -15,6 +16,7 @@ inline size_t componentSize(ComponentType c) {
     }
 }
 
+/** @brief Returns the number of components for a given element type (e.g. VEC3 → 3, MAT4 → 16). */
 inline uint32_t componentCount(ValueType t) {
     switch (t) {
         case ValueType::SCALAR: return 1;

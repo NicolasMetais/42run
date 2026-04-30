@@ -7,22 +7,21 @@
 
 #include <Matrix/Matrix.hpp>
 
+/** @brief A single vertex with all optional attribute sets supported by the renderer. */
 struct Vertex {
 	Vector<float> position;
 	Vector<float> normal;
-
 	Vector<float> tangent;
 
-	std::vector<Vector<float>> uv;
+	std::vector<Vector<float>> uv;    ///< One entry per UV set.
+	std::vector<float> color;         ///< Raw color components.
 
-	std::vector<float> color;
-
-	std::array<int, 4>   joints  = {0, 0, 0, 0};
-	std::array<float, 4> weights = {0.f, 0.f, 0.f, 0.f};
-
+	std::array<int, 4>   joints  = {0, 0, 0, 0};   ///< Up to 4 joint indices for skinning.
+	std::array<float, 4> weights = {0.f, 0.f, 0.f, 0.f}; ///< Corresponding blend weights.
 };
 
-struct SubMesh { //un submesh par material pour render le mesh par type de materials
+/** @brief A contiguous batch of vertices sharing a single material, with its own VAO/VBO/EBO. */
+struct SubMesh {
 	std::vector<Vertex> vertices;
 	std::vector<uint32_t> indices;
 	GLuint VAO = 0;
@@ -30,9 +29,8 @@ struct SubMesh { //un submesh par material pour render le mesh par type de mater
 	GLuint EBO = 0;
 
 	GLenum indexType = GL_UNSIGNED_INT;
-	const Mat* material = nullptr; //IL FAUT ADAPTER CETTE STRUCTURE A MON OBJIMPORTER
+	const Mat* material = nullptr;
 
-	//checker pour building d'attributes modulable openGL
 	bool hasPos = false;
 	bool hasNormal = false;
 	bool hasUv = false;
@@ -51,16 +49,15 @@ struct SubMesh { //un submesh par material pour render le mesh par type de mater
 	size_t weightCount = 0;
 };
 
+/** @brief All GPU-ready data for a model: submeshes, materials, textures, and bounding info. */
 struct MeshData {
 	std::vector<SubMesh> submeshes;
 	std::vector<Mat> materials;
 	std::vector<Image> images;
-	std::vector<Text> textures; //liste de sampler et de source qui pointe sur un filtre et un uri
+	std::vector<Text> textures; ///< Sampler + source pairs used by materials.
 
-
-	Vector<float> min = {FLT_MAX, FLT_MAX, FLT_MAX};
-	Vector<float> max = {FLT_MIN, FLT_MIN, FLT_MIN};
-	Vector<float> center;
-	float radius = 0.0f;
+	Vector<float> min = {FLT_MAX, FLT_MAX, FLT_MAX}; ///< AABB minimum corner.
+	Vector<float> max = {FLT_MIN, FLT_MIN, FLT_MIN}; ///< AABB maximum corner.
+	Vector<float> center;   ///< Bounding sphere center.
+	float radius = 0.0f;    ///< Bounding sphere radius.
 };
-

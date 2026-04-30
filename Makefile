@@ -1,9 +1,11 @@
 NAME = 42Run
 CXX = c++
 CXXFLAGS = -Wall -Wextra -Werror -Iincludes -Iloader/include -std=c++17 -g3 $(shell sdl2-config --cflags) -fPIE
+
 ifdef DEBUG
 CXXFLAGS += -DDEBUG_WHITE
 endif
+
 LDFLAGS = $(shell sdl2-config --libs) -lGL -lz -lpng -ljpeg -fPIE
 
 SRCS =	srcs/main.cpp \

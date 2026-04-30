@@ -38,7 +38,6 @@ void GltfModel::parseJson(std::string fileName) {
 	parseSkins(gltf);
 	parseBuffer(gltf);
 	loadBinaryBuffer("resources/" + gltf["buffers"][0]["uri"].get<std::string>());
-	// linkBufferViewToBinary();
 };
 
 void GltfModel::BufferViewValidation() {
@@ -55,20 +54,6 @@ void GltfModel::BufferViewValidation() {
 			throw std::runtime_error("Accessor in BufferView isn't compatible with byteLength bufferView");
 	}
 };
-
-// void GltfModel::linkBufferViewToBinary() {
-// 	if (binaryData.empty())
-// 		throw std::runtime_error("BinaryData is empty");
-	
-// 	for (auto& bv : bufferViews) {
-// 		Buffer& buf = buffers[bv.buffer];
-
-// 		if (bv.byteOffset + bv.byteLength > buf.byteLength)
-// 			throw std::runtime_error("BufferView exceeds buffer size");
-
-// 		bv.base = binaryData.data() + bv.byteOffset;
-// 	}
-// };
 
 void GltfModel::parseBuffer(const nlohmann::json& gltf) {
 	if (!gltf.contains("buffers") || gltf["buffers"].empty())
@@ -119,7 +104,8 @@ void GltfModel::parseBuffer(const nlohmann::json& gltf) {
 
 };
 
-
+/// @brief 
+/// @param gltf 
 void GltfModel::parseNodes(const nlohmann::json& gltf) {
 	if (!gltf.contains("nodes") || gltf["nodes"].empty())
 		return ;
@@ -192,7 +178,7 @@ void GltfModel::parseNodes(const nlohmann::json& gltf) {
 		//matrix
 		if (jsonNode.contains("matrix")) {
 			std::vector<float> matrix = jsonNode["matrix"].get<std::vector<float>>();
-			if (matrix.size() != 16) //attention faut verifier un vrai 4x4
+			if (matrix.size() != 16)
 				throw std::runtime_error("Wrong matrix size");
 			newNode.matrix = matrix;
 		}
@@ -754,7 +740,6 @@ static Interpolation parseInterpolation(const std::string& s) {
 void GltfModel::parseAnimations(const nlohmann::json& gltf) {
 	if (!gltf.contains("animations"))
 		return;
-	std::cout << "Avant crash" << std::endl;
 	for (const auto& animJson : gltf["animations"]) {
 		Animation newAnimation;
 		newAnimation.name = animJson.value("name", "");
@@ -792,8 +777,6 @@ void GltfModel::parseAnimations(const nlohmann::json& gltf) {
 		}
 		this->animations.push_back(newAnimation);
 	}
-	std::cout << "Apres crash" << std::endl;
-
 };
 
 void GltfModel::parseSkins(const nlohmann::json& gltf) {

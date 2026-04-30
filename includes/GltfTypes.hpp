@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 
+/** @brief OpenGL-compatible component type values as defined by the GLTF spec. */
 enum class ComponentType : uint16_t {
     BYTE           = 5120,
     UNSIGNED_BYTE  = 5121,
@@ -10,6 +11,7 @@ enum class ComponentType : uint16_t {
     FLOAT          = 5126
 };
 
+/** @brief Logical element type of an accessor (scalar, vector, or matrix). */
 enum class ValueType : uint8_t {
     SCALAR,
     VEC2,

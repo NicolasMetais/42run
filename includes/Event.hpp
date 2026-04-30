@@ -5,4 +5,5 @@
 #include <Renderer.hpp>
 #include <Transform.hpp>
 
-void event(SDL_Event& e,Camera& camera, bool& run);
+/** @brief Processes a single SDL event and updates the camera or running state accordingly. */
+void event(SDL_Event& e, Camera& camera, bool& run);
