@@ -28,6 +28,8 @@ SRCS =	srcs/main.cpp \
 		srcs/Event.cpp \
 		srcs/utils.cpp \
 		srcs/SceneManager.cpp \
+		srcs/GameScene.cpp \
+		srcs/ModelLoader.cpp \
 		srcs/AnimationManager.cpp \
 		loader/src/glad.c \
 

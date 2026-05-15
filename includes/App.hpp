@@ -9,12 +9,13 @@
 #include <Timer.hpp>
 #include <Event.hpp>
 #include <Keyboard.hpp>
-#include <GltfImporter.hpp>
 #include <TextureManager.hpp>
 #include <SceneManager.hpp>
 #include <Scene.hpp>
 #include <Mouse.hpp>
 #include <LoadedModel.hpp>
+#include <ModelLoader.hpp>
+#include <GameScene.hpp>
 #include <AnimationManager.hpp>
 
 /** @brief Top-level application: owns all subsystems and drives the main loop. */
@@ -29,15 +30,15 @@ class App {
 		Timer timer;
 		Keyboard keyboard;
 		Mouse mouse;
-		GltfImporter gltf;
 		TextureManager textureManager;
-		SceneManager sceneManager;
 		AnimationManager animManager;
-		std::vector<LoadedModel> models;
+		GameScene* activeScene = nullptr;
+		std::vector<GameScene> scenes;
 		bool running;
 		bool mouselock = true;
 		float fps;
 		float deltaTime;
+		ModelLoader modelLoader;
 
 		/** @brief Polls and dispatches SDL events to input subsystems. */
 		void processEvents();
@@ -58,8 +59,6 @@ class App {
 		/** @brief Initialises the window, OpenGL context, and all subsystems at the given resolution. */
 		App(int width, int height);
 		~App();
-		/** @brief Loads a GLTF or OBJ model from @p filename and adds it to the scene. */
-		void LoadNewModel(std::string filename);
 		/** @brief Starts the main loop; blocks until the application exits. */
 		void run();
 		/** @brief Computes and stores the current frames-per-second value. */

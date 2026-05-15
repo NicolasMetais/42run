@@ -33,7 +33,7 @@ MeshData GltfImporter::buildMeshData(const GltfModel& model, Mesh mesh) {
 
 			//materials
 			if (primitive.materialIndex >= 0 && primitive.materialIndex < (int)model.materials.size())
-				SubMesh.material = &meshData.materials[primitive.materialIndex];
+				SubMesh.materialIndex = primitive.materialIndex;
 
 			//Vertices
 			if (primitive.positionAccessor < 0) continue;

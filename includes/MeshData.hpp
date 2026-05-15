@@ -29,7 +29,7 @@ struct SubMesh {
 	GLuint EBO = 0;
 
 	GLenum indexType = GL_UNSIGNED_INT;
-	const Mat* material = nullptr;
+	int materialIndex = -1;
 
 	bool hasPos = false;
 	bool hasNormal = false;

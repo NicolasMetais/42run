@@ -239,12 +239,12 @@ void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mes
 
 };
 
-void Renderer::draw(SubMesh& mesh) {
+void Renderer::draw(SubMesh& mesh, const Mat* mat) {
     // std::cout << "Drawing mesh. EBO: " << mesh.EBO << ", indices: " << mesh.indices.size() << std::endl;
     glBindVertexArray(mesh.VAO);
 	GLenum err = glGetError();
     // if (err != GL_NO_ERROR) std::cerr << "GL Error after bind: " << err << std::endl;
-    if (mesh.material && mesh.material->doubleSided)
+    if (mat && mat->doubleSided)
         glDisable(GL_CULL_FACE);
     else
         glEnable(GL_CULL_FACE);
@@ -269,7 +269,8 @@ void Renderer::draw(SubMesh& mesh) {
 
 void Renderer::rendering(Matrix<float>& mvp, MeshData& obj, Matrix<float> model, Camera& camera, GLuint skyboxId, GLuint prefilterMapId, const std::vector<Matrix<float>>* jointMats) {
 	for (auto& mesh : obj.submeshes) {
-		const Mat* mat = mesh.material;
+		const Mat* mat = (mesh.materialIndex >= 0 && mesh.materialIndex < (int)obj.materials.size())
+			? &obj.materials[mesh.materialIndex] : nullptr;
 
 		Shader& shader = (mat && mat->type == MaterialType::PBR) ? this->gltfShader : this->objShader;
 		shader.bind();
@@ -288,7 +289,7 @@ void Renderer::rendering(Matrix<float>& mvp, MeshData& obj, Matrix<float> model,
 			shader.setInt("hasSkin", 0);
 		}
 
-		draw(mesh);
+		draw(mesh, mat);
 	}
 };
 

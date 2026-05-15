@@ -383,16 +383,22 @@ MeshData ObjImporter::buildMeshData() {
 	MeshData data;
 
 	std::unordered_map<std::string, SubMesh> submeshMap;
+	std::unordered_map<std::string, int> matIndexMap;
 
 	for (const Face& face: f) {
 
 		std::string matName = face.materialName;
 		SubMesh& submesh = submeshMap[matName];
 
-		if (!matName.empty() && materials.count(matName))
-			submesh.material = &materials[matName];
-		else
-			submesh.material = nullptr;
+		if (!matName.empty() && materials.count(matName)) {
+			if (matIndexMap.find(matName) == matIndexMap.end()) {
+				matIndexMap[matName] = (int)data.materials.size();
+				data.materials.push_back(materials[matName]);
+			}
+			submesh.materialIndex = matIndexMap[matName];
+		} else {
+			submesh.materialIndex = -1;
+		}
 		for (size_t i = 1; i + 1 < face.fvertices.size(); ++i) {
 
 			FaceVertex fv[3] = {

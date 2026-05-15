@@ -24,7 +24,6 @@ int main(int ac, char **av) {
 	}
 	try {
 		App app(WIDTH, HEIGHT);
-		app.LoadNewModel("resources/ABeautifulGame.gltf");
 		app.run();
 	}
 	catch (const std::exception& e) {

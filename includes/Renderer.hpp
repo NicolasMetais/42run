@@ -37,7 +37,7 @@ class Renderer {
 		/** @brief Binds textures and uploads PBR/Phong material parameters for a submesh. */
 		void sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mesh, GLuint skyboxId, GLuint prefilterMapId);
 		/** @brief Issues the indexed or array draw call for a submesh. */
-		void draw(SubMesh& mesh);
+		void draw(SubMesh& mesh, const Mat* mat);
 	public:
 		Renderer();
 		/**

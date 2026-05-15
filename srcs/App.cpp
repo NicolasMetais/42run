@@ -71,7 +71,7 @@ void printSubMesh(const SubMesh& sm)
     std::cout << "  VAO: " << sm.VAO << "\n";
     std::cout << "  VBO: " << sm.VBO << "\n";
     std::cout << "  EBO: " << sm.EBO << "\n";
-    std::cout << "  material ptr: " << sm.material << "\n";
+    std::cout << "  material ptr: " << sm.materialIndex << "\n";
 
     std::cout << "  Vertices count: " << sm.vertices.size() << "\n";
     for (size_t i = 0; i < sm.vertices.size(); ++i)
@@ -108,10 +108,12 @@ void printMeshData(const MeshData& mesh)
 }
 
 App::App(int width, int height) : window(width, height), renderer(), mesh()
-		, camera(static_cast<float>(width), static_cast<float>(height), Vector<float>{0, 1, 3}, Vector<float>{0,0,0}, Vector<float>{0,1,0}), running(true) {
+		, camera(static_cast<float>(width), static_cast<float>(height), Vector<float>{0, 1, 3}, Vector<float>{0,0,0}, Vector<float>{0,1,0}), running(true), modelLoader(renderer, textureManager) {
     this->skybox.generateIrradianceMap();
     this->skybox.generatePrefilterMap();
 
+    scenes.push_back(GameScene::fromJson("resources/levels/level1.json", modelLoader));
+    activeScene = &scenes[0];
 	// this->transform.setScale(1.0f);
 	// Vector<float> cent(3);
 	// cent = (data.max + data.min) * 0.5f;
@@ -120,37 +122,37 @@ App::App(int width, int height) : window(width, height), renderer(), mesh()
 
 App::~App(){};
 
-void App::LoadNewModel(std::string filename) {
-    LoadedModel lm;
-    lm.gltf.parseJson(filename);
-    lm.meshes.reserve(lm.gltf.meshes.size());
-    for (auto& mesh : lm.gltf.meshes) {
-        lm.meshes.push_back(gltf.buildMeshData(lm.gltf, mesh));
-        utils::prepareMats(lm.meshes.back(), textureManager);
-        for (auto& sub: lm.meshes.back().submeshes)
-            renderer.InitMesh(sub);
-    }
-    models.push_back(std::move(lm));
+// void App::LoadNewModel(std::string filename) {
+//     LoadedModel lm;
+//     lm.gltf.parseJson(filename);
+//     lm.meshes.reserve(lm.gltf.meshes.size());
+//     for (auto& mesh : lm.gltf.meshes) {
+//         lm.meshes.push_back(gltf.buildMeshData(lm.gltf, mesh));
+//         utils::prepareMats(lm.meshes.back(), textureManager);
+//         for (auto& sub: lm.meshes.back().submeshes)
+//             renderer.InitMesh(sub);
+//     }
+//     models.push_back(std::move(lm));
 
-    sceneManager.setModel(&models[0]);
-    sceneManager.loadScene(models[0].gltf.defaultScene);
+//     sceneManager.setModel(&models[0]);
+//     sceneManager.loadScene(models[0].gltf.defaultScene);
 
-    Vector<float> globalMin = {FLT_MAX, FLT_MAX, FLT_MAX};
-    Vector<float> globalMax = {-FLT_MAX, -FLT_MAX, -FLT_MAX};
-    for (auto& m : models.back().meshes) {
-        for (int k = 0; k < 3; k++) {
-            if (m.min[k] < globalMin[k]) globalMin[k] = m.min[k];
-            if (m.max[k] > globalMax[k]) globalMax[k] = m.max[k];
-        }
-    }
-    Vector<float> center = (globalMin + globalMax) * 0.5f;
-    float radius = (globalMax - globalMin).length() * 0.5f;
-    camera.fitToScene(center, radius);
-};
+//     Vector<float> globalMin = {FLT_MAX, FLT_MAX, FLT_MAX};
+//     Vector<float> globalMax = {-FLT_MAX, -FLT_MAX, -FLT_MAX};
+//     for (auto& m : models.back().meshes) {
+//         for (int k = 0; k < 3; k++) {
+//             if (m.min[k] < globalMin[k]) globalMin[k] = m.min[k];
+//             if (m.max[k] > globalMax[k]) globalMax[k] = m.max[k];
+//         }
+//     }
+//     Vector<float> center = (globalMin + globalMax) * 0.5f;
+//     float radius = (globalMax - globalMin).length() * 0.5f;
+//     camera.fitToScene(center, radius);
+// };
 
 
 void App::update() {
-    for (auto& lm : models)
+    for (auto& lm : activeScene->models)
         animManager.update(lm, deltaTime);
 };
 
@@ -195,9 +197,9 @@ void App::render() {
 	Matrix<float> view = camera.buildView();
 	Matrix<float> projection = camera.buildProjection();
 
-	for (auto& lm : models) {
-		const Scene& scene = sceneManager.getScene();
-		Matrix<float> modelMat = transform.getModelMatrix();
+	for (auto& lm : activeScene->models) {
+		const Scene& scene = lm.gltf.scenes[lm.gltf.defaultScene];
+		Matrix<float> modelMat = lm.transform.getModelMatrix() * transform.getModelMatrix();
 		for (int rootIdx : scene.rootNodes)
 			renderNode(lm, rootIdx, modelMat, view, projection);
 	}
@@ -220,7 +222,7 @@ void App::run(){
         
         frameCount++;
     }
-    for (auto& lm : models)
+    for (auto& lm : activeScene->models)
         for (auto& mesh : lm.meshes)
             renderer.cleanup(mesh);
 };
