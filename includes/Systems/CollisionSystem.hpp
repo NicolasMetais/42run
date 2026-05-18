@@ -1,0 +1,21 @@
+#pragma once
+#include <unordered_map>
+#include <ECS.hpp>
+#include <Transform.hpp>
+#include <Entity/ColliderComponent.hpp>
+#include <Entity/RigidbodyComponent.hpp>
+
+namespace CollisionSystem {
+    // Resolves dynamic (rigidbody) entities against static (collider-only) entities.
+    void resolveEntities(
+        std::unordered_map<EntityId, Transform>& transforms,
+        std::unordered_map<EntityId, ColliderComponent>& colliders,
+        std::unordered_map<EntityId, RigidbodyComponent>& rigidbodies
+    );
+
+    // Returns true if two world-space AABBs overlap.
+    bool aabbOverlap(
+        const Vector<float>& minA, const Vector<float>& maxA,
+        const Vector<float>& minB, const Vector<float>& maxB
+    );
+}

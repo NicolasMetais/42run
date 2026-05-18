@@ -47,6 +47,9 @@ struct SubMesh {
 
 	bool hasWeights = false;
 	size_t weightCount = 0;
+
+	Vector<float> min = {FLT_MAX, FLT_MAX, FLT_MAX};
+	Vector<float> max = {-FLT_MAX, -FLT_MAX, -FLT_MAX};
 };
 
 /** @brief All GPU-ready data for a model: submeshes, materials, textures, and bounding info. */

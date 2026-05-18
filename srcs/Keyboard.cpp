@@ -1,112 +1,72 @@
 #include <Keyboard.hpp>
 
-#define MOVE_MESH_FORWARD 0x400
-#define MOVE_MESH_BACKWARD 0x800
-
-#define MOVE_MESH_UP 0x200
-#define MOVE_MESH_DOWN 0x100
-#define MOVE_MESH_LEFT 0x80
-#define MOVE_MESH_RIGHT 0x40
-
-#define KEY_DOWN 0x20
-#define KEY_UP 0x10
-#define KEY_W 0x8
-#define KEY_A 0x4
-#define KEY_S 0x2
-#define KEY_D 0x1
-
+#define KEY_W           0x001
+#define KEY_A           0x002
+#define KEY_S           0x004
+#define KEY_D           0x008
+#define KEY_CAM_UP      0x010
+#define KEY_CAM_DOWN    0x020
+#define PLAYER_LEFT     0x040
+#define PLAYER_RIGHT    0x080
+#define PLAYER_FORWARD  0x100
+#define PLAYER_BACK     0x200
+#define PLAYER_JUMP     0x400
 
 void Keyboard::processEvent(SDL_Event& e, bool& running, Camera& cam, float& fps, bool& lockCam) {
-switch (e.type) {
-	case SDL_KEYDOWN:
-	case SDL_KEYUP:
-		bool pressed = (e.type == SDL_KEYDOWN);
-		switch (e.key.keysym.scancode) {
-			case SDL_SCANCODE_EQUALS:
-			case SDL_SCANCODE_KP_PLUS:
-				if (pressed)
-					cam.speedUp();
-			break;
-			case SDL_SCANCODE_MINUS:
-			case SDL_SCANCODE_KP_MINUS:
-				if (pressed)
-					cam.speedDown();
-			break;
-			case SDL_SCANCODE_ESCAPE:
-				if (pressed) running = false;
-			break ;
-			case SDL_SCANCODE_W:
-				pressed ? moveFlags |= KEY_W : moveFlags &= ~KEY_W;
-			break ;
-			case SDL_SCANCODE_A:
-				pressed ? moveFlags |= KEY_A : moveFlags &= ~KEY_A;
-			break ;
-			case SDL_SCANCODE_S:
-				pressed ? moveFlags |= KEY_S : moveFlags &= ~KEY_S;
-			break ;
-			case SDL_SCANCODE_D:
-				pressed ? moveFlags |= KEY_D : moveFlags &= ~KEY_D;
-			break ;
-			case SDL_SCANCODE_LSHIFT: 
-			case SDL_SCANCODE_SPACE:
-				pressed ? moveFlags |= KEY_UP : moveFlags &= ~KEY_UP;
-			break ;
-			case SDL_SCANCODE_LCTRL:
-				pressed ? moveFlags |= KEY_DOWN : moveFlags &= ~KEY_DOWN;
-			break ;
-			case SDL_SCANCODE_UP:
-				pressed ? moveFlags |= MOVE_MESH_UP : moveFlags &= ~MOVE_MESH_UP;
-			break ;
-			case SDL_SCANCODE_DOWN:
-				pressed ? moveFlags |= MOVE_MESH_DOWN : moveFlags &= ~MOVE_MESH_DOWN;
-			break ;
-			case SDL_SCANCODE_LEFT:
-				pressed ? moveFlags |= MOVE_MESH_LEFT : moveFlags &= ~MOVE_MESH_LEFT;
-			break ;
-			case SDL_SCANCODE_RIGHT:
-				pressed ? moveFlags |= MOVE_MESH_RIGHT : moveFlags &= ~MOVE_MESH_RIGHT;
-			break ;
-			case SDL_SCANCODE_PAGEUP:
-				pressed ? moveFlags |= MOVE_MESH_FORWARD : moveFlags &= ~MOVE_MESH_FORWARD;
-			break ;
-			case SDL_SCANCODE_PAGEDOWN:
-				pressed ? moveFlags |= MOVE_MESH_BACKWARD : moveFlags &= ~MOVE_MESH_BACKWARD;
-			break ;
-			case SDL_SCANCODE_F:
-				if (pressed)
-					std::cout << "FPS: " << fps << std::endl;
-				break ;
-			case SDL_SCANCODE_Q:
-				if (pressed)
-				{
-					if (lockCam) {
-						SDL_SetRelativeMouseMode(SDL_FALSE);
-						SDL_ShowCursor(SDL_ENABLE);
-					}
-					else {
-						SDL_SetRelativeMouseMode(SDL_TRUE);
-						SDL_ShowCursor(SDL_DISABLE);
-					}
-					lockCam = !lockCam;
-				}
-				break ;
-			default:
-				break ;
-		}
-	}
-};
+    if (e.type != SDL_KEYDOWN && e.type != SDL_KEYUP) return;
 
-void Keyboard::applyMovement(Camera& camera, Transform& transform, float deltaTime) {
-	if (moveFlags & KEY_W) camera.moveForward(deltaTime);
-	if (moveFlags & KEY_S) camera.moveBackward(deltaTime);
-	if (moveFlags & KEY_A) camera.moveLeft(deltaTime);
-	if (moveFlags & KEY_D) camera.moveRight(deltaTime);
-	if (moveFlags & KEY_UP) camera.moveUp(deltaTime);
-	if (moveFlags & KEY_DOWN) camera.moveDown(deltaTime);
-	if (moveFlags & MOVE_MESH_UP) transform.move(Vector<float>{0.0f,3.0f * deltaTime, 0.0f});
-	if (moveFlags & MOVE_MESH_DOWN) transform.move(Vector<float>{0.0f,-3.0f * deltaTime, 0.0f});
-	if (moveFlags & MOVE_MESH_LEFT) transform.move(Vector<float>{-3.0f * deltaTime,0.0f, 0.0f});
-	if (moveFlags & MOVE_MESH_RIGHT) transform.move(Vector<float>{3.0f* deltaTime,0.0f, 0.0f});
-	if (moveFlags & MOVE_MESH_FORWARD) transform.move(Vector<float>{0.0f,0.0f, -3.0f * deltaTime});
-	if (moveFlags & MOVE_MESH_BACKWARD) transform.move(Vector<float>{0.0f,0.0f, 3.0f * deltaTime});
-};
+    bool pressed = (e.type == SDL_KEYDOWN);
+    SDL_Scancode sc  = e.key.keysym.scancode;
+
+    // --- touches non-lettre : scancode (layout-independent) ---
+    switch (sc) {
+        case SDL_SCANCODE_EQUALS: case SDL_SCANCODE_KP_PLUS:
+            if (pressed) { cam.speedUp(); }   break;
+        case SDL_SCANCODE_MINUS:  case SDL_SCANCODE_KP_MINUS:
+            if (pressed) { cam.speedDown(); } break;
+        case SDL_SCANCODE_ESCAPE:
+            if (pressed) { running = false; } break;
+        case SDL_SCANCODE_LSHIFT:
+            pressed ? moveFlags |= KEY_CAM_UP   : moveFlags &= ~KEY_CAM_UP;   break;
+        case SDL_SCANCODE_LCTRL:
+            pressed ? moveFlags |= KEY_CAM_DOWN : moveFlags &= ~KEY_CAM_DOWN; break;
+        case SDL_SCANCODE_LEFT:
+            pressed ? moveFlags |= PLAYER_LEFT    : moveFlags &= ~PLAYER_LEFT;    break;
+        case SDL_SCANCODE_RIGHT:
+            pressed ? moveFlags |= PLAYER_RIGHT   : moveFlags &= ~PLAYER_RIGHT;   break;
+        case SDL_SCANCODE_UP:
+            pressed ? moveFlags |= PLAYER_FORWARD : moveFlags &= ~PLAYER_FORWARD; break;
+        case SDL_SCANCODE_DOWN:
+            pressed ? moveFlags |= PLAYER_BACK    : moveFlags &= ~PLAYER_BACK;    break;
+        case SDL_SCANCODE_SPACE:
+            pressed ? moveFlags |= PLAYER_JUMP    : moveFlags &= ~PLAYER_JUMP;    break;
+        case SDL_SCANCODE_W:
+            pressed ? moveFlags |= PLAYER_FORWARD : moveFlags &= ~PLAYER_FORWARD; break;
+        case SDL_SCANCODE_S:
+            pressed ? moveFlags |= PLAYER_BACK    : moveFlags &= ~PLAYER_BACK;    break;
+        case SDL_SCANCODE_A:
+            pressed ? moveFlags |= PLAYER_LEFT    : moveFlags &= ~PLAYER_LEFT;    break;
+        case SDL_SCANCODE_D:
+            pressed ? moveFlags |= PLAYER_RIGHT   : moveFlags &= ~PLAYER_RIGHT;   break;
+        case SDL_SCANCODE_F:
+            if (pressed) { std::cout << "FPS: " << fps << std::endl; } break;
+        case SDL_SCANCODE_TAB:
+            if (pressed) {
+                lockCam = !lockCam;
+                SDL_SetRelativeMouseMode(lockCam ? SDL_TRUE  : SDL_FALSE);
+                SDL_ShowCursor        (lockCam ? SDL_DISABLE : SDL_ENABLE);
+            }
+            break;
+        default: break;
+    }
+}
+
+void Keyboard::applyMovement(Camera&, Transform&, float) {
+    // caméra en follow mode — le mouvement est géré par camera.follow() dans App::update()
+}
+
+bool Keyboard::isLeft()    const { return moveFlags & PLAYER_LEFT; }
+bool Keyboard::isRight()   const { return moveFlags & PLAYER_RIGHT; }
+bool Keyboard::isForward() const { return moveFlags & PLAYER_FORWARD; }
+bool Keyboard::isBack()    const { return moveFlags & PLAYER_BACK; }
+bool Keyboard::isJump()    const { return moveFlags & PLAYER_JUMP; }

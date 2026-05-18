@@ -17,6 +17,8 @@
 #include <ModelLoader.hpp>
 #include <GameScene.hpp>
 #include <AnimationManager.hpp>
+#include <Systems/PhysicsSystem.hpp>
+#include <Systems/CollisionSystem.hpp>
 
 /** @brief Top-level application: owns all subsystems and drives the main loop. */
 class App {
@@ -39,7 +41,6 @@ class App {
 		float fps;
 		float deltaTime;
 		ModelLoader modelLoader;
-
 		/** @brief Polls and dispatches SDL events to input subsystems. */
 		void processEvents();
 		/** @brief Updates game state (camera, animations, transforms) for the current frame. */

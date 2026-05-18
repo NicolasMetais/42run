@@ -96,6 +96,8 @@ MeshData GltfImporter::buildMeshData(const GltfModel& model, Mesh mesh) {
 				for (int k = 0; k < 3; ++k) {
 					if (v.position[k] < meshData.min[k]) meshData.min[k] = v.position[k];
 					if (v.position[k] > meshData.max[k]) meshData.max[k] = v.position[k];
+					if (v.position[k] < SubMesh.min[k])  SubMesh.min[k]  = v.position[k];
+					if (v.position[k] > SubMesh.max[k])  SubMesh.max[k]  = v.position[k];
 				}
 				//normal
 				if (normAccessor && normAccessor->type == ValueType::VEC3) {

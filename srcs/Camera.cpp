@@ -116,12 +116,12 @@ void Camera::moveBackward(float deltaTime) {
 
 void Camera::moveLeft(float deltaTime) {
     Vector<float> rightXZ = cross_product(Vector<float>{0.0f, 1.0f, 0.0f}, -N).normalize();
-    cameraPos += rightXZ * speed * deltaTime;
+    cameraPos -= rightXZ * speed * deltaTime;
 }
 
 void Camera::moveRight(float deltaTime) {
     Vector<float> rightXZ = cross_product(Vector<float>{0.0f, 1.0f, 0.0f}, -N).normalize();
-    cameraPos -= rightXZ * speed * deltaTime;
+    cameraPos += rightXZ * speed * deltaTime;
 }
 
 void Camera::speedUp() {
@@ -134,6 +134,15 @@ void Camera::speedDown() {
 	if (this->speed < 0.01f)
 		this->speed = 0.01f;
 	std::cout << "Speed changed to " << speed << std::endl;
+}
+
+void Camera::follow(const Vector<float>& playerPos) {
+    cameraPos = Vector<float>{playerPos.x(), playerPos.y() + 3.0f, playerPos.z() - 6.0f};
+    target = (playerPos - cameraPos).normalize();
+    Vector<float> Yaxis{0.0f, 1.0f, 0.0f};
+    U = cross_product(Yaxis, target).normalize();
+    V = cross_product(target, U).normalize();
+    N = -target;
 }
 
 void Camera::fitToScene(const Vector<float>& center, float radius) {

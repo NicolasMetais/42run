@@ -114,6 +114,7 @@ App::App(int width, int height) : window(width, height), renderer(), mesh()
 
     scenes.push_back(GameScene::fromJson("resources/levels/level1.json", modelLoader));
     activeScene = &scenes[0];
+    activeScene->loadPlayer("resources/player.json", modelLoader);
 	// this->transform.setScale(1.0f);
 	// Vector<float> cent(3);
 	// cent = (data.max + data.min) * 0.5f;
@@ -122,38 +123,27 @@ App::App(int width, int height) : window(width, height), renderer(), mesh()
 
 App::~App(){};
 
-// void App::LoadNewModel(std::string filename) {
-//     LoadedModel lm;
-//     lm.gltf.parseJson(filename);
-//     lm.meshes.reserve(lm.gltf.meshes.size());
-//     for (auto& mesh : lm.gltf.meshes) {
-//         lm.meshes.push_back(gltf.buildMeshData(lm.gltf, mesh));
-//         utils::prepareMats(lm.meshes.back(), textureManager);
-//         for (auto& sub: lm.meshes.back().submeshes)
-//             renderer.InitMesh(sub);
-//     }
-//     models.push_back(std::move(lm));
-
-//     sceneManager.setModel(&models[0]);
-//     sceneManager.loadScene(models[0].gltf.defaultScene);
-
-//     Vector<float> globalMin = {FLT_MAX, FLT_MAX, FLT_MAX};
-//     Vector<float> globalMax = {-FLT_MAX, -FLT_MAX, -FLT_MAX};
-//     for (auto& m : models.back().meshes) {
-//         for (int k = 0; k < 3; k++) {
-//             if (m.min[k] < globalMin[k]) globalMin[k] = m.min[k];
-//             if (m.max[k] > globalMax[k]) globalMax[k] = m.max[k];
-//         }
-//     }
-//     Vector<float> center = (globalMin + globalMax) * 0.5f;
-//     float radius = (globalMax - globalMin).length() * 0.5f;
-//     camera.fitToScene(center, radius);
-// };
-
-
 void App::update() {
-    for (auto& lm : activeScene->models)
-        animManager.update(lm, deltaTime);
+    if (activeScene->playerId != UINT32_MAX) {
+        auto& rb = activeScene->rigidbodies[activeScene->playerId];
+        constexpr float SPEED = 5.0f;
+        rb.velocity.x() = 0.0f;
+        rb.velocity.z() = 0.0f;
+        if (keyboard.isLeft())    rb.velocity.x() =  SPEED;
+        if (keyboard.isRight())   rb.velocity.x() = -SPEED;
+        if (keyboard.isForward()) rb.velocity.z() =  SPEED;
+        if (keyboard.isBack())    rb.velocity.z() = -SPEED;
+        if (keyboard.isJump() && rb.onGround) rb.velocity.y() = 8.0f;
+    }
+
+    PhysicsSystem::update(activeScene->transforms, activeScene->rigidbodies, deltaTime);
+    CollisionSystem::resolveEntities(activeScene->transforms, activeScene->colliders, activeScene->rigidbodies);
+
+    if (activeScene->playerId != UINT32_MAX)
+        camera.follow(activeScene->transforms[activeScene->playerId].getPosition());
+
+    for (auto& [id, render] : activeScene->renders)
+        animManager.update(*render.model, deltaTime);
 };
 
 void App::processEvents() {
@@ -197,9 +187,10 @@ void App::render() {
 	Matrix<float> view = camera.buildView();
 	Matrix<float> projection = camera.buildProjection();
 
-	for (auto& lm : activeScene->models) {
+	for (auto& [id, render] : activeScene->renders) {
+		LoadedModel& lm = *render.model;
 		const Scene& scene = lm.gltf.scenes[lm.gltf.defaultScene];
-		Matrix<float> modelMat = lm.transform.getModelMatrix() * transform.getModelMatrix();
+		Matrix<float> modelMat = activeScene->transforms[id].getModelMatrix() * transform.getModelMatrix();
 		for (int rootIdx : scene.rootNodes)
 			renderNode(lm, rootIdx, modelMat, view, projection);
 	}
@@ -210,11 +201,13 @@ void App::render() {
 
 void App::run(){
     SDL_GL_SetSwapInterval(0);
+    timer.tick(); // discard loading time
 
     int frameCount = 0;
     while(this->running)
     {
         this->deltaTime = timer.tick();
+        if (this->deltaTime > 0.1f) this->deltaTime = 0.1f; // clamp: évite les sauts physiques si freeze
         processEvents();
         update();
         render();
@@ -222,8 +215,8 @@ void App::run(){
         
         frameCount++;
     }
-    for (auto& lm : activeScene->models)
-        for (auto& mesh : lm.meshes)
+    for (auto& [id, render] : activeScene->renders)
+        for (auto& mesh : render.model->meshes)
             renderer.cleanup(mesh);
 };
 

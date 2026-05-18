@@ -72,6 +72,8 @@ class Camera {
 		 */
 		void fitToScene(const Vector<float>& center, float radius);
 
+		void follow(const Vector<float>& playerPos);
+
 		Vector<float> getMousePos() const { return this->mousePos; };
 		Vector<float> getCameraPos() const { return this->cameraPos; };
 		const Vector<float>& getTarget() const { return this->target; };

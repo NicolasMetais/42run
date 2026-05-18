@@ -8,7 +8,7 @@
 /** @brief Handles keyboard input: records pressed keys and applies movement each frame. */
 class Keyboard {
 	private:
-		uint16_t moveFlags = 0; ///< Bitmask of currently held movement keys.
+		uint32_t moveFlags = 0; ///< Bitmask of currently held movement keys.
 	public:
 		~Keyboard() {};
 		/**
@@ -20,6 +20,12 @@ class Keyboard {
 		 * @param lockCam Toggled on mouse lock/unlock key press.
 		 */
 		void processEvent(SDL_Event& e, bool& running, Camera& cam, float& fps, bool& lockCam);
-		/** @brief Applies the accumulated movement flags to the camera and transform for this frame. */
+		/** @brief Applies camera movement from WASD/Shift/Ctrl keys. */
 		void applyMovement(Camera& camera, Transform& transform, float deltaTime);
+
+		bool isLeft()    const;
+		bool isRight()   const;
+		bool isForward() const;
+		bool isBack()    const;
+		bool isJump()    const;
 };

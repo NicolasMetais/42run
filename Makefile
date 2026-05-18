@@ -31,6 +31,9 @@ SRCS =	srcs/main.cpp \
 		srcs/GameScene.cpp \
 		srcs/ModelLoader.cpp \
 		srcs/AnimationManager.cpp \
+		srcs/Entity/ColliderComponent.cpp \
+		srcs/Systems/PhysicsSystem.cpp \
+		srcs/Systems/CollisionSystem.cpp \
 		loader/src/glad.c \
 
 OBJ_DIR = obj
