@@ -1,4 +1,4 @@
-#include <GltfImporter.hpp>
+#include <Loader/GltfImporter.hpp>
 
 MeshData GltfImporter::buildMeshData(const GltfModel& model, Mesh mesh) {
 	const uint8_t* basePtr = model.binaryData.data();

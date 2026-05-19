@@ -1,4 +1,4 @@
-#include <ObjImporter.hpp>
+#include <Loader/ObjImporter.hpp>
 
 ObjImporter::FaceVertex ObjImporter::parseFaceElement(const std::string& part)
 {

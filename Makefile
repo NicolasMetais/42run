@@ -14,11 +14,11 @@ SRCS =	srcs/main.cpp \
 		srcs/Mouse.cpp \
 		srcs/Keyboard.cpp \
 		srcs/Window.cpp \
-		srcs/GltfModel.cpp \
-		srcs/GltfImporter.cpp \
-		srcs/AccessorView.cpp \
+		srcs/Loader/GltfModel.cpp \
+		srcs/Loader/GltfImporter.cpp \
+		srcs/Loader/AccessorView.cpp \
 		srcs/Camera.cpp \
-		srcs/ObjImporter.cpp \
+		srcs/Loader/ObjImporter.cpp \
 		srcs/Skybox.cpp \
 		srcs/Shader.cpp \
 		srcs/Renderer.cpp \
@@ -29,11 +29,12 @@ SRCS =	srcs/main.cpp \
 		srcs/utils.cpp \
 		srcs/SceneManager.cpp \
 		srcs/GameScene.cpp \
-		srcs/ModelLoader.cpp \
-		srcs/AnimationManager.cpp \
-		srcs/Entity/ColliderComponent.cpp \
+		srcs/Loader/ModelLoader.cpp \
+		srcs/Animation/AnimationManager.cpp \
 		srcs/Systems/PhysicsSystem.cpp \
 		srcs/Systems/CollisionSystem.cpp \
+		srcs/Runner/ChunkManager.cpp \
+		srcs/Runner/ChunkGenerator.cpp \
 		loader/src/glad.c \
 
 OBJ_DIR = obj

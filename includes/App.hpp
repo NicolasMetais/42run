@@ -3,7 +3,7 @@
 #include <Window.hpp>
 #include <Renderer.hpp>
 #include <Camera.hpp>
-#include <ObjImporter.hpp>
+#include <Loader/ObjImporter.hpp>
 #include <Skybox.hpp>
 #include <Transform.hpp>
 #include <Timer.hpp>
@@ -11,12 +11,13 @@
 #include <Keyboard.hpp>
 #include <TextureManager.hpp>
 #include <SceneManager.hpp>
-#include <Scene.hpp>
+#include <Loader/Scene.hpp>
 #include <Mouse.hpp>
-#include <LoadedModel.hpp>
-#include <ModelLoader.hpp>
+#include <Loader/LoadedModel.hpp>
+#include <Loader/ModelLoader.hpp>
 #include <GameScene.hpp>
-#include <AnimationManager.hpp>
+#include <Runner/ChunkManager.hpp>
+#include <Animation/AnimationManager.hpp>
 #include <Systems/PhysicsSystem.hpp>
 #include <Systems/CollisionSystem.hpp>
 
@@ -41,6 +42,7 @@ class App {
 		float fps;
 		float deltaTime;
 		ModelLoader modelLoader;
+		std::optional<ChunkManager> chunkManager;
 		/** @brief Polls and dispatches SDL events to input subsystems. */
 		void processEvents();
 		/** @brief Updates game state (camera, animations, transforms) for the current frame. */

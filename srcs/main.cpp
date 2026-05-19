@@ -1,4 +1,4 @@
-#include <ObjImporter.hpp>
+#include <Loader/ObjImporter.hpp>
 #include <App.hpp>
 #include <chrono>
 #include <Matrix/Matrix.hpp>
@@ -9,7 +9,7 @@
 #include <Texture.hpp>
 #include <Skybox.hpp>
 #include <Event.hpp>
-#include <GltfModel.hpp>
+#include <Loader/GltfModel.hpp>
 #include <SDL2/SDL.h>
 
 #define HEIGHT 1500

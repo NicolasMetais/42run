@@ -1,8 +1,8 @@
 #pragma once
 #include <iostream>
-#include <GltfModel.hpp>
-#include <Scene.hpp>
-#include <LoadedModel.hpp>
+#include <Loader/GltfModel.hpp>
+#include <Loader/Scene.hpp>
+#include <Loader/LoadedModel.hpp>
 
 /** @brief Tracks the active model and current scene within that model. */
 class SceneManager {

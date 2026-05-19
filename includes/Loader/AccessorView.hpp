@@ -8,10 +8,10 @@ struct GltfModel;
 #include <type_traits>
 #include <cassert>
 #include <algorithm>
-#include <BufferView.hpp>
-#include <Buffer.hpp>
+#include <Loader/BufferView.hpp>
+#include <Loader/Buffer.hpp>
 #include <Matrix/Matrix.hpp>
-#include <GltfUtils.hpp>
+#include <Loader/GltfUtils.hpp>
 #include <json.hpp>
 #include <cstdint>
 

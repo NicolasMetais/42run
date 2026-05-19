@@ -3,7 +3,7 @@
 #include <Matrix/Matrix.hpp>
 #include <MeshData.hpp>
 #include <TextureManager.hpp>
-#include <Node.hpp>
+#include <Loader/Node.hpp>
 
 /** @brief Math and scene utility functions used throughout the renderer. */
 namespace utils {

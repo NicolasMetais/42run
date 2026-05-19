@@ -1,7 +1,7 @@
 #pragma once
 #include <cstddef>
 #include <cassert>
-#include <GltfTypes.hpp>
+#include <Loader/GltfTypes.hpp>
 
 /** @brief Returns the size in bytes of a single component of the given type. */
 inline size_t componentSize(ComponentType c) {

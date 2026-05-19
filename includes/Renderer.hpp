@@ -1,6 +1,6 @@
 #pragma once
 #include <iostream>
-#include <ObjImporter.hpp>
+#include <Loader/ObjImporter.hpp>
 #include <TextureManager.hpp>
 #include <TextureManager.hpp>
 #include <Shader.hpp>

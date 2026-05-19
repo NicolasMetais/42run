@@ -2,9 +2,9 @@
 #include <iostream>
 #include <unordered_map>
 #include <Renderer.hpp>
-#include <GltfImporter.hpp>
+#include <Loader/GltfImporter.hpp>
 #include <TextureManager.hpp>
-#include <LoadedModel.hpp>
+#include <Loader/LoadedModel.hpp>
 
 class ModelLoader {
     private:

@@ -1,5 +1,5 @@
 #pragma once
-#include <LoadedModel.hpp>
+#include <Loader/LoadedModel.hpp>
 
 struct RenderComponent {
     LoadedModel* model = nullptr;

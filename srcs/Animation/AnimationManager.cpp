@@ -1,4 +1,4 @@
-#include <AnimationManager.hpp>
+#include <Animation/AnimationManager.hpp>
 #include <utils.hpp>
 #include <cmath>
 #include <cstring>

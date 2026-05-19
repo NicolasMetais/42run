@@ -2,7 +2,7 @@
 #include <iostream>
 #include <Matrix/Matrix.hpp>
 #include <SDL2/SDL.h>
-#include <ObjImporter.hpp>
+#include <Loader/ObjImporter.hpp>
 
 /** @brief First-person perspective camera with mouse-look and keyboard movement. */
 class Camera {

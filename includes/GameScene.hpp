@@ -3,8 +3,8 @@
 #include <vector>
 #include <unordered_map>
 #include <json.hpp>
-#include <LoadedModel.hpp>
-#include <ModelLoader.hpp>
+#include <Loader/LoadedModel.hpp>
+#include <Loader/ModelLoader.hpp>
 #include <Transform.hpp>
 #include <Entity/ColliderComponent.hpp>
 #include <Entity/RenderComponent.hpp>
@@ -24,6 +24,10 @@ struct GameScene {
     std::unordered_map<EntityId, RigidbodyComponent> rigidbodies;
 
     EntityId createEntity() { return nextId++; }
+    void destroyEntity(EntityId id);
+
+    ColliderComponent colliderFromModel(const LoadedModel& lm);
+void collectBoxes(const GltfModel& gltf, const std::vector<MeshData>& meshes, int nodeIdx, const Matrix<float>& parentWorld, ColliderComponent& col);
 
     static GameScene fromJson(const std::string& path, ModelLoader& loader);
     void loadPlayer(const std::string& path, ModelLoader& loader);

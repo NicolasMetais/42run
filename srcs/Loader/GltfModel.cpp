@@ -1,4 +1,4 @@
-#include <GltfModel.hpp>
+#include <Loader/GltfModel.hpp>
 
 void GltfModel::loadBinaryBuffer(const std::string& filename) {
 	std::ifstream file(filename, std::ios::binary | std::ios::ate);

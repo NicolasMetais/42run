@@ -107,13 +107,16 @@ void printMeshData(const MeshData& mesh)
     }
 }
 
-App::App(int width, int height) : window(width, height), renderer(), mesh()
-		, camera(static_cast<float>(width), static_cast<float>(height), Vector<float>{0, 1, 3}, Vector<float>{0,0,0}, Vector<float>{0,1,0}), running(true), modelLoader(renderer, textureManager) {
+App::App(int width, int height) 
+        : window(width, height), renderer(), mesh(), camera(static_cast<float>(width), static_cast<float>(height)
+        , Vector<float>{0, 1, 3}, Vector<float>{0,0,0}, Vector<float>{0,1,0}), running(true)
+        , modelLoader(renderer, textureManager){
     this->skybox.generateIrradianceMap();
     this->skybox.generatePrefilterMap();
 
     scenes.push_back(GameScene::fromJson("resources/levels/level1.json", modelLoader));
     activeScene = &scenes[0];
+    chunkManager.emplace(*activeScene, modelLoader, 3, 7.0f, 5.0f, "resources/TwoSidedPlane.gltf", std::vector<std::string>{});
     activeScene->loadPlayer("resources/player.json", modelLoader);
 	// this->transform.setScale(1.0f);
 	// Vector<float> cent(3);
@@ -124,6 +127,7 @@ App::App(int width, int height) : window(width, height), renderer(), mesh()
 App::~App(){};
 
 void App::update() {
+    chunkManager->update(deltaTime);
     if (activeScene->playerId != UINT32_MAX) {
         auto& rb = activeScene->rigidbodies[activeScene->playerId];
         constexpr float SPEED = 5.0f;

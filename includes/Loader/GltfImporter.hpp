@@ -1,8 +1,8 @@
 #pragma once
 #include <iostream>
 #include <MeshData.hpp>
-#include <Mesh.hpp>
-#include <GltfModel.hpp>
+#include <Loader/Mesh.hpp>
+#include <Loader/GltfModel.hpp>
 #include <utils.hpp>
 
 /** @brief Converts raw GLTF data into GPU-ready MeshData. */

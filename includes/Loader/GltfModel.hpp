@@ -2,19 +2,19 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <Mesh.hpp>
+#include <Loader/Mesh.hpp>
 #include <json.hpp>
-#include <Buffer.hpp>
-#include <Node.hpp>
+#include <Loader/Buffer.hpp>
+#include <Loader/Node.hpp>
 #include <Mat.hpp>
-#include <Scene.hpp>
+#include <Loader/Scene.hpp>
 #include <Text.hpp>
-#include <Image.hpp>
-#include <GltfTypes.hpp>
+#include <Loader/Image.hpp>
+#include <Loader/GltfTypes.hpp>
 #include <TextureSampler.hpp>
-#include <Animation.hpp>
-#include <Skin.hpp>
-#include <AccessorView.hpp>
+#include <Animation/Animation.hpp>
+#include <Loader/Skin.hpp>
+#include <Loader/AccessorView.hpp>
 
 /** @brief Holds all data parsed from a GLTF/GLB file. */
 struct GltfModel {

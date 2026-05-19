@@ -2,7 +2,7 @@
 #include <utils.hpp>
 #include <cfloat>
 
-static void collectBoxes(
+void GameScene::collectBoxes(
     const GltfModel& gltf,
     const std::vector<MeshData>& meshes,
     int nodeIdx,
@@ -42,7 +42,7 @@ static void collectBoxes(
         collectBoxes(gltf, meshes, child, world, col);
 }
 
-static ColliderComponent colliderFromModel(const LoadedModel& lm) {
+ColliderComponent GameScene::colliderFromModel(const LoadedModel& lm) {
     ColliderComponent col;
     Matrix<float> root = identity<float>(4);
     const Scene& scene = lm.gltf.scenes[lm.gltf.defaultScene];
@@ -71,7 +71,7 @@ GameScene GameScene::fromJson(const std::string& path, ModelLoader& loader) {
         scene.renders[id]    = { &lm };
 
         if (data.contains("collider"))
-            scene.colliders[id] = colliderFromModel(lm);
+            scene.colliders[id] = scene.colliderFromModel(lm);
 
         if (data.contains("rigidbody"))
             scene.rigidbodies[id] = {};
@@ -99,3 +99,11 @@ void GameScene::loadPlayer(const std::string& path, ModelLoader& loader) {
     colliders[id]  = colliderFromModel(lm);
     rigidbodies[id] = {};
 }
+
+void GameScene::destroyEntity(EntityId id) {
+    transforms.erase(id);
+    renders.erase(id);
+    colliders.erase(id);
+    rigidbodies.erase(id);
+};
+

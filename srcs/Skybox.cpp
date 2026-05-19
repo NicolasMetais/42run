@@ -7,7 +7,7 @@ static const int DEBUG_MODE =
     0;
 #endif
 
-Skybox::Skybox() : shaders("srcs/skybox.vs", "srcs/skybox.fs") {
+Skybox::Skybox() : shaders("srcs/shaders/skybox.vs", "srcs/shaders/skybox.fs") {
 	this->skyboxVertices = {
     -1.0f,  1.0f, -1.0f,
     -1.0f, -1.0f, -1.0f,
@@ -130,7 +130,7 @@ void Skybox::generateIrradianceMap() {
 		utils::view(origin, Vector<float>{0, 0, -1}, Vector<float>{0, -1, 0}),
 	};
 
-	Shader irradianceShader("srcs/irradiance.vs", "srcs/irradiance.fs");
+	Shader irradianceShader("srcs/shaders/irradiance.vs", "srcs/shaders/irradiance.fs");
 	irradianceShader.bind();
 	irradianceShader.setInt("environmentMap", 0);
 	irradianceShader.setMatrix4_true("projection", captureProjection.datal());
@@ -196,7 +196,7 @@ void Skybox::generatePrefilterMap() {
 		utils::view(origin, Vector<float>{0, 0, -1}, Vector<float>{0, -1, 0}),
 	};
 
-	Shader prefilterShader("srcs/prefilter.vs", "srcs/prefilter.fs");
+	Shader prefilterShader("srcs/shaders/prefilter.vs", "srcs/shaders/prefilter.fs");
 	prefilterShader.bind();
 	prefilterShader.setInt("environmentMap", 0);
 	prefilterShader.setMatrix4_true("projection", captureProjection.datal());

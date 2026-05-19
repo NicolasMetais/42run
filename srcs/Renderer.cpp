@@ -8,7 +8,7 @@ static const int DEBUG_MODE =
     0;
 #endif
 
-Renderer::Renderer() : gltfShader("srcs/gltf.vs", "srcs/gltf.fs"), objShader("srcs/obj.vs", "srcs/obj.fs"), debug("srcs/debug.vs", "srcs/debug.fs") {
+Renderer::Renderer() : gltfShader("srcs/shaders/gltf.vs", "srcs/shaders/gltf.fs"), objShader("srcs/shaders/obj.vs", "srcs/shaders/obj.fs"), debug("srcs/shaders/debug.vs", "srcs/shaders/debug.fs") {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glDepthFunc(GL_LESS);

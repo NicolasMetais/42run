@@ -1,6 +1,6 @@
 #pragma once
-#include <GltfModel.hpp>
-#include <LoadedModel.hpp>
+#include <Loader/GltfModel.hpp>
+#include <Loader/LoadedModel.hpp>
 
 /** @brief Drives skeletal animations on a LoadedModel, advancing time and computing joint matrices. */
 class AnimationManager {

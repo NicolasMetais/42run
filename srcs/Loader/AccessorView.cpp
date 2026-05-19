@@ -1,5 +1,5 @@
-#include <AccessorView.hpp>
-#include <GltfModel.hpp>
+#include <Loader/AccessorView.hpp>
+#include <Loader/GltfModel.hpp>
 
 Vector<float> AccessorView::getVector(size_t index, size_t components, const uint8_t* basePtr) const {
     size_t stride = bufferView->byteStride;

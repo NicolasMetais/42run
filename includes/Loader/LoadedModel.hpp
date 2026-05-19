@@ -1,5 +1,5 @@
 #pragma once
-#include <GltfModel.hpp>
+#include <Loader/GltfModel.hpp>
 #include <MeshData.hpp>
 #include <Transform.hpp>
 
