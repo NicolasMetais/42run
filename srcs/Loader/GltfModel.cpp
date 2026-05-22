@@ -21,7 +21,7 @@ void GltfModel::parseJson(std::string fileName) {
 	nlohmann::json gltf;
 	std::ifstream file(fileName);
 	if (!file.is_open())
-		throw std::runtime_error("Cannot open glTF file");
+		throw std::runtime_error("Cannot open gltf file");
 	file >> gltf;
 
 	parseMeshes(gltf);

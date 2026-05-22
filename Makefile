@@ -35,6 +35,8 @@ SRCS =	srcs/main.cpp \
 		srcs/Systems/CollisionSystem.cpp \
 		srcs/Runner/ChunkManager.cpp \
 		srcs/Runner/ChunkGenerator.cpp \
+		srcs/TextRenderer/FontManager.cpp \
+		srcs/TextRenderer/TextRenderer.cpp \
 		loader/src/glad.c \
 
 OBJ_DIR = obj
