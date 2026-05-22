@@ -9,6 +9,7 @@
 #include <Entity/ColliderComponent.hpp>
 #include <Entity/RenderComponent.hpp>
 #include <Entity/RigidbodyComponent.hpp>
+#include <Entity/TriggerComponent.hpp>
 #include <ECS.hpp>
 #include <SceneManager.hpp>
 
@@ -22,6 +23,7 @@ struct GameScene {
     std::unordered_map<EntityId, RenderComponent> renders;
     std::unordered_map<EntityId, ColliderComponent> colliders;
     std::unordered_map<EntityId, RigidbodyComponent> rigidbodies;
+    std::unordered_map<EntityId, TriggerComponent> triggers;
 
     EntityId createEntity() { return nextId++; }
     void destroyEntity(EntityId id);

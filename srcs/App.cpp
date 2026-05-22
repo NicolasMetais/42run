@@ -116,7 +116,7 @@ App::App(int width, int height)
 
     scenes.push_back(GameScene::fromJson("resources/levels/level1.json", modelLoader));
     activeScene = &scenes[0];
-    chunkManager.emplace(*activeScene, modelLoader, 3, 7.0f, 5.0f, "resources/TwoSidedPlane.gltf", std::vector<std::string>{});
+    chunkManager.emplace(*activeScene, modelLoader, 3, 7.0f, 5.0f, "resources/TwoSidedPlane.gltf", std::vector<std::string>{"resources/DamagedHelmet.gltf"}, [this]() { this->running = false; });
     activeScene->loadPlayer("resources/player.json", modelLoader);
 	// this->transform.setScale(1.0f);
 	// Vector<float> cent(3);
@@ -133,15 +133,18 @@ void App::update() {
         constexpr float SPEED = 5.0f;
         rb.velocity.x() = 0.0f;
         rb.velocity.z() = 0.0f;
-        if (keyboard.isLeft())    rb.velocity.x() =  SPEED;
-        if (keyboard.isRight())   rb.velocity.x() = -SPEED;
+        if (keyboard.consumeLeft() && lanePosition < 2 ) this->lanePosition++;
+        if (keyboard.consumeRight() && lanePosition > 0) this->lanePosition--;
         if (keyboard.isForward()) rb.velocity.z() =  SPEED;
         if (keyboard.isBack())    rb.velocity.z() = -SPEED;
         if (keyboard.isJump() && rb.onGround) rb.velocity.y() = 8.0f;
+        float targetX = (lanePosition - 1) * 4.0f;
+        float currentX = activeScene->transforms[activeScene->playerId].getPosition().x();
+        activeScene->transforms[activeScene->playerId].move({(targetX - currentX) * SPEED * deltaTime, 0, 0});
     }
 
     PhysicsSystem::update(activeScene->transforms, activeScene->rigidbodies, deltaTime);
-    CollisionSystem::resolveEntities(activeScene->transforms, activeScene->colliders, activeScene->rigidbodies);
+    CollisionSystem::resolveEntities(activeScene->transforms, activeScene->colliders, activeScene->rigidbodies, activeScene->triggers);
 
     if (activeScene->playerId != UINT32_MAX)
         camera.follow(activeScene->transforms[activeScene->playerId].getPosition());
@@ -156,13 +159,13 @@ void App::processEvents() {
 		event(e, this->camera, this->running);
 		mouse.processEvent(e);
 		keyboard.processEvent(e, this->running, this->camera, this->fps, this->mouselock);
-		if (e.type == SDL_KEYDOWN) {
-			SDL_Keycode sym = e.key.keysym.sym;
-			SDL_Scancode sc  = e.key.keysym.scancode;
-			if (sc == SDL_SCANCODE_1 || sym == SDLK_1 || sym == SDLK_KP_1) animManager.setAnimation(0);
-			if (sc == SDL_SCANCODE_2 || sym == SDLK_2 || sym == SDLK_KP_2 || sc == SDL_SCANCODE_E) animManager.setAnimation(1);
-			if (sc == SDL_SCANCODE_3 || sym == SDLK_3 || sym == SDLK_KP_3) animManager.setAnimation(2);
-		}
+		// if (e.type == SDL_KEYDOWN) {
+		// 	SDL_Keycode sym = e.key.keysym.sym;
+		// 	SDL_Scancode sc  = e.key.keysym.scancode;
+		// 	if (sc == SDL_SCANCODE_1 || sym == SDLK_1 || sym == SDLK_KP_1) animManager.setAnimation(0);
+		// 	if (sc == SDL_SCANCODE_2 || sym == SDLK_2 || sym == SDLK_KP_2 || sc == SDL_SCANCODE_E) animManager.setAnimation(1);
+		// 	if (sc == SDL_SCANCODE_3 || sym == SDLK_3 || sym == SDLK_KP_3) animManager.setAnimation(2);
+		// }
 	}
 	mouse.applyRotation(this->transform, this->camera); //mouse rotation
 	keyboard.applyMovement(this->camera, this->transform, this->deltaTime); //keyboard movement

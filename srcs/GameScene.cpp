@@ -75,6 +75,9 @@ GameScene GameScene::fromJson(const std::string& path, ModelLoader& loader) {
 
         if (data.contains("rigidbody"))
             scene.rigidbodies[id] = {};
+
+        if (data.contains("trigger"))
+            scene.triggers[id] = {};
     }
     return scene;
 }
@@ -98,6 +101,8 @@ void GameScene::loadPlayer(const std::string& path, ModelLoader& loader) {
     renders[id]    = { &lm };
     colliders[id]  = colliderFromModel(lm);
     rigidbodies[id] = {};
+    triggers[id] = {};
+
 }
 
 void GameScene::destroyEntity(EntityId id) {
@@ -105,5 +110,7 @@ void GameScene::destroyEntity(EntityId id) {
     renders.erase(id);
     colliders.erase(id);
     rigidbodies.erase(id);
+    triggers.erase(id);
+
 };
 

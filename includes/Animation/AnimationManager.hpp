@@ -5,7 +5,7 @@
 /** @brief Drives skeletal animations on a LoadedModel, advancing time and computing joint matrices. */
 class AnimationManager {
     private:
-        int   currentAnim = 0;   ///< Index of the currently playing animation.
+        int   currentAnim = 2;   ///< Index of the currently playing animation.
         float currentTime = 0.0f; ///< Elapsed time within the current animation in seconds.
 
         /** @brief Samples a single animation channel and writes the interpolated transform to the target node. */

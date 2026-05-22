@@ -21,7 +21,8 @@ bool CollisionSystem::aabbOverlap(
 void CollisionSystem::resolveEntities(
     std::unordered_map<EntityId, Transform>& transforms,
     std::unordered_map<EntityId, ColliderComponent>& colliders,
-    std::unordered_map<EntityId, RigidbodyComponent>& rigidbodies)
+    std::unordered_map<EntityId, RigidbodyComponent>& rigidbodies,
+    std::unordered_map<EntityId, TriggerComponent>& triggers)
 {
     for (auto& [dynId, rb] : rigidbodies) {
         auto dynTIt = transforms.find(dynId);
@@ -55,6 +56,11 @@ void CollisionSystem::resolveEntities(
                     float ox = std::min(dMax.x(), sMax.x()) - std::max(dMin.x(), sMin.x());
                     float oy = std::min(dMax.y(), sMax.y()) - std::max(dMin.y(), sMin.y());
                     float oz = std::min(dMax.z(), sMax.z()) - std::max(dMin.z(), sMin.z());
+
+                    if (triggers.count(statId)) {
+                        triggers[statId].onTrigger();
+                        continue;
+                    }
 
                     if (oy <= ox && oy <= oz) {
                         float dynCY  = (dMin.y() + dMax.y()) * 0.5f;

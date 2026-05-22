@@ -35,15 +35,13 @@ void Keyboard::processEvent(SDL_Event& e, bool& running, Camera& cam, float& fps
         case SDL_SCANCODE_RIGHT:
             pressed ? moveFlags |= PLAYER_RIGHT   : moveFlags &= ~PLAYER_RIGHT;   break;
         case SDL_SCANCODE_UP:
-            pressed ? moveFlags |= PLAYER_FORWARD : moveFlags &= ~PLAYER_FORWARD; break;
-        case SDL_SCANCODE_DOWN:
-            pressed ? moveFlags |= PLAYER_BACK    : moveFlags &= ~PLAYER_BACK;    break;
-        case SDL_SCANCODE_SPACE:
             pressed ? moveFlags |= PLAYER_JUMP    : moveFlags &= ~PLAYER_JUMP;    break;
+        // case SDL_SCANCODE_DOWN:
+        //     pressed ? moveFlags |= PLAYER_BACK    : moveFlags &= ~PLAYER_BACK;    break;
         case SDL_SCANCODE_W:
-            pressed ? moveFlags |= PLAYER_FORWARD : moveFlags &= ~PLAYER_FORWARD; break;
-        case SDL_SCANCODE_S:
-            pressed ? moveFlags |= PLAYER_BACK    : moveFlags &= ~PLAYER_BACK;    break;
+            pressed ? moveFlags |= PLAYER_JUMP    : moveFlags &= ~PLAYER_JUMP;    break;
+        // case SDL_SCANCODE_S:
+        //     pressed ? moveFlags |= PLAYER_BACK    : moveFlags &= ~PLAYER_BACK;    break;
         case SDL_SCANCODE_A:
             pressed ? moveFlags |= PLAYER_LEFT    : moveFlags &= ~PLAYER_LEFT;    break;
         case SDL_SCANCODE_D:
@@ -65,8 +63,18 @@ void Keyboard::applyMovement(Camera&, Transform&, float) {
     // caméra en follow mode — le mouvement est géré par camera.follow() dans App::update()
 }
 
-bool Keyboard::isLeft()    const { return moveFlags & PLAYER_LEFT; }
-bool Keyboard::isRight()   const { return moveFlags & PLAYER_RIGHT; }
+bool Keyboard::consumeLeft() {
+    bool val = moveFlags & PLAYER_LEFT;
+    moveFlags &= ~PLAYER_LEFT;
+    return val;
+};
+
+bool Keyboard::consumeRight() {
+    bool val = moveFlags & PLAYER_RIGHT;
+    moveFlags &= ~PLAYER_RIGHT;
+    return val;
+};
+
 bool Keyboard::isForward() const { return moveFlags & PLAYER_FORWARD; }
 bool Keyboard::isBack()    const { return moveFlags & PLAYER_BACK; }
 bool Keyboard::isJump()    const { return moveFlags & PLAYER_JUMP; }

@@ -23,8 +23,8 @@ class Keyboard {
 		/** @brief Applies camera movement from WASD/Shift/Ctrl keys. */
 		void applyMovement(Camera& camera, Transform& transform, float deltaTime);
 
-		bool isLeft()    const;
-		bool isRight()   const;
+		bool consumeLeft();
+		bool consumeRight();
 		bool isForward() const;
 		bool isBack()    const;
 		bool isJump()    const;

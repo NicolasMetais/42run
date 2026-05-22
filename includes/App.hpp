@@ -43,6 +43,7 @@ class App {
 		float deltaTime;
 		ModelLoader modelLoader;
 		std::optional<ChunkManager> chunkManager;
+		int lanePosition = 1;
 		/** @brief Polls and dispatches SDL events to input subsystems. */
 		void processEvents();
 		/** @brief Updates game state (camera, animations, transforms) for the current frame. */
