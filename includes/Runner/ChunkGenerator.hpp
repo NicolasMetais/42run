@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <Loader/ModelLoader.hpp>
-#include <GameScene.hpp>
+#include <Scene/GameScene.hpp>
 #include <Runner/Chunk.hpp>
 #include <random>
 

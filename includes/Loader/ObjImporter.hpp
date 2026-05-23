@@ -8,7 +8,7 @@
 #include <array>
 #include <glad/glad.h>
 #include <Mat.hpp>
-#include <Texture.hpp>
+#include <Texture/Texture.hpp>
 #include <MeshData.hpp>
 #include <unordered_map>
 

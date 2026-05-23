@@ -4,7 +4,7 @@
 #include <vector>
 #include <Runner/Chunk.hpp>
 #include <Loader/ModelLoader.hpp>
-#include <GameScene.hpp>
+#include <Scene/GameScene.hpp>
 #include <Runner/ChunkGenerator.hpp>
 
 class ChunkManager {

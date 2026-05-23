@@ -1,4 +1,4 @@
-#include <SceneManager.hpp>
+#include <Scene/SceneManager.hpp>
 
 void SceneManager::setModel(const LoadedModel* model) {
     this->activeModel = model;

@@ -1,29 +1,30 @@
 #pragma once
 #include <iostream>
 #include <Window.hpp>
-#include <Renderer.hpp>
+#include <Renderer/Renderer.hpp>
 #include <Camera.hpp>
 #include <Loader/ObjImporter.hpp>
-#include <Skybox.hpp>
-#include <Transform.hpp>
+#include <Skybox/Skybox.hpp>
+#include <Scene/Transform.hpp>
 #include <Timer.hpp>
-#include <Event.hpp>
-#include <Keyboard.hpp>
-#include <TextureManager.hpp>
-#include <SceneManager.hpp>
+#include <Input/Event.hpp>
+#include <Input/Keyboard.hpp>
+#include <Texture/TextureManager.hpp>
+#include <Scene/SceneManager.hpp>
 #include <Loader/Scene.hpp>
-#include <Mouse.hpp>
+#include <Input/Mouse.hpp>
 #include <Loader/LoadedModel.hpp>
 #include <Loader/ModelLoader.hpp>
-#include <GameScene.hpp>
+#include <Scene/GameScene.hpp>
 #include <Runner/ChunkManager.hpp>
 #include <Animation/AnimationManager.hpp>
 #include <Systems/PhysicsSystem.hpp>
 #include <Systems/CollisionSystem.hpp>
+#include <UI/UIRenderer.hpp>
 #include <Font/FontManager.hpp>
 #include <Font/TextRenderer.hpp>
 
-
+enum class AppState { MENU, PLAYING, PAUSE, GAME_OVER };
 
 /** @brief Top-level application: owns all subsystems and drives the main loop. */
 class App {
@@ -49,6 +50,11 @@ class App {
 		std::optional<ChunkManager> chunkManager;
 		TextRenderer textRenderer;
 		FontManager fontManager;
+		AppState state = AppState::MENU;
+		UIRenderer uiRenderer;
+		int screenW;
+		int screenH;
+		float elapsedTime = 0.0f;
 		int lanePosition = 1;
 		/** @brief Polls and dispatches SDL events to input subsystems. */
 		void processEvents();

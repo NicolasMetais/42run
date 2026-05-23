@@ -2,7 +2,7 @@
 #include <iostream>
 #include <json.hpp>
 #include <Matrix/Matrix.hpp>
-#include <Texture.hpp>
+#include <Texture/Texture.hpp>
 
 /** @brief Selects the shading model used by a material. */
 enum MaterialType {

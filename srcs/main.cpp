@@ -3,12 +3,12 @@
 #include <chrono>
 #include <Matrix/Matrix.hpp>
 #include <Window.hpp>
-#include <Transform.hpp>
-#include <Renderer.hpp>
+#include <Scene/Transform.hpp>
+#include <Renderer/Renderer.hpp>
 #include <Camera.hpp>
-#include <Texture.hpp>
-#include <Skybox.hpp>
-#include <Event.hpp>
+#include <Texture/Texture.hpp>
+#include <Skybox/Skybox.hpp>
+#include <Input/Event.hpp>
 #include <Loader/GltfModel.hpp>
 #include <SDL2/SDL.h>
 

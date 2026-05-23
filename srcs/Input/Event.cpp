@@ -1,4 +1,4 @@
-#include <Event.hpp>
+#include <Input/Event.hpp>
 
 void event(SDL_Event& e, Camera& camera, bool& run) {
 	switch (e.type) {

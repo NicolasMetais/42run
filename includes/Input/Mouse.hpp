@@ -2,8 +2,8 @@
 #include <iostream>
 #include <SDL2/SDL.h>
 #include <Camera.hpp>
-#include <Renderer.hpp>
-#include <Transform.hpp>
+#include <Renderer/Renderer.hpp>
+#include <Scene/Transform.hpp>
 
 /** @brief Handles mouse input: tracks motion and applies rotation to the transform/camera. */
 class Mouse {

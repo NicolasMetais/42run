@@ -110,7 +110,7 @@ void printMeshData(const MeshData& mesh)
 App::App(int width, int height) 
         : window(width, height), renderer(), mesh(), camera(static_cast<float>(width), static_cast<float>(height)
         , Vector<float>{0, 1, 3}, Vector<float>{0,0,0}, Vector<float>{0,1,0}), running(true)
-        , modelLoader(renderer, textureManager), textRenderer(textureManager, width, height){
+        , modelLoader(renderer, textureManager), textRenderer(textureManager, width, height), uiRenderer(textureManager, width, height), screenW(width), screenH(height) {
     this->skybox.generateIrradianceMap();
     this->skybox.generatePrefilterMap();
 
@@ -128,30 +128,33 @@ App::App(int width, int height)
 App::~App(){};
 
 void App::update() {
-    chunkManager->update(deltaTime);
-    if (activeScene->playerId != UINT32_MAX) {
-        auto& rb = activeScene->rigidbodies[activeScene->playerId];
-        constexpr float SPEED = 5.0f;
-        rb.velocity.x() = 0.0f;
-        rb.velocity.z() = 0.0f;
-        if (keyboard.consumeLeft() && lanePosition < 2 ) this->lanePosition++;
-        if (keyboard.consumeRight() && lanePosition > 0) this->lanePosition--;
-        if (keyboard.isForward()) rb.velocity.z() =  SPEED;
-        if (keyboard.isBack())    rb.velocity.z() = -SPEED;
-        if (keyboard.isJump() && rb.onGround) rb.velocity.y() = 8.0f;
-        float targetX = (lanePosition - 1) * 4.0f;
-        float currentX = activeScene->transforms[activeScene->playerId].getPosition().x();
-        activeScene->transforms[activeScene->playerId].move({(targetX - currentX) * SPEED * deltaTime, 0, 0});
+    this->elapsedTime += this->deltaTime;
+    if (state == AppState::PLAYING) {
+        chunkManager->update(deltaTime);
+        if (activeScene->playerId != UINT32_MAX) {
+            auto& rb = activeScene->rigidbodies[activeScene->playerId];
+            constexpr float SPEED = 5.0f;
+            rb.velocity.x() = 0.0f;
+            rb.velocity.z() = 0.0f;
+            if (keyboard.consumeLeft() && lanePosition < 2 ) this->lanePosition++;
+            if (keyboard.consumeRight() && lanePosition > 0) this->lanePosition--;
+            if (keyboard.isForward()) rb.velocity.z() =  SPEED;
+            if (keyboard.isBack())    rb.velocity.z() = -SPEED;
+            if (keyboard.isJump() && rb.onGround) rb.velocity.y() = 8.0f;
+            float targetX = (lanePosition - 1) * 4.0f;
+            float currentX = activeScene->transforms[activeScene->playerId].getPosition().x();
+            activeScene->transforms[activeScene->playerId].move({(targetX - currentX) * SPEED * deltaTime, 0, 0});
+        }
+
+        PhysicsSystem::update(activeScene->transforms, activeScene->rigidbodies, deltaTime);
+        CollisionSystem::resolveEntities(activeScene->transforms, activeScene->colliders, activeScene->rigidbodies, activeScene->triggers);
+
+        if (activeScene->playerId != UINT32_MAX)
+            camera.follow(activeScene->transforms[activeScene->playerId].getPosition());
+
+        for (auto& [id, render] : activeScene->renders)
+            animManager.update(*render.model, deltaTime);
     }
-
-    PhysicsSystem::update(activeScene->transforms, activeScene->rigidbodies, deltaTime);
-    CollisionSystem::resolveEntities(activeScene->transforms, activeScene->colliders, activeScene->rigidbodies, activeScene->triggers);
-
-    if (activeScene->playerId != UINT32_MAX)
-        camera.follow(activeScene->transforms[activeScene->playerId].getPosition());
-
-    for (auto& [id, render] : activeScene->renders)
-        animManager.update(*render.model, deltaTime);
 };
 
 void App::processEvents() {
@@ -190,22 +193,30 @@ void App::renderNode(LoadedModel& lm, int nodeIdx, const Matrix<float>& parentWo
 };
 
 void App::render() {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if (state == AppState::MENU) {
+        int mX, mY;
+        SDL_GetMouseState(&mX, &mY);
+        float mouseU = (float)mX / this->screenW;
+        float mouseV = (float)mY / this->screenH;
+        uiRenderer.drawWaterBackground(mouseU, mouseV, elapsedTime);
+    } else if (state == AppState::PLAYING) {
 
-	Matrix<float> view = camera.buildView();
-	Matrix<float> projection = camera.buildProjection();
+        Matrix<float> view = camera.buildView();
+        Matrix<float> projection = camera.buildProjection();
 
-	for (auto& [id, render] : activeScene->renders) {
-		LoadedModel& lm = *render.model;
-		const Scene& scene = lm.gltf.scenes[lm.gltf.defaultScene];
-		Matrix<float> modelMat = activeScene->transforms[id].getModelMatrix() * transform.getModelMatrix();
-		for (int rootIdx : scene.rootNodes)
-			renderNode(lm, rootIdx, modelMat, view, projection);
-	}
+        for (auto& [id, render] : activeScene->renders) {
+            LoadedModel& lm = *render.model;
+            const Scene& scene = lm.gltf.scenes[lm.gltf.defaultScene];
+            Matrix<float> modelMat = activeScene->transforms[id].getModelMatrix() * transform.getModelMatrix();
+            for (int rootIdx : scene.rootNodes)
+                renderNode(lm, rootIdx, modelMat, view, projection);
+        }
 
-	skybox.draw(camera.buildViewNoTranslation(), projection);
-    textRenderer.drawText("Ceci est un compteur de metres", "Roboto", 20, 40, 32, fontManager.getFont("Roboto"));
-	SDL_GL_SwapWindow(window.getWin());
+        skybox.draw(camera.buildViewNoTranslation(), projection);
+        textRenderer.drawText("Ceci est un compteur de metres", "Roboto", 20, 40, 32, fontManager.getFont("Roboto"));
+    }
+    SDL_GL_SwapWindow(window.getWin());
 };
 
 void App::run(){

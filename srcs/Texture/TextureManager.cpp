@@ -1,4 +1,4 @@
-#include <TextureManager.hpp>
+#include <Texture/TextureManager.hpp>
 
 Texture& TextureManager::getOrLoad(const std::string& uri) {
 	auto it = cache.find(uri);

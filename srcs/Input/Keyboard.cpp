@@ -1,4 +1,4 @@
-#include <Keyboard.hpp>
+#include <Input/Keyboard.hpp>
 
 #define KEY_W           0x001
 #define KEY_A           0x002

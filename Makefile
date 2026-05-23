@@ -11,24 +11,24 @@ LDFLAGS = $(shell sdl2-config --libs) -lGL -lz -lpng -ljpeg -fPIE
 SRCS =	srcs/main.cpp \
 		srcs/App.cpp \
 		srcs/Timer.cpp \
-		srcs/Mouse.cpp \
-		srcs/Keyboard.cpp \
 		srcs/Window.cpp \
+		srcs/Camera.cpp \
+		srcs/Shader.cpp \
+		srcs/utils.cpp \
+		srcs/Input/Mouse.cpp \
+		srcs/Input/Keyboard.cpp \
+		srcs/Input/Event.cpp \
+		srcs/Texture/Texture.cpp \
+		srcs/Texture/TextureManager.cpp \
+		srcs/Scene/Transform.cpp \
+		srcs/Scene/SceneManager.cpp \
+		srcs/Scene/GameScene.cpp \
+		srcs/Skybox/Skybox.cpp \
+		srcs/Renderer/Renderer.cpp \
 		srcs/Loader/GltfModel.cpp \
 		srcs/Loader/GltfImporter.cpp \
 		srcs/Loader/AccessorView.cpp \
-		srcs/Camera.cpp \
 		srcs/Loader/ObjImporter.cpp \
-		srcs/Skybox.cpp \
-		srcs/Shader.cpp \
-		srcs/Renderer.cpp \
-		srcs/Transform.cpp \
-		srcs/Texture.cpp \
-		srcs/TextureManager.cpp \
-		srcs/Event.cpp \
-		srcs/utils.cpp \
-		srcs/SceneManager.cpp \
-		srcs/GameScene.cpp \
 		srcs/Loader/ModelLoader.cpp \
 		srcs/Animation/AnimationManager.cpp \
 		srcs/Systems/PhysicsSystem.cpp \

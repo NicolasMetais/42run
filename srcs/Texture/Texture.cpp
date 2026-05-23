@@ -1,4 +1,4 @@
-#include <Texture.hpp>
+#include <Texture/Texture.hpp>
 
 void Texture::loadTexture(const std::string& path) {
 	if (path.size() >= 4 && path.substr(path.size() - 4) == ".bmp")

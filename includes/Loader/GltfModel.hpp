@@ -11,7 +11,7 @@
 #include <Text.hpp>
 #include <Loader/Image.hpp>
 #include <Loader/GltfTypes.hpp>
-#include <TextureSampler.hpp>
+#include <Texture/TextureSampler.hpp>
 #include <Animation/Animation.hpp>
 #include <Loader/Skin.hpp>
 #include <Loader/AccessorView.hpp>

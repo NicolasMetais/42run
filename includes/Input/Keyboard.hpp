@@ -2,8 +2,8 @@
 #include <iostream>
 #include <SDL2/SDL.h>
 #include <Camera.hpp>
-#include <Renderer.hpp>
-#include <Transform.hpp>
+#include <Renderer/Renderer.hpp>
+#include <Scene/Transform.hpp>
 
 /** @brief Handles keyboard input: records pressed keys and applies movement each frame. */
 class Keyboard {

@@ -1,9 +1,9 @@
 #pragma once
 #include <iostream>
 #include <unordered_map>
-#include <Renderer.hpp>
+#include <Renderer/Renderer.hpp>
 #include <Loader/GltfImporter.hpp>
-#include <TextureManager.hpp>
+#include <Texture/TextureManager.hpp>
 #include <Loader/LoadedModel.hpp>
 
 class ModelLoader {

@@ -1,4 +1,4 @@
-#include <Mouse.hpp>
+#include <Input/Mouse.hpp>
 
 #define SENSITIVITY 0.005f
 

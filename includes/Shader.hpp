@@ -26,6 +26,8 @@ class Shader {
 		void setMatrix4_true(const std::string& name, const float* value) const;
 		/** @brief Uploads a column-major 4x4 matrix uniform (transpose = false). */
 		void setMatrix4_false(const std::string& name, const float* value) const;
+		/** @brief Uploads a vec2 uniform. */
+		void setVec2(const std::string& name, const float x, const float y) const;
 		/** @brief Uploads a vec3 uniform. */
 		void setVec3(const std::string& name, const float x, const float y, const float z) const;
 		/** @brief Uploads a vec4 uniform. */
@@ -33,7 +35,7 @@ class Shader {
 		/** @brief Uploads an int uniform (also used for sampler slots). */
 		void setInt(const std::string& name, const int value) const;
 		/** @brief Uploads a float uniform. */
-		void setfloat(const std::string& name, const float value) const;
+		void setFloat(const std::string& name, const float value) const;
 		/** @brief Returns the location of a uniform variable, or -1 if not found. */
 		GLint getUniformLocation(const std::string& name) const;
 		GLuint getId() const { return this->id; };

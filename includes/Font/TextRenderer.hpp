@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 #include <vector>
-#include <TextureManager.hpp>
+#include <Texture/TextureManager.hpp>
 #include <Font/AtlasFont.hpp>
 #include <Shader.hpp>
 #include <glad/glad.h>

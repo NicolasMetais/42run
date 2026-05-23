@@ -1,8 +1,8 @@
 #pragma once
 #include <iostream>
 #include <Loader/ObjImporter.hpp>
-#include <TextureManager.hpp>
-#include <TextureManager.hpp>
+#include <Texture/TextureManager.hpp>
+#include <Texture/TextureManager.hpp>
 #include <Shader.hpp>
 #include <algorithm>
 #include <glad/glad.h>

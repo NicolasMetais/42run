@@ -1,4 +1,4 @@
-#include <Skybox.hpp>
+#include <Skybox/Skybox.hpp>
 
 static const int DEBUG_MODE =
 #ifdef DEBUG_WHITE
@@ -7,7 +7,7 @@ static const int DEBUG_MODE =
     0;
 #endif
 
-Skybox::Skybox() : shaders("srcs/shaders/skybox.vs", "srcs/shaders/skybox.fs") {
+Skybox::Skybox() : shaders("srcs/Skybox/skybox.vs", "srcs/Skybox/skybox.fs") {
 	this->skyboxVertices = {
     -1.0f,  1.0f, -1.0f,
     -1.0f, -1.0f, -1.0f,
@@ -130,7 +130,7 @@ void Skybox::generateIrradianceMap() {
 		utils::view(origin, Vector<float>{0, 0, -1}, Vector<float>{0, -1, 0}),
 	};
 
-	Shader irradianceShader("srcs/shaders/irradiance.vs", "srcs/shaders/irradiance.fs");
+	Shader irradianceShader("srcs/Skybox/irradiance.vs", "srcs/Skybox/irradiance.fs");
 	irradianceShader.bind();
 	irradianceShader.setInt("environmentMap", 0);
 	irradianceShader.setMatrix4_true("projection", captureProjection.datal());
@@ -196,7 +196,7 @@ void Skybox::generatePrefilterMap() {
 		utils::view(origin, Vector<float>{0, 0, -1}, Vector<float>{0, -1, 0}),
 	};
 
-	Shader prefilterShader("srcs/shaders/prefilter.vs", "srcs/shaders/prefilter.fs");
+	Shader prefilterShader("srcs/Skybox/prefilter.vs", "srcs/Skybox/prefilter.fs");
 	prefilterShader.bind();
 	prefilterShader.setInt("environmentMap", 0);
 	prefilterShader.setMatrix4_true("projection", captureProjection.datal());
@@ -212,7 +212,7 @@ void Skybox::generatePrefilterMap() {
 		glViewport(0, 0, mipWidth, mipHeight);
 
 		float roughness = (float)mip / 4.0f;
-		prefilterShader.setfloat("roughness", roughness);
+		prefilterShader.setFloat("roughness", roughness);
 
 		for (size_t i = 0; i < 6; ++i) {
 			prefilterShader.setMatrix4_true("view", captureViews[i].datal());

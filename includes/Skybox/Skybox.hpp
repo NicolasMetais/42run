@@ -6,7 +6,7 @@
 #include <glad/glad.h>
 #include <Window.hpp>
 #include <Shader.hpp>
-#include <Texture.hpp>
+#include <Texture/Texture.hpp>
 #include <utils.hpp>
 #include <Camera.hpp>
 

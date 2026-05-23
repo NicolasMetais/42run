@@ -1,7 +1,7 @@
 #pragma once
 #include <Loader/GltfModel.hpp>
 #include <MeshData.hpp>
-#include <Transform.hpp>
+#include <Scene/Transform.hpp>
 
 /** @brief A fully loaded model: parsed GLTF data, GPU-ready meshes, world transform, and joint matrices. */
 struct LoadedModel {

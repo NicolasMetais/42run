@@ -1,4 +1,4 @@
-#include <GameScene.hpp>
+#include <Scene/GameScene.hpp>
 #include <utils.hpp>
 #include <cfloat>
 

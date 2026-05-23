@@ -1,6 +1,6 @@
 #include <Font/TextRenderer.hpp>
 
-TextRenderer::TextRenderer(TextureManager& TextureManager, int w, int h) : textureManager(TextureManager), msdf("srcs/shaders/msdf.vs", "srcs/shaders/msdf.fs"), screenW(w), screenH(h) {
+TextRenderer::TextRenderer(TextureManager& TextureManager, int w, int h) : textureManager(TextureManager), msdf("srcs/Font/msdf.vs", "srcs/Font/msdf.fs"), screenW(w), screenH(h) {
     glGenVertexArrays(1, &this->VAO);
     glBindVertexArray(this->VAO);
 

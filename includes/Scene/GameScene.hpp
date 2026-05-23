@@ -5,13 +5,13 @@
 #include <json.hpp>
 #include <Loader/LoadedModel.hpp>
 #include <Loader/ModelLoader.hpp>
-#include <Transform.hpp>
+#include <Scene/Transform.hpp>
 #include <Entity/ColliderComponent.hpp>
 #include <Entity/RenderComponent.hpp>
 #include <Entity/RigidbodyComponent.hpp>
 #include <Entity/TriggerComponent.hpp>
 #include <ECS.hpp>
-#include <SceneManager.hpp>
+#include <Scene/SceneManager.hpp>
 
 struct GameScene {
 	SceneManager sceneManager;

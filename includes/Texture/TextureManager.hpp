@@ -1,7 +1,7 @@
 #pragma once
 #include <iostream>
 #include <unordered_map>
-#include <Texture.hpp>
+#include <Texture/Texture.hpp>
 
 /** @brief Cache of loaded textures keyed by URI, avoiding redundant GPU uploads. */
 class TextureManager {

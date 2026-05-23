@@ -1,5 +1,5 @@
-#include <Renderer.hpp>
-#include <VertexAttrib.hpp>
+#include <Renderer/Renderer.hpp>
+#include <Renderer/VertexAttrib.hpp>
 
 static const int DEBUG_MODE =
 #ifdef DEBUG_WHITE
@@ -8,7 +8,7 @@ static const int DEBUG_MODE =
     0;
 #endif
 
-Renderer::Renderer() : gltfShader("srcs/shaders/gltf.vs", "srcs/shaders/gltf.fs"), objShader("srcs/shaders/obj.vs", "srcs/shaders/obj.fs"), debug("srcs/shaders/debug.vs", "srcs/shaders/debug.fs") {
+Renderer::Renderer() : gltfShader("srcs/Renderer/gltf.vs", "srcs/Renderer/gltf.fs"), objShader("srcs/Renderer/obj.vs", "srcs/Renderer/obj.fs"), debug("srcs/Renderer/debug.vs", "srcs/Renderer/debug.fs") {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glDepthFunc(GL_LESS);
@@ -165,10 +165,10 @@ void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mes
 		shader.setVec3("Kd", 0.8f, 0.8f, 0.8f);
 		shader.setVec3("Ka", 0.1f, 0.1f, 0.1f);
 		shader.setVec3("Ks", 0.2f, 0.2f, 0.2f);
-		shader.setfloat("Ni", 1.0f);
+		shader.setFloat("Ni", 1.0f);
 		shader.setInt("Ns", 32);
 		shader.setInt("illum", 0);
-		shader.setfloat("d", 1.0f);
+		shader.setFloat("d", 1.0f);
 		shader.setInt("hasMtl", 0);
 
 		shader.setInt("isMap_Ka", 0); //attention faut recheck si j'envois les bon trucs c'pas clair
@@ -183,10 +183,10 @@ void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mes
 		shader.setVec3("Kd", mat->Kd.x(), mat->Kd.y(), mat->Kd.z());
 		shader.setVec3("Ka", mat->Ka.x(), mat->Ka.y(), mat->Ka.z());
 		shader.setVec3("Ks", mat->Ks.x(), mat->Ks.y(), mat->Ks.z());
-		shader.setfloat("Ni", mat->Ni);
+		shader.setFloat("Ni", mat->Ni);
 		shader.setInt("Ns", mat->Ns);
 		shader.setInt("illum", mat->illum);
-		shader.setfloat("d", mat->d);
+		shader.setFloat("d", mat->d);
 		shader.setInt("hasMtl", 1);
 		shader.setVec3("lightColor", 1.0f, 0.0f, 1.0f);
 
@@ -204,14 +204,14 @@ void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mes
 		float roughness = (pbr.roughnessFactor < 0.0f) ? 1.0f : pbr.roughnessFactor;
 
 		shader.setVec4("baseColorFactor", pbr.baseColorFactor[0], pbr.baseColorFactor[1], pbr.baseColorFactor[2], pbr.baseColorFactor[3]);
-		shader.setfloat("metallicFactor", metallic);
-		shader.setfloat("roughnessFactor", roughness);
+		shader.setFloat("metallicFactor", metallic);
+		shader.setFloat("roughnessFactor", roughness);
 
 		shader.setVec3("emissiveFactor", mat->emissiveFactor[0], mat->emissiveFactor[1], mat->emissiveFactor[2]);
 
-		shader.setfloat("normalScale", mat->normalTextureScale);
-		shader.setfloat("occlusionStrength", mat->occlusionStrength);
-		shader.setfloat("alphaCutOff", mat->alphaCutoff);
+		shader.setFloat("normalScale", mat->normalTextureScale);
+		shader.setFloat("occlusionStrength", mat->occlusionStrength);
+		shader.setFloat("alphaCutOff", mat->alphaCutoff);
 
 		//Alphamode
 		int alphaMode = 0;
@@ -227,7 +227,7 @@ void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mes
 		// shader.setInt("hasBaseColorTexture", 1); //forcing pour tester
 		shader.setInt("hasTangent", mesh.hasTangent);
 		shader.setInt("hasVertexColor", mesh.hasColor);
-		shader.setfloat("lightIntensity", 1.0f);
+		shader.setFloat("lightIntensity", 1.0f);
 		glActiveTexture(GL_TEXTURE20);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxId);
 		shader.setInt("irradianceMap", 20);
