@@ -20,6 +20,10 @@
 #include <Animation/AnimationManager.hpp>
 #include <Systems/PhysicsSystem.hpp>
 #include <Systems/CollisionSystem.hpp>
+#include <Font/FontManager.hpp>
+#include <Font/TextRenderer.hpp>
+
+
 
 /** @brief Top-level application: owns all subsystems and drives the main loop. */
 class App {
@@ -43,6 +47,8 @@ class App {
 		float deltaTime;
 		ModelLoader modelLoader;
 		std::optional<ChunkManager> chunkManager;
+		TextRenderer textRenderer;
+		FontManager fontManager;
 		int lanePosition = 1;
 		/** @brief Polls and dispatches SDL events to input subsystems. */
 		void processEvents();

@@ -110,7 +110,7 @@ void printMeshData(const MeshData& mesh)
 App::App(int width, int height) 
         : window(width, height), renderer(), mesh(), camera(static_cast<float>(width), static_cast<float>(height)
         , Vector<float>{0, 1, 3}, Vector<float>{0,0,0}, Vector<float>{0,1,0}), running(true)
-        , modelLoader(renderer, textureManager){
+        , modelLoader(renderer, textureManager), textRenderer(textureManager, width, height){
     this->skybox.generateIrradianceMap();
     this->skybox.generatePrefilterMap();
 
@@ -118,6 +118,7 @@ App::App(int width, int height)
     activeScene = &scenes[0];
     chunkManager.emplace(*activeScene, modelLoader, 3, 7.0f, 5.0f, "resources/TwoSidedPlane.gltf", std::vector<std::string>{"resources/DamagedHelmet.gltf"}, [this]() { this->running = false; });
     activeScene->loadPlayer("resources/player.json", modelLoader);
+    fontManager.load(this->textureManager, "resources/Roboto.json", "Roboto");
 	// this->transform.setScale(1.0f);
 	// Vector<float> cent(3);
 	// cent = (data.max + data.min) * 0.5f;
@@ -203,6 +204,7 @@ void App::render() {
 	}
 
 	skybox.draw(camera.buildViewNoTranslation(), projection);
+    textRenderer.drawText("Ceci est un compteur de metres", "Roboto", 20, 40, 32, fontManager.getFont("Roboto"));
 	SDL_GL_SwapWindow(window.getWin());
 };
 

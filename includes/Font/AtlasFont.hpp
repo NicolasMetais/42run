@@ -1,6 +1,6 @@
 #pragma once
 #include <unordered_map>
-#include <TextRenderer/GlyphData.hpp>
+#include <Font/GlyphData.hpp>
 
 struct AtlasFont {
     int width;

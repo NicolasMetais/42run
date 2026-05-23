@@ -1,4 +1,4 @@
-#include <TextRenderer/FontManager.hpp>
+#include <Font/FontManager.hpp>
 
 namespace { //namespace here has the same effect as static
     template<typename T>
@@ -46,7 +46,7 @@ void FontManager::load(TextureManager& textureManager, std::string path, std::st
     Fonts[name] = newFont;
 };
 
-AtlasFont FontManager::getFont(const std::string& name) {
-    return Fonts[name];
+const AtlasFont& FontManager::getFont(const std::string& name) const {
+    return Fonts.at(name);
 };
 
