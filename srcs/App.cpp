@@ -199,7 +199,20 @@ void App::render() {
         SDL_GetMouseState(&mX, &mY);
         float mouseU = (float)mX / this->screenW;
         float mouseV = (float)mY / this->screenH;
-        uiRenderer.drawWaterBackground(mouseU, mouseV, elapsedTime);
+        float speed = sqrt(pow(mouseU - prevMouseU, 2.0f) + pow(mouseV - prevMouseV, 2.0f));
+        speed = fmin(speed * 100.0f, 1.0f);
+        if (speed > 0.01f) {
+            rippleStrength = 1.0f;
+            rippleTime = 0.0f;
+            rippleCenterU = mouseU;
+            rippleCenterV = mouseV;
+        }
+        rippleTime += deltaTime;
+        rippleStrength -= deltaTime * 0.8f;
+        rippleStrength = fmax(rippleStrength, 0.0f);
+        prevMouseU = mouseU;
+        prevMouseV = mouseV;
+        uiRenderer.drawWaterBackground(textureManager.getOrLoad("TwoSidedPlane_BaseColor.png"), rippleCenterU, rippleCenterV, elapsedTime, rippleStrength, rippleTime);
     } else if (state == AppState::PLAYING) {
 
         Matrix<float> view = camera.buildView();
@@ -212,7 +225,6 @@ void App::render() {
             for (int rootIdx : scene.rootNodes)
                 renderNode(lm, rootIdx, modelMat, view, projection);
         }
-
         skybox.draw(camera.buildViewNoTranslation(), projection);
         textRenderer.drawText("Ceci est un compteur de metres", "Roboto", 20, 40, 32, fontManager.getFont("Roboto"));
     }

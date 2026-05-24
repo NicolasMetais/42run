@@ -54,7 +54,13 @@ class App {
 		UIRenderer uiRenderer;
 		int screenW;
 		int screenH;
+		float prevMouseU = 0;
+		float prevMouseV = 0;
 		float elapsedTime = 0.0f;
+		float rippleStrength = 0.0f;
+		float rippleTime = 0.0f;
+		float rippleCenterU = 0.5f;
+		float rippleCenterV = 0.5f;
 		int lanePosition = 1;
 		/** @brief Polls and dispatches SDL events to input subsystems. */
 		void processEvents();

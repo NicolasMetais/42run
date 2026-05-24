@@ -90,6 +90,7 @@ void UIRenderer::drawUIComponent(float x, float y, float z, float width, float h
        -1,            1,             0, 1
     };
     menu.setMatrix4_false("projection", proj);
+    menu.setInt("bottomTex", 0);
     menu.setVec4("color", r, g ,b, 1.0f);
     menu.setInt("useTexture", 0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -144,7 +145,8 @@ void UIRenderer::drawUIComponent(float x, float y, float z, float width, float h
     glBindVertexArray(0);
 };
 
-void UIRenderer::drawWaterBackground(Texture& tex, float mouseX, float mouseY, float time) {
+void UIRenderer::drawWaterBackground(Texture& tex, float mouseX, float mouseY, float time, float mouseSpeed, float rippleTime) {
+    glActiveTexture(GL_TEXTURE0);
     water.bind();
     float proj[16] = {
         2.0f/screenW, 0,             0, 0,
@@ -153,8 +155,12 @@ void UIRenderer::drawWaterBackground(Texture& tex, float mouseX, float mouseY, f
        -1,            1,             0, 1
     };
     water.setMatrix4_false("projection", proj);
+    water.setFloat("mouseSpeed", mouseSpeed);
     water.setFloat("time", time);
+    water.setFloat("rippleTime", rippleTime);
     water.setVec2("mouse", mouseX, mouseY);
+    tex.bind();
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glBindVertexArray(this->VAO);
     glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
     glBufferData(GL_ARRAY_BUFFER, 6 * 4 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);

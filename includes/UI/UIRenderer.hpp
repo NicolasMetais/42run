@@ -17,6 +17,6 @@ class UIRenderer {
         UIRenderer(TextureManager& TextureManager, int w, int h);
         void drawUIComponent(Texture& tex, float x, float y, float z, float width, float height);
         void drawUIComponent(float x, float y, float z, float width, float height, float r, float g, float b);
-        void drawWaterBackground(float mouseX, float mouseY, float time);
+        void drawWaterBackground(Texture& tex, float mouseX, float mouseY, float time, float mouseSpeed, float rippleTime);
 
 };
