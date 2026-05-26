@@ -3,6 +3,7 @@
 void event(SDL_Event& e, Camera& camera, bool& run) {
 	switch (e.type) {
 		case SDL_QUIT:
+			std::cerr << "SDL_QUIT recu" << std::endl;
 			run = false;
 		break;
 		case SDL_WINDOWEVENT:

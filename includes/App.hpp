@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <Window.hpp>
+#include <stack>
 #include <Renderer/Renderer.hpp>
 #include <Camera.hpp>
 #include <Loader/ObjImporter.hpp>
@@ -22,9 +23,11 @@
 #include <Systems/CollisionSystem.hpp>
 #include <UI/UIRenderer.hpp>
 #include <Font/FontManager.hpp>
+#include <UI/MenuScreen.hpp>
+#include <UI/MainMenu.hpp>
 #include <Font/TextRenderer.hpp>
 
-enum class AppState { MENU, PLAYING, PAUSE, GAME_OVER };
+enum class AppState { PLAYING, GAME_OVER };
 
 /** @brief Top-level application: owns all subsystems and drives the main loop. */
 class App {
@@ -50,18 +53,19 @@ class App {
 		std::optional<ChunkManager> chunkManager;
 		TextRenderer textRenderer;
 		FontManager fontManager;
-		AppState state = AppState::MENU;
+		AppState state = AppState::PLAYING;
 		UIRenderer uiRenderer;
+		std::vector<RippleDrop> ripples;
 		int screenW;
 		int screenH;
-		float prevMouseU = 0;
-		float prevMouseV = 0;
+		float prevMouseU = 0.0f;
+		float prevMouseV = 0.0f;
 		float elapsedTime = 0.0f;
-		float rippleStrength = 0.0f;
-		float rippleTime = 0.0f;
-		float rippleCenterU = 0.5f;
-		float rippleCenterV = 0.5f;
+		float lastDropTime = 0.0f;
+		int selectedOption = 0;
 		int lanePosition = 1;
+		std::stack<MenuScreen*> menus;
+		RenderContext menuContext;
 		/** @brief Polls and dispatches SDL events to input subsystems. */
 		void processEvents();
 		/** @brief Updates game state (camera, animations, transforms) for the current frame. */

@@ -15,5 +15,8 @@ void main() {
     vec3 sample = texture(fontTex, uv).rgb;
     float dist = median(sample.r, sample.g, sample.b);
     float alpha = smoothstep(0.5 - 0.005, 0.5 + 0.005, dist); //smoothstep for antialising
-    fragColor = vec4(textColor, alpha);
+    float outline = smoothstep(0.49 - 0.005, 0.49 + 0.005, dist);
+    vec4 letter = vec4(textColor, alpha);
+    vec4 border = vec4(0.0, 0.0, 0.0, outline);
+    fragColor = mix(border, letter, alpha);
 }

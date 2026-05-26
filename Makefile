@@ -6,6 +6,11 @@ ifdef DEBUG
 CXXFLAGS += -DDEBUG_WHITE
 endif
 
+ifdef ASAN
+CXXFLAGS += -fsanitize=address,undefined -fno-omit-frame-pointer
+LDFLAGS  += -fsanitize=address,undefined -no-pie
+endif
+
 LDFLAGS = $(shell sdl2-config --libs) -lGL -lz -lpng -ljpeg -fPIE
 
 SRCS =	srcs/main.cpp \
@@ -38,6 +43,10 @@ SRCS =	srcs/main.cpp \
 		srcs/Font/FontManager.cpp \
 		srcs/Font/TextRenderer.cpp \
 		srcs/UI/UIRenderer.cpp \
+		srcs/UI/MainMenu.cpp \
+		srcs/UI/OptionsMenu.cpp \
+		srcs/UI/PauseMenu.cpp \
+		srcs/UI/SkinMenu.cpp \
 		loader/src/glad.c \
 
 OBJ_DIR = obj
@@ -56,7 +65,7 @@ $(OBJ_DIR)/%.o: %.cpp
 
 $(OBJ_DIR)/%.o: %.c
 	mkdir -p $(dir $@)
-	cc -Wall -Wextra -Werror -Iincludes -Iloader -g3 -MMD -MP -c $< -o  $@ -fPIC
+	cc -Wall -Wextra -Werror -Iincludes -Iloader -g3 -MMD -MP -c $< -o  $@ -fPIC $(if $(ASAN),-fsanitize=address -fsanitize=undefined)
 
 -include $(OBJS:.o=.d)
 

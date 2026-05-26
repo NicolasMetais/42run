@@ -1,124 +1,25 @@
 #include <App.hpp>
-
-// Affichage d'un Vector<float> (supposé en 3D)
-void printVector(const Vector<float>& v, const std::string& name)
-{
-	if (v.size() == 3) {
-		std::cout << name << ": ("
-				<< v.x() << ", "
-				<< v.y() << ", "
-				<< v.z() << ")\n";
-	}
-	else if (v.size() == 2) {
-		std::cout << name << ": ("
-				<< v.x() << ", "
-				<< v.y() << ")\n";
-	} else if (v.size() == 4) {
-		std::cout << name << ": ("
-				<< v.x() << ", "
-				<< v.y() << ", "
-				<< v.z() <<  ", "
-                << v.w() << ")\n";
-	}
-}
-
-// Affichage d'un Vertex
-void printVertex(const Vertex& v)
-{
-    std::cout << "Vertex:\n";
-
-    printVector(v.position, "  position");
-    printVector(v.normal, "  normal");
-    std::cout << "tangent.size() = " << v.tangent.size() << std::endl;
-    printVector(v.tangent, "  tangent");
-
-    // UVs
-    for (size_t i = 0; i < v.uv.size(); ++i)
-    {
-        printVector(v.uv[i], "  uv[" + std::to_string(i) + "]");
-    }
-
-    // Couleurs
-    std::cout << "  color: ";
-    for (float c : v.color)
-    {
-        std::cout << c << " ";
-    }
-    std::cout << "\n";
-
-    // Joints
-    std::cout << "  joints: ";
-    for (int j : v.joints)
-    {
-        std::cout << j << " ";
-    }
-    std::cout << "\n";
-
-    // Weights
-    std::cout << "  weights: ";
-    for (float w : v.weights)
-    {
-        std::cout << w << " ";
-    }
-    std::cout << "\n";
-}
-
-
-// Affichage d'un SubMesh
-void printSubMesh(const SubMesh& sm)
-{
-    std::cout << "SubMesh:\n";
-    std::cout << "  VAO: " << sm.VAO << "\n";
-    std::cout << "  VBO: " << sm.VBO << "\n";
-    std::cout << "  EBO: " << sm.EBO << "\n";
-    std::cout << "  material ptr: " << sm.materialIndex << "\n";
-
-    std::cout << "  Vertices count: " << sm.vertices.size() << "\n";
-    for (size_t i = 0; i < sm.vertices.size(); ++i)
-    {
-        std::cout << " Vertex[" << i << "]\n";
-        printVertex(sm.vertices[i]);
-    }
-
-    std::cout << "  Indices: ";
-    for (size_t i = 0; i < sm.indices.size(); ++i)
-    {
-        std::cout << sm.indices[i] << " ";
-    }
-    std::cout << "\n";
-}
-
-// Affichage d'un MeshData
-void printMeshData(const MeshData& mesh)
-{
-    std::cout << "MeshData:\n";
-
-    printVector(mesh.min, "  min");
-    printVector(mesh.max, "  max");
-    printVector(mesh.center, "  center");
-
-    std::cout << "  radius: " << mesh.radius << "\n";
-
-    std::cout << "SubMeshes count: " << mesh.submeshes.size() << "\n";
-    for (size_t i = 0; i < mesh.submeshes.size(); ++i)
-    {
-        std::cout << "\nSubMesh[" << i << "]\n";
-        printSubMesh(mesh.submeshes[i]);
-    }
-}
+#include <algorithm>
 
 App::App(int width, int height) 
         : window(width, height), renderer(), mesh(), camera(static_cast<float>(width), static_cast<float>(height)
         , Vector<float>{0, 1, 3}, Vector<float>{0,0,0}, Vector<float>{0,1,0}), running(true)
-        , modelLoader(renderer, textureManager), textRenderer(textureManager, width, height), uiRenderer(textureManager, width, height), screenW(width), screenH(height) {
+        , modelLoader(renderer, textureManager), textRenderer(textureManager, width, height)
+        , uiRenderer(textureManager, width, height), screenW(width), screenH(height)
+        , menuContext(textRenderer, fontManager, uiRenderer, screenW, screenH) {
     this->skybox.generateIrradianceMap();
     this->skybox.generatePrefilterMap();
 
+    scenes.push_back(GameScene::fromJson("resources/levels/menu.json", modelLoader));
     scenes.push_back(GameScene::fromJson("resources/levels/level1.json", modelLoader));
     activeScene = &scenes[0];
     chunkManager.emplace(*activeScene, modelLoader, 3, 7.0f, 5.0f, "resources/TwoSidedPlane.gltf", std::vector<std::string>{"resources/DamagedHelmet.gltf"}, [this]() { this->running = false; });
     activeScene->loadPlayer("resources/player.json", modelLoader);
     fontManager.load(this->textureManager, "resources/Roboto.json", "Roboto");
+    menus.push(new MainMenu(
+        [this]() { menus.pop(); },
+        [this]() { std::cerr << "running=false depuis App.cpp:21" << std::endl; running = false;}
+    ));
 	// this->transform.setScale(1.0f);
 	// Vector<float> cent(3);
 	// cent = (data.max + data.min) * 0.5f;
@@ -129,7 +30,7 @@ App::~App(){};
 
 void App::update() {
     this->elapsedTime += this->deltaTime;
-    if (state == AppState::PLAYING) {
+    if (menus.empty() && state == AppState::PLAYING) {
         chunkManager->update(deltaTime);
         if (activeScene->playerId != UINT32_MAX) {
             auto& rb = activeScene->rigidbodies[activeScene->playerId];
@@ -162,7 +63,10 @@ void App::processEvents() {
 	while (SDL_PollEvent(&e)) {
 		event(e, this->camera, this->running);
 		mouse.processEvent(e);
-		keyboard.processEvent(e, this->running, this->camera, this->fps, this->mouselock);
+        if (!menus.empty())
+		    keyboard.processMenuEvent(e, this->running);
+        else
+		    keyboard.processEvent(e, this->running, this->camera, this->fps, this->mouselock);
 		// if (e.type == SDL_KEYDOWN) {
 		// 	SDL_Keycode sym = e.key.keysym.sym;
 		// 	SDL_Scancode sc  = e.key.keysym.scancode;
@@ -171,7 +75,7 @@ void App::processEvents() {
 		// 	if (sc == SDL_SCANCODE_3 || sym == SDLK_3 || sym == SDLK_KP_3) animManager.setAnimation(2);
 		// }
 	}
-	mouse.applyRotation(this->transform, this->camera); //mouse rotation
+	// mouse.applyRotation(this->transform, this->camera); //mouse rotation
 	keyboard.applyMovement(this->camera, this->transform, this->deltaTime); //keyboard movement
 };
 
@@ -194,30 +98,22 @@ void App::renderNode(LoadedModel& lm, int nodeIdx, const Matrix<float>& parentWo
 
 void App::render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    if (state == AppState::MENU) {
+    Matrix<float> view = camera.buildView();
+    Matrix<float> projection = camera.buildProjection();
+    if (!menus.empty()) {
         int mX, mY;
         SDL_GetMouseState(&mX, &mY);
         float mouseU = (float)mX / this->screenW;
         float mouseV = (float)mY / this->screenH;
-        float speed = sqrt(pow(mouseU - prevMouseU, 2.0f) + pow(mouseV - prevMouseV, 2.0f));
-        speed = fmin(speed * 100.0f, 1.0f);
-        if (speed > 0.01f) {
-            rippleStrength = 1.0f;
-            rippleTime = 0.0f;
-            rippleCenterU = mouseU;
-            rippleCenterV = mouseV;
-        }
-        rippleTime += deltaTime;
-        rippleStrength -= deltaTime * 0.8f;
-        rippleStrength = fmax(rippleStrength, 0.0f);
-        prevMouseU = mouseU;
-        prevMouseV = mouseV;
-        uiRenderer.drawWaterBackground(textureManager.getOrLoad("TwoSidedPlane_BaseColor.png"), rippleCenterU, rippleCenterV, elapsedTime, rippleStrength, rippleTime);
+        (void)mouseU;
+        (void)mouseV;
+        camera.rotateH(deltaTime * 10.0f);
+        skybox.draw(camera.buildViewNoTranslation(), projection);
+        
+            menus.top()->update(keyboard, menus);
+        if (!menus.empty())
+            menus.top()->draw(menuContext);
     } else if (state == AppState::PLAYING) {
-
-        Matrix<float> view = camera.buildView();
-        Matrix<float> projection = camera.buildProjection();
-
         for (auto& [id, render] : activeScene->renders) {
             LoadedModel& lm = *render.model;
             const Scene& scene = lm.gltf.scenes[lm.gltf.defaultScene];
@@ -235,17 +131,14 @@ void App::run(){
     SDL_GL_SetSwapInterval(0);
     timer.tick(); // discard loading time
 
-    int frameCount = 0;
     while(this->running)
     {
         this->deltaTime = timer.tick();
-        if (this->deltaTime > 0.1f) this->deltaTime = 0.1f; // clamp: évite les sauts physiques si freeze
+        if (this->deltaTime > 0.1f) this->deltaTime = 0.1f;
         processEvents();
         update();
         render();
         FPScalculator();
-        
-        frameCount++;
     }
     for (auto& [id, render] : activeScene->renders)
         for (auto& mesh : render.model->meshes)

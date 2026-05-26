@@ -20,6 +20,7 @@ class Keyboard {
 		 * @param lockCam Toggled on mouse lock/unlock key press.
 		 */
 		void processEvent(SDL_Event& e, bool& running, Camera& cam, float& fps, bool& lockCam);
+		void processMenuEvent(SDL_Event& e, bool& running);
 		/** @brief Applies camera movement from WASD/Shift/Ctrl keys. */
 		void applyMovement(Camera& camera, Transform& transform, float deltaTime);
 
@@ -28,4 +29,7 @@ class Keyboard {
 		bool isForward() const;
 		bool isBack()    const;
 		bool isJump()    const;
+		bool consumeMenuUp();
+		bool consumeMenuDown();
+		bool consumeMenuConfirm();
 };

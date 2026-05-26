@@ -74,6 +74,8 @@ class Camera {
 
 		void follow(const Vector<float>& playerPos);
 
+		void rotateH(float delta) { angleH += delta; cameraUpdate(); };
+
 		Vector<float> getMousePos() const { return this->mousePos; };
 		Vector<float> getCameraPos() const { return this->cameraPos; };
 		const Vector<float>& getTarget() const { return this->target; };

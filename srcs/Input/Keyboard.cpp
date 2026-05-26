@@ -11,6 +11,31 @@
 #define PLAYER_FORWARD  0x100
 #define PLAYER_BACK     0x200
 #define PLAYER_JUMP     0x400
+#define MENU_UP         0x800
+#define MENU_DOWN       0x1000
+#define MENU_CONFIRM    0x2000
+
+void Keyboard::processMenuEvent(SDL_Event& e, bool& running) {
+    if (e.type != SDL_KEYDOWN && e.type != SDL_KEYUP) return;
+
+    bool pressed = (e.type == SDL_KEYDOWN);
+    SDL_Scancode sc  = e.key.keysym.scancode;
+
+    switch (sc) {
+        case SDL_SCANCODE_UP:
+            pressed ? moveFlags |= MENU_UP    : moveFlags &= ~MENU_UP; break;
+        case SDL_SCANCODE_DOWN:
+            pressed ? moveFlags |= MENU_DOWN    : moveFlags &= ~MENU_DOWN; break;
+        case SDL_SCANCODE_RETURN:
+            pressed ? moveFlags |= MENU_CONFIRM    : moveFlags &= ~MENU_CONFIRM;    break;
+        case SDL_SCANCODE_KP_ENTER:
+            pressed ? moveFlags |= MENU_CONFIRM    : moveFlags &= ~MENU_CONFIRM;    break;
+        case SDL_SCANCODE_ESCAPE:
+            if (pressed) { std::cerr << "running=false depuis Keyboard.cpp:34" << std::endl; running = false; } break;
+        default: break;
+    }
+};
+
 
 void Keyboard::processEvent(SDL_Event& e, bool& running, Camera& cam, float& fps, bool& lockCam) {
     if (e.type != SDL_KEYDOWN && e.type != SDL_KEYUP) return;
@@ -25,7 +50,7 @@ void Keyboard::processEvent(SDL_Event& e, bool& running, Camera& cam, float& fps
         case SDL_SCANCODE_MINUS:  case SDL_SCANCODE_KP_MINUS:
             if (pressed) { cam.speedDown(); } break;
         case SDL_SCANCODE_ESCAPE:
-            if (pressed) { running = false; } break;
+            if (pressed) { std::cerr << "running=false depuis Keyboard.cpp:53" << std::endl; running = false; } break;
         case SDL_SCANCODE_LSHIFT:
             pressed ? moveFlags |= KEY_CAM_UP   : moveFlags &= ~KEY_CAM_UP;   break;
         case SDL_SCANCODE_LCTRL:
@@ -78,3 +103,23 @@ bool Keyboard::consumeRight() {
 bool Keyboard::isForward() const { return moveFlags & PLAYER_FORWARD; }
 bool Keyboard::isBack()    const { return moveFlags & PLAYER_BACK; }
 bool Keyboard::isJump()    const { return moveFlags & PLAYER_JUMP; }
+
+bool Keyboard::consumeMenuUp() {
+    bool v = moveFlags & MENU_UP;
+    moveFlags &= ~MENU_UP;
+    return v; 
+}
+
+bool Keyboard::consumeMenuDown() {
+    bool v = moveFlags & MENU_DOWN;
+    moveFlags &= ~MENU_DOWN;
+    return v;
+}
+
+bool Keyboard::consumeMenuConfirm() {
+    bool v = moveFlags & MENU_CONFIRM;
+    moveFlags &= ~MENU_CONFIRM;
+    return v;
+}
+
+

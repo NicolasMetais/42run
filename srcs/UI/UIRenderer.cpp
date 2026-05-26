@@ -145,7 +145,7 @@ void UIRenderer::drawUIComponent(float x, float y, float z, float width, float h
     glBindVertexArray(0);
 };
 
-void UIRenderer::drawWaterBackground(Texture& tex, float mouseX, float mouseY, float time, float mouseSpeed, float rippleTime) {
+void UIRenderer::drawWaterBackground(Texture& tex, float time, const std::vector<RippleDrop>& drops) {
     glActiveTexture(GL_TEXTURE0);
     water.bind();
     float proj[16] = {
@@ -155,10 +155,17 @@ void UIRenderer::drawWaterBackground(Texture& tex, float mouseX, float mouseY, f
        -1,            1,             0, 1
     };
     water.setMatrix4_false("projection", proj);
-    water.setFloat("mouseSpeed", mouseSpeed);
     water.setFloat("time", time);
-    water.setFloat("rippleTime", rippleTime);
-    water.setVec2("mouse", mouseX, mouseY);
+    water.setInt("bottomTex", 0);
+    int count = std::min((int)drops.size(), 8);
+    float dropData[24] = {};
+    for (int i = 0; i < count; i++) {
+        dropData[i*3]   = drops[i].u;
+        dropData[i*3+1] = drops[i].v;
+        dropData[i*3+2] = drops[i].age;
+    }
+    glUniform3fv(water.getUniformLocation("drops"), count, dropData);
+    glUniform1i(water.getUniformLocation("dropCount"), count);
     tex.bind();
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glBindVertexArray(this->VAO);
@@ -212,3 +219,12 @@ void UIRenderer::drawWaterBackground(Texture& tex, float mouseX, float mouseY, f
     glBindVertexArray(0);
 };
 
+void UIRenderer::drawSliderComponent(float x, float y, float z, float value, float width, float height, float r, float g, float b) {
+    drawUIComponent(x, y, z, width, height, 0.3f, 0.3f, 0.3f);
+    drawUIComponent(x, y, z, width * value, height, r, g, b);
+    drawUIComponent(x + width *  value - height * 0.5f, y, z, height, height, 1,1,1);
+};
+
+void UIRenderer::drawCheckboxComponent(float x, float y, float z, float width, float height, float r, float g, float b) {
+    drawUIComponent(x, y, z, width, height, r, g, b);
+};
