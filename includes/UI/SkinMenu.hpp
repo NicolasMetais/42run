@@ -2,12 +2,12 @@
 #include <UI/MenuScreen.hpp>
 #include <stack>
 
-
-class OptionsMenu : public MenuScreen {
+class SkinMenu : public MenuScreen {
     public:
         void update(Keyboard& kb, std::stack<MenuScreen*>& stack);
         void draw(RenderContext& tools);
     private:
         int selector = 0;
+
 };
 

@@ -13,12 +13,12 @@ App::App(int width, int height)
     scenes.push_back(GameScene::fromJson("resources/levels/menu.json", modelLoader));
     scenes.push_back(GameScene::fromJson("resources/levels/level1.json", modelLoader));
     activeScene = &scenes[0];
-    chunkManager.emplace(*activeScene, modelLoader, 3, 7.0f, 5.0f, "resources/TwoSidedPlane.gltf", std::vector<std::string>{"resources/DamagedHelmet.gltf"}, [this]() { this->running = false; });
+    chunkManager.emplace(*activeScene, modelLoader, 3, 7.0f, 5.0f, "resources/TwoSidedPlane.gltf", std::vector<std::string>{"resources/DamagedHelmet.gltf"}, [this]() { this->triggerGameOver(); } );
     activeScene->loadPlayer("resources/player.json", modelLoader);
     fontManager.load(this->textureManager, "resources/Roboto.json", "Roboto");
     menus.push(new MainMenu(
-        [this]() { menus.pop(); },
-        [this]() { std::cerr << "running=false depuis App.cpp:21" << std::endl; running = false;}
+        [this]() { menus.pop(); this->distance = 0.0f; },
+        [this]() { running = false;}
     ));
 	// this->transform.setScale(1.0f);
 	// Vector<float> cent(3);
@@ -31,6 +31,8 @@ App::~App(){};
 void App::update() {
     this->elapsedTime += this->deltaTime;
     if (menus.empty() && state == AppState::PLAYING) {
+        // dans update(), à la place de gametime :
+        distance += chunkManager->getRunspeed() * deltaTime;
         chunkManager->update(deltaTime);
         if (activeScene->playerId != UINT32_MAX) {
             auto& rb = activeScene->rigidbodies[activeScene->playerId];
@@ -122,7 +124,8 @@ void App::render() {
                 renderNode(lm, rootIdx, modelMat, view, projection);
         }
         skybox.draw(camera.buildViewNoTranslation(), projection);
-        textRenderer.drawText("Ceci est un compteur de metres", "Roboto", 20, 40, 32, fontManager.getFont("Roboto"));
+        std::string score = std::to_string((int)(distance));
+        textRenderer.drawText(score + " Meters", "Roboto", 20, 40, 32, fontManager.getFont("Roboto"));
     }
     SDL_GL_SwapWindow(window.getWin());
 };
@@ -148,3 +151,29 @@ void App::run(){
 void App::FPScalculator() {
 	this->fps = 1.0f / this->deltaTime;
 };
+
+void App::resetGame() {
+    this->lanePosition = 1;
+    distance = 0.0f;
+
+    activeScene->rigidbodies[activeScene->playerId].velocity = {0,0,0};
+    activeScene->transforms[activeScene->playerId].setPosition(0, 0, 0); //pour virer l'animation de transition
+
+
+    chunkManager.emplace(*activeScene, modelLoader, 3, 7.0f, 5.0f, "resources/TwoSidedPlane.gltf", std::vector<std::string>{"resources/DamagedHelmet.gltf"}, [this]() { this->triggerGameOver(); });
+};
+
+void App::triggerGameOver() {
+    menus.push(new GameOverMenu (
+        [this]() { resetGame(); },
+        [this]() {
+            while (!menus.empty())
+                menus.pop();
+            menus.push(new MainMenu(
+                [this]() { menus.pop(); },
+                [this]() { running = false;}
+            ));
+        }
+    ));
+};
+

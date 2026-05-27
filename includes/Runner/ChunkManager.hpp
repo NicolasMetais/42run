@@ -15,8 +15,13 @@ class ChunkManager {
         int laneNb;
         float chunkLength;
         float runSpeed;
+        int chunkCount = 0;
     public:
         ChunkManager(GameScene& scene, ModelLoader& loader, int laneNb, float chunkLength, float runSpeed, const std::string& floorMesh, const std::vector<std::string>& obstaclesMeshes, std::function<void()> func);
         void update(float deltaTime);
         void destroyChunk();
+        int getChunkCount() { return this->chunkCount; };
+        int getRunspeed() { return this->runSpeed; };
+        ~ChunkManager();
+
 };

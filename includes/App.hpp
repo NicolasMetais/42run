@@ -24,6 +24,7 @@
 #include <UI/UIRenderer.hpp>
 #include <Font/FontManager.hpp>
 #include <UI/MenuScreen.hpp>
+#include <UI/GameOverMenu.hpp>
 #include <UI/MainMenu.hpp>
 #include <Font/TextRenderer.hpp>
 
@@ -49,6 +50,7 @@ class App {
 		bool mouselock = true;
 		float fps;
 		float deltaTime;
+		float distance;
 		ModelLoader modelLoader;
 		std::optional<ChunkManager> chunkManager;
 		TextRenderer textRenderer;
@@ -89,4 +91,6 @@ class App {
 		void run();
 		/** @brief Computes and stores the current frames-per-second value. */
 		void FPScalculator();
+		void resetGame();
+		void triggerGameOver();
 };

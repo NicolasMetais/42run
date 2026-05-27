@@ -17,5 +17,7 @@ class ChunkGenerator {
         std::function<void()> triggerfunc;
     public:
         ChunkGenerator(const std::string& floorMesh, const std::vector<std::string>& obstacleMeshes, ModelLoader& loader, GameScene& scene, float chunkLength, std::function<void()> func);
-        Chunk generateNewChunk(float lastZpos);
+        Chunk generateNewChunk(float spawnPos);
+        Chunk generateEmptyChunk(float spawnPos);
+
 };

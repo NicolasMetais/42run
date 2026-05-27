@@ -3,11 +3,14 @@
 #include <stack>
 
 
-class OptionsMenu : public MenuScreen {
+class GameOverMenu : public MenuScreen {
     public:
         void update(Keyboard& kb, std::stack<MenuScreen*>& stack);
         void draw(RenderContext& tools);
+        GameOverMenu(std::function<void()> resetGame, std::function<void()> onMainMenu);
     private:
+        std::function<void()> resetGame;
+        std::function<void()> onMainMenu;
         int selector = 0;
 };
 

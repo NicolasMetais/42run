@@ -1,6 +1,7 @@
 #pragma once
 #include <UI/OptionsMenu.hpp>
 #include <UI/MenuScreen.hpp>
+#include <UI/SkinMenu.hpp>
 #include <stack>
 
 

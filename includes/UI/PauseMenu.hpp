@@ -3,7 +3,7 @@
 #include <stack>
 
 
-class OptionsMenu : public MenuScreen {
+class PauseMenu : public MenuScreen {
     public:
         void update(Keyboard& kb, std::stack<MenuScreen*>& stack);
         void draw(RenderContext& tools);
