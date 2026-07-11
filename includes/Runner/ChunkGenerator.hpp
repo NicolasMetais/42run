@@ -18,6 +18,8 @@ class ChunkGenerator {
     public:
         ChunkGenerator(const std::string& floorMesh, const std::vector<std::string>& obstacleMeshes, ModelLoader& loader, GameScene& scene, float chunkLength, std::function<void()> func);
         Chunk generateNewChunk(float spawnPos);
+        void screenGenerator(Chunk& newChunk, float x, float y, float z);
+        void ventsGenerator(Chunk& newChunk, float x, float y, float z);
         Chunk generateEmptyChunk(float spawnPos);
 
 };

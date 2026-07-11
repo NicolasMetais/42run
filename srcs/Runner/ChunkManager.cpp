@@ -4,7 +4,7 @@ ChunkManager::ChunkManager(GameScene& scene, ModelLoader& loader, int laneNb, fl
                 , const std::string& floorMesh, const std::vector<std::string>& obstaclesMeshes, std::function<void()> func)
                 : generator(floorMesh, obstaclesMeshes, loader, scene, chunkLength, func), scene(scene), laneNb(laneNb), chunkLength(chunkLength), runSpeed(runSpeed) {
                 ChunkQueue.push_back(generator.generateEmptyChunk(0));  
-                for (int i = 1; i < 10; ++i)
+                for (int i = 1; i < 100; ++i)
                         ChunkQueue.push_back(generator.generateNewChunk((i * chunkLength) * 2));
 };
 

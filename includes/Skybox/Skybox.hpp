@@ -7,14 +7,9 @@
 #include <Window.hpp>
 #include <Shader.hpp>
 #include <Texture/Texture.hpp>
+#include <Skybox/ParseHdr.hpp>
 #include <utils.hpp>
 #include <Camera.hpp>
-
-/** @brief One face of the skybox cubemap with its associated texture. */
-struct SkyboxFace {
-	std::string name;
-	Texture tex;
-};
 
 /** @brief HDR environment cubemap with irradiance and prefiltered specular maps for PBR. */
 class Skybox {
@@ -23,9 +18,9 @@ class Skybox {
 		GLuint cubeMaptexture;    ///< Main environment cubemap texture ID.
 		GLuint irradianceMapId;   ///< Diffuse irradiance cubemap for PBR ambient.
 		GLuint prefilterMapId;    ///< Prefiltered specular cubemap for PBR reflections.
-		std::vector<SkyboxFace> TextureList;
 		std::vector<float> skyboxVertices;
 		Shader shaders;
+		parseHdr hdr;
 	public:
 		Skybox();
 		/** @brief Renders the skybox cube using a view matrix with no translation. */

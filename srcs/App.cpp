@@ -13,8 +13,9 @@ App::App(int width, int height)
     scenes.push_back(GameScene::fromJson("resources/levels/menu.json", modelLoader));
     scenes.push_back(GameScene::fromJson("resources/levels/level1.json", modelLoader));
     activeScene = &scenes[0];
-    chunkManager.emplace(*activeScene, modelLoader, 3, 7.0f, 5.0f, "resources/TwoSidedPlane.gltf", std::vector<std::string>{"resources/DamagedHelmet.gltf"}, [this]() { this->triggerGameOver(); } );
+    chunkManager.emplace(*activeScene, modelLoader, Lane::COUNT, 7.0f, 5.0f, "resources/Chunk.gltf", std::vector<std::string>{"resources/Obstacles.gltf", "resources/screens.gltf"}, [this]() { this->triggerGameOver(); } );
     activeScene->loadPlayer("resources/player.json", modelLoader);
+    activeScene->transforms[activeScene->playerId].setPosition(Lane::centerX(lanePosition), 0, 0);
     fontManager.load(this->textureManager, "resources/Roboto.json", "Roboto");
     menus.push(new MainMenu(
         [this]() { menus.pop(); this->distance = 0.0f; },
@@ -39,12 +40,12 @@ void App::update() {
             constexpr float SPEED = 5.0f;
             rb.velocity.x() = 0.0f;
             rb.velocity.z() = 0.0f;
-            if (keyboard.consumeLeft() && lanePosition < 2 ) this->lanePosition++;
+            if (keyboard.consumeLeft() && lanePosition < Lane::COUNT - 1) this->lanePosition++;
             if (keyboard.consumeRight() && lanePosition > 0) this->lanePosition--;
             if (keyboard.isForward()) rb.velocity.z() =  SPEED;
             if (keyboard.isBack())    rb.velocity.z() = -SPEED;
             if (keyboard.isJump() && rb.onGround) rb.velocity.y() = 8.0f;
-            float targetX = (lanePosition - 1) * 4.0f;
+            float targetX = Lane::centerX(lanePosition);
             float currentX = activeScene->transforms[activeScene->playerId].getPosition().x();
             activeScene->transforms[activeScene->playerId].move({(targetX - currentX) * SPEED * deltaTime, 0, 0});
         }
@@ -82,7 +83,9 @@ void App::processEvents() {
 };
 
 void App::renderNode(LoadedModel& lm, int nodeIdx, const Matrix<float>& parentWorld,
-                     const Matrix<float>& view, const Matrix<float>& projection) {
+                     const Matrix<float>& view, const Matrix<float>& projection,
+                     const std::unordered_set<int>& hiddenNodes, RenderPass pass) {
+	if (hiddenNodes.count(nodeIdx)) return;
 	const Node& node = lm.gltf.nodes[nodeIdx];
 	Matrix<float> world = parentWorld * utils::nodeLocalMatrix(node);
 	Matrix<float> mvp = projection * view * world;
@@ -91,11 +94,11 @@ void App::renderNode(LoadedModel& lm, int nodeIdx, const Matrix<float>& parentWo
 		const std::vector<Matrix<float>>* jointMats = nullptr;
 		if (node.skin >= 0 && node.skin < (int)lm.jointMatrices.size())
 			jointMats = &lm.jointMatrices[node.skin];
-		renderer.rendering(mvp, lm.meshes[node.mesh], world, camera, skybox.getIrradianceMapId(), skybox.getPrefilterMapId(), jointMats);
+		renderer.rendering(mvp, lm.meshes[node.mesh], world, camera, skybox.getIrradianceMapId(), skybox.getPrefilterMapId(), jointMats, pass);
 	}
 
 	for (int child : node.children)
-		renderNode(lm, child, world, view, projection);
+		renderNode(lm, child, world, view, projection, hiddenNodes, pass);
 };
 
 void App::render() {
@@ -116,14 +119,36 @@ void App::render() {
         if (!menus.empty())
             menus.top()->draw(menuContext);
     } else if (state == AppState::PLAYING) {
-        for (auto& [id, render] : activeScene->renders) {
+        auto drawEntity = [&](EntityId id, RenderComponent& render, RenderPass pass) {
             LoadedModel& lm = *render.model;
             const Scene& scene = lm.gltf.scenes[lm.gltf.defaultScene];
             Matrix<float> modelMat = activeScene->transforms[id].getModelMatrix() * transform.getModelMatrix();
             for (int rootIdx : scene.rootNodes)
-                renderNode(lm, rootIdx, modelMat, view, projection);
-        }
+                renderNode(lm, rootIdx, modelMat, view, projection, render.hiddenNodes, pass);
+        };
+
+        // 1. opaques + MASK
+        renderer.beginOpaquePass();
+        for (auto& [id, render] : activeScene->renders)
+            drawEntity(id, render, RenderPass::Opaque);
+
+        // 2. skybox : remplit les pixels restants avant les transparents
         skybox.draw(camera.buildViewNoTranslation(), projection);
+
+        // 3. transparents (BLEND) : tries loin -> proche, profondeur gelee
+        std::vector<std::pair<float, EntityId>> byDistance;
+        Vector<float> camPos = camera.getCameraPos();
+        for (auto& [id, render] : activeScene->renders) {
+            Vector<float> d = activeScene->transforms[id].getPosition() - camPos;
+            byDistance.push_back({d.dot(d), id});
+        }
+        std::sort(byDistance.begin(), byDistance.end(),
+                  [](const auto& a, const auto& b) { return a.first > b.first; });
+        renderer.beginTransparentPass();
+        for (auto& [dist, id] : byDistance)
+            drawEntity(id, activeScene->renders[id], RenderPass::Transparent);
+        renderer.endTransparentPass();
+
         std::string score = std::to_string((int)(distance));
         textRenderer.drawText(score + " Meters", "Roboto", 20, 40, 32, fontManager.getFont("Roboto"));
     }
@@ -153,14 +178,14 @@ void App::FPScalculator() {
 };
 
 void App::resetGame() {
-    this->lanePosition = 1;
+    this->lanePosition = Lane::COUNT / 2;
     distance = 0.0f;
 
     activeScene->rigidbodies[activeScene->playerId].velocity = {0,0,0};
-    activeScene->transforms[activeScene->playerId].setPosition(0, 0, 0); //pour virer l'animation de transition
+    activeScene->transforms[activeScene->playerId].setPosition(Lane::centerX(lanePosition), 0, 0); //pour virer l'animation de transition
 
 
-    chunkManager.emplace(*activeScene, modelLoader, 3, 7.0f, 5.0f, "resources/TwoSidedPlane.gltf", std::vector<std::string>{"resources/DamagedHelmet.gltf"}, [this]() { this->triggerGameOver(); });
+    chunkManager.emplace(*activeScene, modelLoader, Lane::COUNT, 7.0f, 5.0f, "resources/Chunk.gltf", std::vector<std::string>{"resources/Obstacles.gltf", "resources/screens.gltf"}, [this]() { this->triggerGameOver(); });
 };
 
 void App::triggerGameOver() {

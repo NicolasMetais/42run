@@ -48,6 +48,7 @@ SRCS =	srcs/main.cpp \
 		srcs/UI/PauseMenu.cpp \
 		srcs/UI/SkinMenu.cpp \
 		srcs/UI/GameOverMenu.cpp \
+		srcs/Skybox/ParseHdr.cpp \
 		loader/src/glad.c \
 
 OBJ_DIR = obj

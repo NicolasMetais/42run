@@ -33,6 +33,8 @@ uniform vec3  lightDir;
 uniform float normalScale;
 uniform vec3  viewPos;
 uniform bool  debugMode;
+uniform int alphaMode;
+uniform float alphaCutOff;
 
 // ─── Normal ───────────────────────────────────────────────────────────────────
 
@@ -132,7 +134,8 @@ void main()
 
 	vec3 N = getNormal(tbn);
 	vec4 baseColor = getBaseColor();
-
+	if (alphaMode == 1 && baseColor.a < alphaCutOff)
+		discard;
 	float metallic, roughness, ao;
 	getMaterial(metallic, roughness, ao);
 

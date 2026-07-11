@@ -14,7 +14,7 @@ Renderer::Renderer() : gltfShader("srcs/Renderer/gltf.vs", "srcs/Renderer/gltf.f
 	glDepthFunc(GL_LESS);
 	glDepthMask(GL_TRUE);
 
-	// glEnable(GL_MULTISAMPLE); //Antialiasing mais faut coder des trucs
+	glEnable(GL_MULTISAMPLE); // MSAA — les samples sont demandes dans Window (SDL_GL_MULTISAMPLESAMPLES)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -267,10 +267,13 @@ void Renderer::draw(SubMesh& mesh, const Mat* mat) {
     glBindVertexArray(0);
 };
 
-void Renderer::rendering(Matrix<float>& mvp, MeshData& obj, Matrix<float> model, Camera& camera, GLuint skyboxId, GLuint prefilterMapId, const std::vector<Matrix<float>>* jointMats) {
+void Renderer::rendering(Matrix<float>& mvp, MeshData& obj, Matrix<float> model, Camera& camera, GLuint skyboxId, GLuint prefilterMapId, const std::vector<Matrix<float>>* jointMats, RenderPass pass) {
 	for (auto& mesh : obj.submeshes) {
 		const Mat* mat = (mesh.materialIndex >= 0 && mesh.materialIndex < (int)obj.materials.size())
 			? &obj.materials[mesh.materialIndex] : nullptr;
+
+		bool isBlend = mat && mat->alphaMode == "BLEND";
+		if ((pass == RenderPass::Transparent) != isBlend) continue;
 
 		Shader& shader = (mat && mat->type == MaterialType::PBR) ? this->gltfShader : this->objShader;
 		shader.bind();
@@ -291,6 +294,20 @@ void Renderer::rendering(Matrix<float>& mvp, MeshData& obj, Matrix<float> model,
 
 		draw(mesh, mat);
 	}
+};
+
+void Renderer::beginOpaquePass() {
+	glDisable(GL_BLEND);
+};
+
+void Renderer::beginTransparentPass() {
+	glEnable(GL_BLEND);
+	glDepthMask(GL_FALSE);
+};
+
+void Renderer::endTransparentPass() {
+	// le blend reste ON : TextRenderer/UIRenderer et la skybox comptent dessus
+	glDepthMask(GL_TRUE);
 };
 
 void Renderer::cleanup(MeshData& obj) {

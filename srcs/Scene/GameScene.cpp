@@ -7,8 +7,10 @@ void GameScene::collectBoxes(
     const std::vector<MeshData>& meshes,
     int nodeIdx,
     const Matrix<float>& parentWorld,
-    ColliderComponent& col)
+    ColliderComponent& col,
+    const std::unordered_set<int>& hiddenNodes)
 {
+    if (hiddenNodes.count(nodeIdx)) return;
     const Node& node = gltf.nodes[nodeIdx];
     Matrix<float> world = parentWorld * utils::nodeLocalMatrix(node);
 
@@ -39,15 +41,15 @@ void GameScene::collectBoxes(
     }
 
     for (int child : node.children)
-        collectBoxes(gltf, meshes, child, world, col);
+        collectBoxes(gltf, meshes, child, world, col, hiddenNodes);
 }
 
-ColliderComponent GameScene::colliderFromModel(const LoadedModel& lm) {
+ColliderComponent GameScene::colliderFromModel(const LoadedModel& lm, const std::unordered_set<int>& hiddenNodes) {
     ColliderComponent col;
     Matrix<float> root = identity<float>(4);
     const Scene& scene = lm.gltf.scenes[lm.gltf.defaultScene];
     for (int rootIdx : scene.rootNodes)
-        collectBoxes(lm.gltf, lm.meshes, rootIdx, root, col);
+        collectBoxes(lm.gltf, lm.meshes, rootIdx, root, col, hiddenNodes);
     return col;
 }
 

@@ -28,8 +28,8 @@ struct GameScene {
     EntityId createEntity() { return nextId++; }
     void destroyEntity(EntityId id);
 
-    ColliderComponent colliderFromModel(const LoadedModel& lm);
-void collectBoxes(const GltfModel& gltf, const std::vector<MeshData>& meshes, int nodeIdx, const Matrix<float>& parentWorld, ColliderComponent& col);
+    ColliderComponent colliderFromModel(const LoadedModel& lm, const std::unordered_set<int>& hiddenNodes = {});
+void collectBoxes(const GltfModel& gltf, const std::vector<MeshData>& meshes, int nodeIdx, const Matrix<float>& parentWorld, ColliderComponent& col, const std::unordered_set<int>& hiddenNodes);
 
     static GameScene fromJson(const std::string& path, ModelLoader& loader);
     void loadPlayer(const std::string& path, ModelLoader& loader);

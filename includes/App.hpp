@@ -65,7 +65,7 @@ class App {
 		float elapsedTime = 0.0f;
 		float lastDropTime = 0.0f;
 		int selectedOption = 0;
-		int lanePosition = 1;
+		int lanePosition = Lane::COUNT / 2;
 		std::stack<MenuScreen*> menus;
 		RenderContext menuContext;
 		/** @brief Polls and dispatches SDL events to input subsystems. */
@@ -82,7 +82,7 @@ class App {
 		 * @param view        View matrix from the camera.
 		 * @param projection  Projection matrix.
 		 */
-		void renderNode(LoadedModel& lm, int nodeIdx, const Matrix<float>& parentWorld, const Matrix<float>& view, const Matrix<float>& projection);
+		void renderNode(LoadedModel& lm, int nodeIdx, const Matrix<float>& parentWorld, const Matrix<float>& view, const Matrix<float>& projection, const std::unordered_set<int>& hiddenNodes, RenderPass pass);
 	public:
 		/** @brief Initialises the window, OpenGL context, and all subsystems at the given resolution. */
 		App(int width, int height);

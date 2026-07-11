@@ -25,6 +25,10 @@ struct VertexLayout {
 	GLsizei stride;
 };
 
+/** @brief Rendu en deux passes : les opaques/MASK d'abord, puis les materiaux
+ *  BLEND apres la skybox, tries loin -> proche, sans ecriture de profondeur. */
+enum class RenderPass { Opaque, Transparent };
+
 /** @brief Issues OpenGL draw calls, manages shaders, and binds material uniforms. */
 class Renderer {
 	private:
@@ -49,8 +53,15 @@ class Renderer {
 		 * @param skyboxId      Cubemap texture ID for reflections.
 		 * @param prefilterMapId Prefiltered environment map for PBR specular.
 		 * @param jointMats     Optional joint matrices for skeletal animation.
+		 * @param pass          Passe courante : seuls les submeshes du bon alphaMode sont dessines.
 		 */
-		void rendering(Matrix<float>& mvp, MeshData& obj, Matrix<float> model, Camera& camera, GLuint skyboxId, GLuint prefilterMapId, const std::vector<Matrix<float>>* jointMats = nullptr);
+		void rendering(Matrix<float>& mvp, MeshData& obj, Matrix<float> model, Camera& camera, GLuint skyboxId, GLuint prefilterMapId, const std::vector<Matrix<float>>* jointMats = nullptr, RenderPass pass = RenderPass::Opaque);
+		/** @brief Coupe le blending pour la passe opaque (les pixels MASK restent pleins). */
+		void beginOpaquePass();
+		/** @brief Active le blending et gele l'ecriture de profondeur pour les transparents. */
+		void beginTransparentPass();
+		/** @brief Retablit l'ecriture de profondeur. Le blend reste ON : l'UI et la skybox comptent dessus. */
+		void endTransparentPass();
 		/** @brief Uploads vertex data to the GPU and sets up the VAO for a submesh. */
 		void InitMesh(SubMesh& subMesh);
 		/** @brief Deletes all OpenGL buffers and textures owned by @p obj. */
