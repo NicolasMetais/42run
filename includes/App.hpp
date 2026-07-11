@@ -49,6 +49,10 @@ class App {
 		bool running;
 		bool mouselock = true;
 		float fps;
+		bool showFps = false;
+		float fpsAccumTime = 0.0f;   ///< fenetre de lissage du compteur affiche
+		int fpsAccumFrames = 0;
+		int fpsDisplay = 0;
 		float deltaTime;
 		float distance;
 		ModelLoader modelLoader;

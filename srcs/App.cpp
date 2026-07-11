@@ -13,7 +13,7 @@ App::App(int width, int height)
     scenes.push_back(GameScene::fromJson("resources/levels/menu.json", modelLoader));
     scenes.push_back(GameScene::fromJson("resources/levels/level1.json", modelLoader));
     activeScene = &scenes[0];
-    chunkManager.emplace(*activeScene, modelLoader, Lane::COUNT, 7.0f, 5.0f, "resources/Chunk.gltf", std::vector<std::string>{"resources/Obstacles.gltf", "resources/screens.gltf"}, [this]() { this->triggerGameOver(); } );
+    chunkManager.emplace(*activeScene, modelLoader, Lane::COUNT, 7.0f, 5.0f, "resources/Chunk.gltf", std::vector<std::string>{"resources/Obstacles.gltf", "resources/screens.gltf", "resources/RandomVents.gltf"}, [this]() { this->triggerGameOver(); } );
     activeScene->loadPlayer("resources/player.json", modelLoader);
     activeScene->transforms[activeScene->playerId].setPosition(Lane::centerX(lanePosition), 0, 0);
     fontManager.load(this->textureManager, "resources/Roboto.json", "Roboto");
@@ -66,6 +66,9 @@ void App::processEvents() {
 	while (SDL_PollEvent(&e)) {
 		event(e, this->camera, this->running);
 		mouse.processEvent(e);
+		if (e.type == SDL_KEYDOWN && e.key.keysym.scancode == SDL_SCANCODE_F
+			&& (e.key.keysym.mod & KMOD_CTRL))
+			showFps = !showFps;
         if (!menus.empty())
 		    keyboard.processMenuEvent(e, this->running);
         else
@@ -152,6 +155,8 @@ void App::render() {
         std::string score = std::to_string((int)(distance));
         textRenderer.drawText(score + " Meters", "Roboto", 20, 40, 32, fontManager.getFont("Roboto"));
     }
+    if (showFps)
+        textRenderer.drawText(std::to_string(fpsDisplay) + " FPS", "Roboto", screenW - 160, 40, 32, fontManager.getFont("Roboto"));
     SDL_GL_SwapWindow(window.getWin());
 };
 
@@ -175,6 +180,14 @@ void App::run(){
 
 void App::FPScalculator() {
 	this->fps = 1.0f / this->deltaTime;
+	// valeur affichee : moyenne sur 0.5 s, sinon le chiffre vibre trop pour etre lu
+	fpsAccumTime += deltaTime;
+	fpsAccumFrames++;
+	if (fpsAccumTime >= 0.5f) {
+		fpsDisplay = (int)(fpsAccumFrames / fpsAccumTime);
+		fpsAccumTime = 0.0f;
+		fpsAccumFrames = 0;
+	}
 };
 
 void App::resetGame() {
@@ -185,7 +198,7 @@ void App::resetGame() {
     activeScene->transforms[activeScene->playerId].setPosition(Lane::centerX(lanePosition), 0, 0); //pour virer l'animation de transition
 
 
-    chunkManager.emplace(*activeScene, modelLoader, Lane::COUNT, 7.0f, 5.0f, "resources/Chunk.gltf", std::vector<std::string>{"resources/Obstacles.gltf", "resources/screens.gltf"}, [this]() { this->triggerGameOver(); });
+    chunkManager.emplace(*activeScene, modelLoader, Lane::COUNT, 7.0f, 5.0f, "resources/Chunk.gltf", std::vector<std::string>{"resources/Obstacles.gltf", "resources/screens.gltf", "resources/RandomVents.gltf"}, [this]() { this->triggerGameOver(); });
 };
 
 void App::triggerGameOver() {
