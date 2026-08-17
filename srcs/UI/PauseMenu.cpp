@@ -19,7 +19,7 @@ void PauseMenu::update(Keyboard& kb, std::stack<MenuScreen*>& stack) {
 
 void PauseMenu::draw(RenderContext& tools) {
     float positions[] = { tools.screenH * 0.4f, tools.screenH * 0.5f };
-    tools.textRenderer.drawText(">", "Roboto", tools.screenW * 0.40f, positions[selector], tools.screenH * 0.04f, tools.fontManager.getFont("Roboto"));
-    tools.textRenderer.drawText("Options", "Roboto", tools.screenW * 0.47f, tools.screenH * 0.4f, tools.screenH * 0.04f, tools.fontManager.getFont("Roboto"));
-    tools.textRenderer.drawText("Quit", "Roboto", tools.screenW * 0.47f, tools.screenH * 0.5f, tools.screenH * 0.04f, tools.fontManager.getFont("Roboto"));
+    tools.textRenderer.drawText(">", "CalliCat", tools.screenW * 0.40f, positions[selector], tools.screenH * 0.04f, tools.fontManager.getFont("CalliCat"));
+    tools.textRenderer.drawText("Options", "CalliCat", tools.screenW * 0.47f, tools.screenH * 0.4f, tools.screenH * 0.04f, tools.fontManager.getFont("CalliCat"));
+    tools.textRenderer.drawText("Quit", "CalliCat", tools.screenW * 0.47f, tools.screenH * 0.5f, tools.screenH * 0.04f, tools.fontManager.getFont("CalliCat"));
 };

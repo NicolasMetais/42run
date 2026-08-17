@@ -62,39 +62,46 @@ void Shader::unbind() const {
     glUseProgram(0);
 }
 
-//A FAIRE: unordered map de uniformLocation pour opti les appel toutes les frame.
+GLint Shader::cachedLocation(const std::string& name) const {
+    auto it = uniformCache.find(name);
+    if (it != uniformCache.end())
+        return it->second;
+    GLint loc = glGetUniformLocation(this->id, name.c_str());
+    uniformCache.emplace(name, loc);
+    return loc;
+}
 
 void Shader::setMatrix4_false(const std::string& name, const float* value) const {
-    glUniformMatrix4fv( glGetUniformLocation(this->id, name.c_str()), 1, GL_FALSE, value);
+    glUniformMatrix4fv(cachedLocation(name), 1, GL_FALSE, value);
 };
 
 void Shader::setMatrix4_true(const std::string& name, const float* value) const {
-    glUniformMatrix4fv( glGetUniformLocation(this->id, name.c_str()), 1, GL_TRUE, value);
+    glUniformMatrix4fv(cachedLocation(name), 1, GL_TRUE, value);
 };
 
 void Shader::setVec2(const std::string& name, const float x, const float y) const {
-      glUniform2f( glGetUniformLocation(this->id, name.c_str()), x, y);
+      glUniform2f(cachedLocation(name), x, y);
 };
 
 
 void Shader::setVec3(const std::string& name, const float x, const float y, const float z) const {
-    glUniform3f( glGetUniformLocation(this->id, name.c_str()), x, y ,z);
+    glUniform3f(cachedLocation(name), x, y ,z);
 };
 
 void Shader::setVec4(const std::string& name, const float x, const float y, const float z, const float w) const {
-    glUniform4f( glGetUniformLocation(this->id, name.c_str()), x, y ,z, w);
+    glUniform4f(cachedLocation(name), x, y ,z, w);
 };
 
 void Shader::setInt(const std::string& name, const int value) const {
-    glUniform1i( glGetUniformLocation(this->id, name.c_str()), value);
+    glUniform1i(cachedLocation(name), value);
 };
 
 void Shader::setFloat(const std::string& name, const float value) const {
-    glUniform1f( glGetUniformLocation(this->id, name.c_str()), value);
+    glUniform1f(cachedLocation(name), value);
 };
 
 GLint Shader::getUniformLocation(const std::string& name) const {
-    return glGetUniformLocation(this->id, name.c_str());
+    return cachedLocation(name);
 };
 
 

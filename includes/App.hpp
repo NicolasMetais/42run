@@ -30,6 +30,11 @@
 
 enum class AppState { PLAYING, GAME_OVER };
 
+// Indices des animations dans Cat.gltf (ordre d'export, pas de noms cote moteur)
+constexpr int ANIM_JUMP = 0;
+constexpr int ANIM_RUN  = 1;
+constexpr float RUN_ANIM_SPEED = 0.6f; // le cycle exporte tourne trop vite vs le deplacement reel
+
 /** @brief Top-level application: owns all subsystems and drives the main loop. */
 class App {
 	private:
@@ -62,6 +67,7 @@ class App {
 		AppState state = AppState::PLAYING;
 		UIRenderer uiRenderer;
 		std::vector<RippleDrop> ripples;
+		std::vector<std::pair<float, EntityId>> byDistance; ///< buffer reutilise pour le tri des transparents (evite une reallocation par frame)
 		int screenW;
 		int screenH;
 		float prevMouseU = 0.0f;
@@ -70,6 +76,7 @@ class App {
 		float lastDropTime = 0.0f;
 		int selectedOption = 0;
 		int lanePosition = Lane::COUNT / 2;
+		int lastLanePosition = lanePosition; ///< valeur d'avant la derniere tentative de changement de lane, pour le rejet "bump"
 		std::stack<MenuScreen*> menus;
 		RenderContext menuContext;
 		/** @brief Polls and dispatches SDL events to input subsystems. */

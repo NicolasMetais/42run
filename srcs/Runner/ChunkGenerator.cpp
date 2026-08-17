@@ -1,7 +1,7 @@
 #include <Runner/ChunkGenerator.hpp>
 #include <algorithm>
 
-ChunkGenerator::ChunkGenerator(const std::string& floorMesh, const std::vector<std::string>& obstacleMeshes, ModelLoader& loader, GameScene& scene, float chunkLength, std::function<void()> func) : rng(std::random_device{}()), floorMesh(floorMesh), obstacleMeshes(obstacleMeshes), loader(loader), scene(scene), chunkLength(chunkLength), triggerfunc(func) {};
+ChunkGenerator::ChunkGenerator(const std::string& floorMesh, const std::vector<std::string>& obstacleMeshes, ModelLoader& loader, GameScene& scene, float chunkLength, std::function<void()> killFunc, std::function<void()> bumpFunc) : rng(std::random_device{}()), floorMesh(floorMesh), obstacleMeshes(obstacleMeshes), loader(loader), scene(scene), chunkLength(chunkLength), killFunc(killFunc), bumpFunc(bumpFunc) {};
 
 void ChunkGenerator::screenGenerator(Chunk& newChunk, float x, float y, float z) {
     EntityId id = scene.createEntity();
@@ -45,13 +45,10 @@ Chunk ChunkGenerator::generateNewChunk(float spawnPos) {
 
     Chunk newChunk;
 
-    EntityId id = scene.createEntity();
-    newChunk.ids.push_back(id);
     LoadedModel& lm = loader.load(floorMesh);
-    scene.transforms[id].setPosition(0,0, spawnPos);
-    scene.transforms[id].setScale(7.0);
-    scene.renders[id] = {&lm};
-    scene.colliders[id] = scene.colliderFromModel(lm);
+    Transform floorT; floorT.setPosition(0, 0, spawnPos); floorT.setScale(7.0);
+    for (EntityId id : scene.spawnEntity(lm, floorT, RenderComponent{&lm}))
+        newChunk.ids.push_back(id);
     newChunk.zPos = spawnPos;
 
     constexpr float DESK_SCALE = 2.0f;
@@ -76,13 +73,10 @@ Chunk ChunkGenerator::generateNewChunk(float spawnPos) {
         int pass = (pair == freePair) ? roll(0, 2) : -1;
         if (pass == 0) continue;                      // paire libre : pas de bureau
         if (pass == -1 && roll(0, 2) == 0) continue;  // paire normale : absence aleatoire
-        EntityId id = scene.createEntity();
-        newChunk.ids.push_back(id);
-        LoadedModel& lm = loader.load(obstacleMeshes[0]);
-        RenderComponent render{&lm};
+        LoadedModel& deskLm = loader.load(obstacleMeshes[0]);
+        RenderComponent render{&deskLm};
         float x = (Lane::centerX(pair * 2) + Lane::centerX(pair * 2 + 1)) * 0.5f;
-        scene.transforms[id].setPosition(x, -0.2, spawnPos);
-        scene.transforms[id].setScale(DESK_SCALE);
+        Transform deskT; deskT.setPosition(x, -0.2, spawnPos); deskT.setScale(DESK_SCALE);
 
         constexpr float DESK_Y = -0.2f;
 
@@ -104,15 +98,15 @@ Chunk ChunkGenerator::generateNewChunk(float spawnPos) {
         if (showC1) screenGenerator(newChunk, x + 1.28f * DESK_SCALE, DESK_Y * DESK_SCALE, spawnPos - 0.5f * DESK_SCALE);
         if (showC2) screenGenerator(newChunk, x - 1.24f * DESK_SCALE, DESK_Y * DESK_SCALE, spawnPos - 0.5f * DESK_SCALE);
 
-        if (pass == 1 || roll(0, 1))                  // paire libre : dessous force ouvert
+        if (pass == 1 || roll(0, 1)) {                 // paire libre : dessous force ouvert
             render.hideNode("Closed");
-        scene.renders[id] = render;
-        // meme masque pour le collider, sinon mur invisible
-        scene.colliders[id] = scene.colliderFromModel(lm, render.hiddenNodes);
-
-        TriggerComponent trig;
-        trig.onTrigger = this->triggerfunc;
-        scene.triggers[id] = trig;
+            render.hideNode("OBSTACLE_killClosed");          // le panneau disparait, sa zone de mort aussi
+        }
+        // KILL/bump : entites dediees si le modele porte des nodes OBSTACLE_KILL/OBSTACLE_bump,
+        // sinon spawnEntity ne cree que l'entite solide (pas de branchement ici)
+        for (EntityId id : scene.spawnEntity(deskLm, deskT, render,
+                {{"kill", killFunc}, {"bump", bumpFunc}}))
+            newChunk.ids.push_back(id);
     }
         
     return newChunk;
@@ -121,13 +115,10 @@ Chunk ChunkGenerator::generateNewChunk(float spawnPos) {
 Chunk ChunkGenerator::generateEmptyChunk(float spawnPos) {
     Chunk newChunk;
 
-    EntityId id = scene.createEntity();
-    newChunk.ids.push_back(id);
     LoadedModel& lm = loader.load(floorMesh);
-    scene.transforms[id].setPosition(0,0, spawnPos);
-    scene.transforms[id].setScale(7.0);
-    scene.renders[id] = {&lm};
-    scene.colliders[id] = scene.colliderFromModel(lm);
+    Transform floorT; floorT.setPosition(0, 0, spawnPos); floorT.setScale(7.0);
+    for (EntityId id : scene.spawnEntity(lm, floorT, RenderComponent{&lm}))
+        newChunk.ids.push_back(id);
     newChunk.zPos = spawnPos;
     return newChunk;
 };

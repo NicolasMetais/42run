@@ -15,4 +15,12 @@ struct RenderComponent {
             if (model->gltf.nodes[i].name == name)
                 hiddenNodes.insert((int)i);
     }
+
+    /** @brief Cache tous les nodes dont le nom commence par ce prefixe (rendu uniquement). */
+    void hidePrefixed(const std::string& prefix) {
+        if (!model) return;
+        for (size_t i = 0; i < model->gltf.nodes.size(); ++i)
+            if (model->gltf.nodes[i].name.rfind(prefix, 0) == 0)
+                hiddenNodes.insert((int)i);
+    }
 };

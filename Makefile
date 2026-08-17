@@ -44,7 +44,6 @@ SRCS =	srcs/main.cpp \
 		srcs/Font/TextRenderer.cpp \
 		srcs/UI/UIRenderer.cpp \
 		srcs/UI/MainMenu.cpp \
-		srcs/UI/OptionsMenu.cpp \
 		srcs/UI/PauseMenu.cpp \
 		srcs/UI/SkinMenu.cpp \
 		srcs/UI/GameOverMenu.cpp \

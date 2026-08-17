@@ -29,7 +29,18 @@ struct GameScene {
     void destroyEntity(EntityId id);
 
     ColliderComponent colliderFromModel(const LoadedModel& lm, const std::unordered_set<int>& hiddenNodes = {});
-void collectBoxes(const GltfModel& gltf, const std::vector<MeshData>& meshes, int nodeIdx, const Matrix<float>& parentWorld, ColliderComponent& col, const std::unordered_set<int>& hiddenNodes);
+    void collectBoxes(const GltfModel& gltf, const std::vector<MeshData>& meshes, int nodeIdx, const Matrix<float>& parentWorld, ColliderComponent& col, const std::unordered_set<int>& hiddenNodes);
+
+    /**
+     * @brief Spawn unique pour tout objet du jeu : construit toujours une entite
+     * solide (le collider habituel, moins les nodes "OBSTACLE_*"), et pour chaque
+     * entree de obstacleCallbacks, spawn en plus une entite trigger dediee si un
+     * node "OBSTACLE_<cle>" existe dans le modele. L'appelant n'a jamais besoin de
+     * savoir si le modele contient des obstacles ou non.
+     * @return les ids crees (entite solide en premier), a pousser dans Chunk::ids.
+     */
+    std::vector<EntityId> spawnEntity(LoadedModel& lm, Transform t, RenderComponent render,
+                                       const std::unordered_map<std::string, std::function<void()>>& obstacleCallbacks = {});
 
     static GameScene fromJson(const std::string& path, ModelLoader& loader);
     void loadPlayer(const std::string& path, ModelLoader& loader);

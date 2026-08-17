@@ -13,9 +13,11 @@ App::App(int width, int height)
     scenes.push_back(GameScene::fromJson("resources/levels/menu.json", modelLoader));
     scenes.push_back(GameScene::fromJson("resources/levels/level1.json", modelLoader));
     activeScene = &scenes[0];
-    chunkManager.emplace(*activeScene, modelLoader, Lane::COUNT, 7.0f, 5.0f, "resources/Chunk.gltf", std::vector<std::string>{"resources/Obstacles.gltf", "resources/screens.gltf", "resources/RandomVents.gltf"}, [this]() { this->triggerGameOver(); } );
+    chunkManager.emplace(*activeScene, modelLoader, Lane::COUNT, 7.35f, 5.0f, "resources/Chunk.gltf", std::vector<std::string>{"resources/Obstacles.gltf", "resources/screens.gltf", "resources/RandomVents.gltf"}, [this]() { this->triggerGameOver(); }, [this]() { this->lanePosition = this->lastLanePosition; } );
     activeScene->loadPlayer("resources/player.json", modelLoader);
     activeScene->transforms[activeScene->playerId].setPosition(Lane::centerX(lanePosition), 0, 0);
+    animManager.setAnimation(ANIM_RUN, RUN_ANIM_SPEED); // Cat.gltf : 0=jump, 1=run-cycle
+    fontManager.load(this->textureManager, "resources/CalliCat.json", "CalliCat");
     fontManager.load(this->textureManager, "resources/Roboto.json", "Roboto");
     menus.push(new MainMenu(
         [this]() { menus.pop(); this->distance = 0.0f; },
@@ -40,11 +42,15 @@ void App::update() {
             constexpr float SPEED = 5.0f;
             rb.velocity.x() = 0.0f;
             rb.velocity.z() = 0.0f;
-            if (keyboard.consumeLeft() && lanePosition < Lane::COUNT - 1) this->lanePosition++;
-            if (keyboard.consumeRight() && lanePosition > 0) this->lanePosition--;
+            if (keyboard.consumeLeft() && lanePosition < Lane::COUNT - 1) { lastLanePosition = lanePosition; this->lanePosition++; }
+            if (keyboard.consumeRight() && lanePosition > 0) { lastLanePosition = lanePosition; this->lanePosition--; }
             if (keyboard.isForward()) rb.velocity.z() =  SPEED;
             if (keyboard.isBack())    rb.velocity.z() = -SPEED;
-            if (keyboard.isJump() && rb.onGround) rb.velocity.y() = 8.0f;
+            if (keyboard.isJump() && rb.onGround) {
+                rb.velocity.y() = 8.0f;
+                if (animManager.getCurrentAnim() != ANIM_JUMP)
+                    animManager.setAnimation(ANIM_JUMP);
+            }
             float targetX = Lane::centerX(lanePosition);
             float currentX = activeScene->transforms[activeScene->playerId].getPosition().x();
             activeScene->transforms[activeScene->playerId].move({(targetX - currentX) * SPEED * deltaTime, 0, 0});
@@ -52,6 +58,11 @@ void App::update() {
 
         PhysicsSystem::update(activeScene->transforms, activeScene->rigidbodies, deltaTime);
         CollisionSystem::resolveEntities(activeScene->transforms, activeScene->colliders, activeScene->rigidbodies, activeScene->triggers);
+
+        if (activeScene->playerId != UINT32_MAX
+            && activeScene->rigidbodies[activeScene->playerId].onGround
+            && animManager.getCurrentAnim() != ANIM_RUN)
+            animManager.setAnimation(ANIM_RUN, RUN_ANIM_SPEED); // retour au sol : reprend la course
 
         if (activeScene->playerId != UINT32_MAX)
             camera.follow(activeScene->transforms[activeScene->playerId].getPosition());
@@ -139,7 +150,7 @@ void App::render() {
         skybox.draw(camera.buildViewNoTranslation(), projection);
 
         // 3. transparents (BLEND) : tries loin -> proche, profondeur gelee
-        std::vector<std::pair<float, EntityId>> byDistance;
+        byDistance.clear();
         Vector<float> camPos = camera.getCameraPos();
         for (auto& [id, render] : activeScene->renders) {
             Vector<float> d = activeScene->transforms[id].getPosition() - camPos;
@@ -153,7 +164,8 @@ void App::render() {
         renderer.endTransparentPass();
 
         std::string score = std::to_string((int)(distance));
-        textRenderer.drawText(score + " Meters", "Roboto", 20, 40, 32, fontManager.getFont("Roboto"));
+        float endX = textRenderer.drawText(score, "Roboto", 20, 40, 32, fontManager.getFont("Roboto"), 0.03f);
+        textRenderer.drawText(" Meters", "CalliCat", endX, 40, 32, fontManager.getFont("CalliCat"), 0.03f);
     }
     if (showFps)
         textRenderer.drawText(std::to_string(fpsDisplay) + " FPS", "Roboto", screenW - 160, 40, 32, fontManager.getFont("Roboto"));
@@ -198,7 +210,7 @@ void App::resetGame() {
     activeScene->transforms[activeScene->playerId].setPosition(Lane::centerX(lanePosition), 0, 0); //pour virer l'animation de transition
 
 
-    chunkManager.emplace(*activeScene, modelLoader, Lane::COUNT, 7.0f, 5.0f, "resources/Chunk.gltf", std::vector<std::string>{"resources/Obstacles.gltf", "resources/screens.gltf", "resources/RandomVents.gltf"}, [this]() { this->triggerGameOver(); });
+    chunkManager.emplace(*activeScene, modelLoader, Lane::COUNT, 7.35f, 5.0f, "resources/Chunk.gltf", std::vector<std::string>{"resources/Obstacles.gltf", "resources/screens.gltf", "resources/RandomVents.gltf"}, [this]() { this->triggerGameOver(); }, [this]() { this->lanePosition = this->lastLanePosition; });
 };
 
 void App::triggerGameOver() {

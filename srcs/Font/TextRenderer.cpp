@@ -15,7 +15,7 @@ TextRenderer::TextRenderer(TextureManager& TextureManager, int w, int h) : textu
 };
 
 //C HORRIBLE FO REFACTO MAIS OMG J'AI LA BIG FLEMME LA
-void TextRenderer::drawText(const std::string& text, std::string name, float x, float y, float size, const AtlasFont& font) {
+float TextRenderer::drawText(const std::string& text, std::string name, float x, float y, float size, const AtlasFont& font, float outlineWidth) {
     Texture& FontTex = textureManager.getOrLoad(name + ".png");
     glActiveTexture(GL_TEXTURE0);
     msdf.bind();
@@ -26,14 +26,18 @@ void TextRenderer::drawText(const std::string& text, std::string name, float x, 
        -1,            1,             0, 1
     };
     glUniformMatrix4fv(msdf.getUniformLocation("projection"), 1, GL_FALSE, proj);
-    glUniform3f(msdf.getUniformLocation("textColor"), 1.0f, 1.0f, 1.0f);
+    glUniform3f(msdf.getUniformLocation("textColor"), 0.0f, 0.0f, 0.0f);
     glUniform1i(msdf.getUniformLocation("fontTex"), 0);
+    glUniform1f(msdf.getUniformLocation("pxRange"), font.distanceRange);
+    glUniform1f(msdf.getUniformLocation("outlineWidth"), outlineWidth);
+    glUniform3f(msdf.getUniformLocation("outlineColor"), 1.0f, 1.0f, 1.0f);
+
     FontTex.bind();
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glBindVertexArray(this->VAO);
     glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
     glBufferData(GL_ARRAY_BUFFER, text.size() * 6 * 4 * sizeof(float), nullptr, GL_DYNAMIC_DRAW); //dynamyc init for text construction
-    std::vector<float> vertices;
+    vertices.clear();
     vertices.reserve(text.size() * 24);
     for (auto& charac : text) {
         if(!font.glyphs.count(charac)) {
@@ -103,6 +107,7 @@ void TextRenderer::drawText(const std::string& text, std::string name, float x, 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glBindVertexArray(0);
+    return x; //pos du prochain char
 };
 
 

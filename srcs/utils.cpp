@@ -197,7 +197,6 @@ void utils::prepareMats(MeshData& meshdata, TextureManager& texMng) {
 		if (mat.MetallicRoughness.baseColorTexture.index >= 0) {
 			std::string uri = resolveUri(meshdata, mat.MetallicRoughness.baseColorTexture.index);
 			mat.baseColorTextureGPU = &texMng.getOrLoad(uri);
-			// std::cout << mat.baseColorTextureGPU << std::endl;
 		}
 
 		//metallic roughness

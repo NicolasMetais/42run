@@ -45,9 +45,10 @@ static void computeWorldMatrices(const GltfModel& model, int nodeIdx,
         computeWorldMatrices(model, child, worldMats[nodeIdx], worldMats);
 }
 
-void AnimationManager::setAnimation(int index) {
+void AnimationManager::setAnimation(int index, float speed) {
     currentAnim = index;
     currentTime = 0.0f;
+    playbackSpeed = speed;
 }
 
 void AnimationManager::sampleChannel(GltfModel& model, const Animation& anim, const Channel& channel) {
@@ -122,7 +123,19 @@ void AnimationManager::update(LoadedModel& lm, float deltaTime) {
     if (currentAnim < 0 || currentAnim >= (int)lm.gltf.animations.size())
         return;
 
-    currentTime += deltaTime;
+    // capture la pose de repos au premier passage pour ce modele
+    auto [it, inserted] = bindPoses.try_emplace(&lm.gltf, lm.gltf.nodes);
+
+    // reinitialise tous les os a la pose de repos avant d'echantillonner :
+    // les os non couverts par les channels de l'animation courante restent
+    // ainsi neutres au lieu de garder la derniere pose de l'anim precedente
+    for (size_t i = 0; i < lm.gltf.nodes.size(); ++i) {
+        lm.gltf.nodes[i].translation = it->second[i].translation;
+        lm.gltf.nodes[i].rotation    = it->second[i].rotation;
+        lm.gltf.nodes[i].scale       = it->second[i].scale;
+    }
+
+    currentTime += deltaTime * playbackSpeed;
 
     const Animation& anim = lm.gltf.animations[currentAnim];
     for (const Channel& channel : anim.channels)

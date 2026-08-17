@@ -1,6 +1,7 @@
 #include <Scene/GameScene.hpp>
 #include <utils.hpp>
 #include <cfloat>
+#include <functional>
 
 void GameScene::collectBoxes(
     const GltfModel& gltf,
@@ -36,7 +37,7 @@ void GameScene::collectBoxes(
                         if (wc.z() > wMax.z()) wMax.z() = wc.z();
                     }
 
-            col.boxes.push_back({wMin, wMax});
+            col.boxes.push_back({wMin, wMax, node.name});
         }
     }
 
@@ -51,6 +52,52 @@ ColliderComponent GameScene::colliderFromModel(const LoadedModel& lm, const std:
     for (int rootIdx : scene.rootNodes)
         collectBoxes(lm.gltf, lm.meshes, rootIdx, root, col, hiddenNodes);
     return col;
+}
+
+std::vector<EntityId> GameScene::spawnEntity(LoadedModel& lm, Transform t, RenderComponent render,
+    const std::unordered_map<std::string, std::function<void()>>& obstacleCallbacks) {
+
+    std::vector<EntityId> ids;
+    // une seule collecte : les boxes "OBSTACLE_*" sont incluses ici pour pouvoir
+    // etre routees plus bas, meme si elles ne seront jamais rendues (cf hidePrefixed)
+    ColliderComponent allBoxes = colliderFromModel(lm, render.hiddenNodes);
+
+    ColliderComponent solidCol;
+    std::unordered_map<std::string, ColliderComponent> obstacleCols;
+
+    for (auto& box : allBoxes.boxes) {
+        bool routed = false;
+        for (auto& [key, cb] : obstacleCallbacks) {
+            (void)cb;
+            if (box.name.rfind("OBSTACLE_" + key, 0) == 0) {
+                obstacleCols[key].boxes.push_back(box);
+                routed = true;
+                break;
+            }
+        }
+        if (!routed && box.name.rfind("OBSTACLE_", 0) != 0)
+            solidCol.boxes.push_back(box);
+    }
+
+    render.hidePrefixed("OBSTACLE_"); // jamais dessinees, quel que soit le resultat du routage
+
+    EntityId mainId = createEntity();
+    transforms[mainId] = t;
+    renders[mainId] = render;
+    colliders[mainId] = solidCol;
+    ids.push_back(mainId);
+
+    for (auto& [key, col] : obstacleCols) {
+        EntityId id = createEntity();
+        transforms[id] = t;
+        colliders[id] = col;
+        TriggerComponent trig;
+        trig.onTrigger = obstacleCallbacks.at(key);
+        triggers[id] = trig;
+        ids.push_back(id);
+    }
+
+    return ids;
 }
 
 GameScene GameScene::fromJson(const std::string& path, ModelLoader& loader) {
@@ -100,8 +147,19 @@ void GameScene::loadPlayer(const std::string& path, ModelLoader& loader) {
     t.setPosition(pos[0].get<float>(), pos[1].get<float>(), pos[2].get<float>());
     t.setScale(player["scale"].get<float>());
     transforms[id] = t;
-    renders[id]    = { &lm };
-    colliders[id]  = colliderFromModel(lm);
+    RenderComponent render{&lm};
+    render.hidePrefixed("HITBOX"); // jamais dessinee, pure geometrie de collision
+    renders[id] = render;
+
+    // hurtbox dediee (node "HITBOX" dans le modele), pas le mesh visuel entier :
+    // sinon les membres ecartes en pleine animation (course/saut) elargissent
+    // la collision bien au-dela du corps reel
+    ColliderComponent col;
+    for (auto& box : colliderFromModel(lm).boxes)
+        if (box.name.rfind("HITBOX", 0) == 0)
+            col.boxes.push_back(box);
+    colliders[id] = col;
+
     rigidbodies[id] = {};
     triggers[id] = {};
 

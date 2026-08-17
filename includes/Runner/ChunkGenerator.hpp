@@ -14,14 +14,15 @@ class ChunkGenerator {
         ModelLoader& loader;
         GameScene& scene;
         float chunkLength;
-        std::function<void()> triggerfunc;
+        std::function<void()> killFunc;
+        std::function<void()> bumpFunc;
         // paire garantie franchissable du dernier chunk genere : la suivante
         // est tiree a +/-1 de celle-ci pour que le chemin reste continu
         int lastFreePair = 1;
         /** @brief Tirage uniforme dans [min, max] inclus, sur le rng du generateur. */
         int roll(int min, int max) { return std::uniform_int_distribution<int>(min, max)(rng); }
     public:
-        ChunkGenerator(const std::string& floorMesh, const std::vector<std::string>& obstacleMeshes, ModelLoader& loader, GameScene& scene, float chunkLength, std::function<void()> func);
+        ChunkGenerator(const std::string& floorMesh, const std::vector<std::string>& obstacleMeshes, ModelLoader& loader, GameScene& scene, float chunkLength, std::function<void()> killFunc, std::function<void()> bumpFunc);
         Chunk generateNewChunk(float spawnPos);
         void screenGenerator(Chunk& newChunk, float x, float y, float z);
         void ventsGenerator(Chunk& newChunk, float z, bool mirrored);

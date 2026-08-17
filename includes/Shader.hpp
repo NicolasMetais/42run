@@ -2,12 +2,19 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <unordered_map>
 #include <glad/glad.h>
 
 /** @brief Compiles, links, and exposes uniform setters for an OpenGL shader program. */
 class Shader {
 	private:
 		GLuint id;
+		// une location de uniform ne change jamais une fois le programme linke :
+		// on evite un appel driver (glGetUniformLocation, recherche par string)
+		// a chaque frame pour chaque uniform, sur chaque submesh, x2 passes.
+		mutable std::unordered_map<std::string, GLint> uniformCache;
+		/** @brief Renvoie la location d'un uniform, mise en cache apres la premiere requete. */
+		GLint cachedLocation(const std::string& name) const;
 		/** @brief Compiles a single shader stage from a source file path. */
 		GLuint compileShader(GLenum type, const std::string& path);
 		/** @brief Reads the full text of a shader source file. */

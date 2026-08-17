@@ -22,6 +22,7 @@ void FontManager::load(TextureManager& textureManager, std::string path, std::st
     newFont.width = getField<int>(police["atlas"], "width");
     newFont.height = getField<int>(police["atlas"], "height");
     newFont.size = getField<int>(police["atlas"], "size");
+    newFont.distanceRange = getField<float>(police["atlas"], "distanceRange");
     newFont.lineHeight = getField<float>(police["metrics"], "lineHeight");
     newFont.ascender = getField<float>(police["metrics"], "ascender");
     newFont.descender = getField<float>(police["metrics"], "descender");

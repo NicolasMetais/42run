@@ -17,7 +17,7 @@ class ChunkManager {
         float runSpeed;
         int chunkCount = 0;
     public:
-        ChunkManager(GameScene& scene, ModelLoader& loader, int laneNb, float chunkLength, float runSpeed, const std::string& floorMesh, const std::vector<std::string>& obstaclesMeshes, std::function<void()> func);
+        ChunkManager(GameScene& scene, ModelLoader& loader, int laneNb, float chunkLength, float runSpeed, const std::string& floorMesh, const std::vector<std::string>& obstaclesMeshes, std::function<void()> killFunc, std::function<void()> bumpFunc);
         void update(float deltaTime);
         void destroyChunk();
         int getChunkCount() { return this->chunkCount; };

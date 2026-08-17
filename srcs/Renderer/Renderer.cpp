@@ -242,8 +242,6 @@ void Renderer::sendMaterialUniforms(Shader& shader, const Mat* mat, SubMesh& mes
 void Renderer::draw(SubMesh& mesh, const Mat* mat) {
     // std::cout << "Drawing mesh. EBO: " << mesh.EBO << ", indices: " << mesh.indices.size() << std::endl;
     glBindVertexArray(mesh.VAO);
-	GLenum err = glGetError();
-    // if (err != GL_NO_ERROR) std::cerr << "GL Error after bind: " << err << std::endl;
     if (mat && mat->doubleSided)
         glDisable(GL_CULL_FACE);
     else
@@ -262,8 +260,6 @@ void Renderer::draw(SubMesh& mesh, const Mat* mat) {
         glDrawElements(GL_TRIANGLES, mesh.indices.size(), GL_UNSIGNED_INT, 0);
     }
 	// glDrawArrays(GL_TRIANGLES, 0, 3);
-	err = glGetError();
-    if (err != GL_NO_ERROR) std::cerr << "GL Error after draw: " << err << std::endl;
     glBindVertexArray(0);
 };
 
