@@ -27,7 +27,7 @@ void UIRenderer::drawUIComponent(Texture& tex, float x, float y, float z, float 
     menu.setInt("fontTex", 0);
     menu.setInt("useTexture", 1);
     tex.bind();
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); // reduction propre pour les textures sources bien plus grandes que leur taille affichee
     glBindVertexArray(this->VAO);
     glBindBuffer(GL_ARRAY_BUFFER, this->VBO);
     glBufferData(GL_ARRAY_BUFFER, 6 * 4 * sizeof(float), nullptr, GL_DYNAMIC_DRAW);
@@ -79,7 +79,7 @@ void UIRenderer::drawUIComponent(Texture& tex, float x, float y, float z, float 
     glBindVertexArray(0);
 };
 
-void UIRenderer::drawUIComponent(float x, float y, float z, float width, float height, float r, float g, float b) {
+void UIRenderer::drawUIComponent(float x, float y, float z, float width, float height, float r, float g, float b, float a) {
     (void)z;
     glActiveTexture(GL_TEXTURE0);
     menu.bind();
@@ -91,7 +91,7 @@ void UIRenderer::drawUIComponent(float x, float y, float z, float width, float h
     };
     menu.setMatrix4_false("projection", proj);
     menu.setInt("bottomTex", 0);
-    menu.setVec4("color", r, g ,b, 1.0f);
+    menu.setVec4("color", r, g ,b, a);
     menu.setInt("useTexture", 0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glBindVertexArray(this->VAO);

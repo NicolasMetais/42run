@@ -32,4 +32,5 @@ class Keyboard {
 		bool consumeMenuUp();
 		bool consumeMenuDown();
 		bool consumeMenuConfirm();
+		bool consumePause();
 };

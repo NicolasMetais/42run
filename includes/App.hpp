@@ -25,10 +25,11 @@
 #include <Font/FontManager.hpp>
 #include <UI/MenuScreen.hpp>
 #include <UI/GameOverMenu.hpp>
+#include <UI/PauseMenu.hpp>
 #include <UI/MainMenu.hpp>
 #include <Font/TextRenderer.hpp>
 
-enum class AppState { PLAYING, GAME_OVER };
+enum class AppState { PLAYING, GAME_OVER, PAUSED };
 
 // Indices des animations dans Cat.gltf (ordre d'export, pas de noms cote moteur)
 constexpr int ANIM_JUMP = 0;
@@ -94,6 +95,11 @@ class App {
 		 * @param projection  Projection matrix.
 		 */
 		void renderNode(LoadedModel& lm, int nodeIdx, const Matrix<float>& parentWorld, const Matrix<float>& view, const Matrix<float>& projection, const std::unordered_set<int>& hiddenNodes, RenderPass pass);
+		/** @brief Draws the 3D game world (entities, skybox, transparents, score) for the given view/projection. */
+		void drawGameWorld(const Matrix<float>& view, Matrix<float>& projection);
+		float menuFadeTime = 0.0f; ///< temps ecoule depuis le game over/la pause, pour le fondu au noir derriere le menu
+		static constexpr float MENU_FADE_DURATION = 0.6f;
+		static constexpr float MENU_FADE_MAX_DARKNESS = 0.7f;
 	public:
 		/** @brief Initialises the window, OpenGL context, and all subsystems at the given resolution. */
 		App(int width, int height);
@@ -104,4 +110,5 @@ class App {
 		void FPScalculator();
 		void resetGame();
 		void triggerGameOver();
+		void triggerPause();
 };

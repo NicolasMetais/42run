@@ -1,6 +1,6 @@
 #include <Input/Event.hpp>
 
-void event(SDL_Event& e, Camera& camera, bool& run) {
+void event(SDL_Event& e, Camera& camera, bool& run, int& screenW, int& screenH, UIRenderer& uiRenderer, TextRenderer& textRenderer) {
 	switch (e.type) {
 		case SDL_QUIT:
 			std::cerr << "SDL_QUIT recu" << std::endl;
@@ -13,6 +13,10 @@ void event(SDL_Event& e, Camera& camera, bool& run) {
 				int h = e.window.data2;
 				glViewport(0, 0, w, h);
 				camera.updateProjection(w, h);
+				screenW = w;
+				screenH = h;
+				uiRenderer.updateScreenSize(w, h);
+				textRenderer.updateScreenSize(w, h);
 			}
 			break ;
 	}

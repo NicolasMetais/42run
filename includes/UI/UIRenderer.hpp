@@ -22,8 +22,10 @@ class UIRenderer {
         int screenH;
     public:
         UIRenderer(TextureManager& TextureManager, int w, int h);
+        /** @brief Resynchronise les dimensions ecran utilisees pour la projection UI (a appeler au resize). */
+        void updateScreenSize(int w, int h) { screenW = w; screenH = h; }
         void drawUIComponent(Texture& tex, float x, float y, float z, float width, float height);
-        void drawUIComponent(float x, float y, float z, float width, float height, float r, float g, float b);
+        void drawUIComponent(float x, float y, float z, float width, float height, float r, float g, float b, float a = 1.0f);
         void drawSliderComponent(float x, float y, float z, float value, float width, float height, float r, float g, float b);
         void drawCheckboxComponent(float x, float y, float z, float width, float height, float r, float g, float b);
         void drawWaterBackground(Texture& tex, float time, const std::vector<RippleDrop>& drops);

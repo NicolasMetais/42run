@@ -5,9 +5,13 @@
 
 class PauseMenu : public MenuScreen {
     public:
-        void update(Keyboard& kb, std::stack<MenuScreen*>& stack);
+        void update(Keyboard& kb, Mouse& mouse, FontManager& fontManager, int screenW, int screenH, std::stack<MenuScreen*>& stack);
         void draw(RenderContext& tools);
+        PauseMenu(std::function<void()> onResume, std::function<void()> resetGame, std::function<void()> onMainMenu);
     private:
+        std::function<void()> onResume;
+        std::function<void()> resetGame;
+        std::function<void()> onMainMenu;
         int selector = 0;
 };
 

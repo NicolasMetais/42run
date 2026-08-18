@@ -6,7 +6,7 @@ App::App(int width, int height)
         , Vector<float>{0, 1, 3}, Vector<float>{0,0,0}, Vector<float>{0,1,0}), running(true)
         , modelLoader(renderer, textureManager), textRenderer(textureManager, width, height)
         , uiRenderer(textureManager, width, height), screenW(width), screenH(height)
-        , menuContext(textRenderer, fontManager, uiRenderer, screenW, screenH) {
+        , menuContext(textRenderer, fontManager, uiRenderer, textureManager, screenW, screenH) {
     this->skybox.generateIrradianceMap();
     this->skybox.generatePrefilterMap();
 
@@ -33,6 +33,10 @@ App::~App(){};
 
 void App::update() {
     this->elapsedTime += this->deltaTime;
+    if (menus.empty() && state == AppState::PLAYING && keyboard.consumePause()) {
+        triggerPause();
+        return;
+    }
     if (menus.empty() && state == AppState::PLAYING) {
         // dans update(), à la place de gametime :
         distance += chunkManager->getRunspeed() * deltaTime;
@@ -75,7 +79,7 @@ void App::update() {
 void App::processEvents() {
 	SDL_Event e;
 	while (SDL_PollEvent(&e)) {
-		event(e, this->camera, this->running);
+		event(e, this->camera, this->running, this->screenW, this->screenH, this->uiRenderer, this->textRenderer);
 		mouse.processEvent(e);
 		if (e.type == SDL_KEYDOWN && e.key.keysym.scancode == SDL_SCANCODE_F
 			&& (e.key.keysym.mod & KMOD_CTRL))
@@ -115,11 +119,65 @@ void App::renderNode(LoadedModel& lm, int nodeIdx, const Matrix<float>& parentWo
 		renderNode(lm, child, world, view, projection, hiddenNodes, pass);
 };
 
+void App::drawGameWorld(const Matrix<float>& view, Matrix<float>& projection) {
+    auto drawEntity = [&](EntityId id, RenderComponent& render, RenderPass pass) {
+        LoadedModel& lm = *render.model;
+        const Scene& scene = lm.gltf.scenes[lm.gltf.defaultScene];
+        Matrix<float> modelMat = activeScene->transforms[id].getModelMatrix() * transform.getModelMatrix();
+        for (int rootIdx : scene.rootNodes)
+            renderNode(lm, rootIdx, modelMat, view, projection, render.hiddenNodes, pass);
+    };
+
+    // 1. opaques + MASK
+    renderer.beginOpaquePass();
+    for (auto& [id, render] : activeScene->renders)
+        drawEntity(id, render, RenderPass::Opaque);
+
+    // 2. skybox : remplit les pixels restants avant les transparents
+    skybox.draw(camera.buildViewNoTranslation(), projection);
+
+    // 3. transparents (BLEND) : tries loin -> proche, profondeur gelee
+    byDistance.clear();
+    Vector<float> camPos = camera.getCameraPos();
+    for (auto& [id, render] : activeScene->renders) {
+        Vector<float> d = activeScene->transforms[id].getPosition() - camPos;
+        byDistance.push_back({d.dot(d), id});
+    }
+    std::sort(byDistance.begin(), byDistance.end(),
+              [](const auto& a, const auto& b) { return a.first > b.first; });
+    renderer.beginTransparentPass();
+    for (auto& [dist, id] : byDistance)
+        drawEntity(id, activeScene->renders[id], RenderPass::Transparent);
+    renderer.endTransparentPass();
+
+    std::string score = std::to_string((int)(distance));
+    float endX = textRenderer.drawText(score, "Roboto", 20, 40, 32, fontManager.getFont("Roboto"), 0.03f);
+    textRenderer.drawText(" Meters", "CalliCat", endX, 40, 32, fontManager.getFont("CalliCat"), 0.03f);
+};
+
 void App::render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     Matrix<float> view = camera.buildView();
     Matrix<float> projection = camera.buildProjection();
-    if (!menus.empty()) {
+    menuContext.screenW = screenW; // menuContext.screenW/H sont une copie prise a la construction, jamais resynchronisee sinon
+    menuContext.screenH = screenH;
+    if (state == AppState::GAME_OVER || state == AppState::PAUSED) {
+        SDL_ShowCursor(SDL_ENABLE);
+        SDL_SetRelativeMouseMode(SDL_FALSE);
+        drawGameWorld(view, projection); // monde fige : update() ne tourne plus tant que menus est non-vide
+
+        menuFadeTime += deltaTime;
+        float alpha = std::min(menuFadeTime / MENU_FADE_DURATION, 1.0f) * MENU_FADE_MAX_DARKNESS;
+        uiRenderer.drawUIComponent(0.0f, 0.0f, 0.0f, (float)screenW, (float)screenH, 0.0f, 0.0f, 0.0f, alpha);
+
+        if (!menus.empty()) {
+            menus.top()->update(keyboard, mouse, fontManager, screenW, screenH, menus);
+            if (!menus.empty())
+                menus.top()->draw(menuContext);
+        }
+    } else if (!menus.empty()) {
+        SDL_ShowCursor(SDL_ENABLE);
+        SDL_SetRelativeMouseMode(SDL_FALSE); // libere le curseur (mode relatif = capture + masque, ignore ShowCursor)
         int mX, mY;
         SDL_GetMouseState(&mX, &mY);
         float mouseU = (float)mX / this->screenW;
@@ -128,44 +186,14 @@ void App::render() {
         (void)mouseV;
         camera.rotateH(deltaTime * 10.0f);
         skybox.draw(camera.buildViewNoTranslation(), projection);
-        
-            menus.top()->update(keyboard, menus);
+
+            menus.top()->update(keyboard, mouse, fontManager, screenW, screenH, menus);
         if (!menus.empty())
             menus.top()->draw(menuContext);
     } else if (state == AppState::PLAYING) {
-        auto drawEntity = [&](EntityId id, RenderComponent& render, RenderPass pass) {
-            LoadedModel& lm = *render.model;
-            const Scene& scene = lm.gltf.scenes[lm.gltf.defaultScene];
-            Matrix<float> modelMat = activeScene->transforms[id].getModelMatrix() * transform.getModelMatrix();
-            for (int rootIdx : scene.rootNodes)
-                renderNode(lm, rootIdx, modelMat, view, projection, render.hiddenNodes, pass);
-        };
-
-        // 1. opaques + MASK
-        renderer.beginOpaquePass();
-        for (auto& [id, render] : activeScene->renders)
-            drawEntity(id, render, RenderPass::Opaque);
-
-        // 2. skybox : remplit les pixels restants avant les transparents
-        skybox.draw(camera.buildViewNoTranslation(), projection);
-
-        // 3. transparents (BLEND) : tries loin -> proche, profondeur gelee
-        byDistance.clear();
-        Vector<float> camPos = camera.getCameraPos();
-        for (auto& [id, render] : activeScene->renders) {
-            Vector<float> d = activeScene->transforms[id].getPosition() - camPos;
-            byDistance.push_back({d.dot(d), id});
-        }
-        std::sort(byDistance.begin(), byDistance.end(),
-                  [](const auto& a, const auto& b) { return a.first > b.first; });
-        renderer.beginTransparentPass();
-        for (auto& [dist, id] : byDistance)
-            drawEntity(id, activeScene->renders[id], RenderPass::Transparent);
-        renderer.endTransparentPass();
-
-        std::string score = std::to_string((int)(distance));
-        float endX = textRenderer.drawText(score, "Roboto", 20, 40, 32, fontManager.getFont("Roboto"), 0.03f);
-        textRenderer.drawText(" Meters", "CalliCat", endX, 40, 32, fontManager.getFont("CalliCat"), 0.03f);
+        SDL_ShowCursor(SDL_DISABLE);
+        SDL_SetRelativeMouseMode(SDL_TRUE);
+        drawGameWorld(view, projection);
     }
     if (showFps)
         textRenderer.drawText(std::to_string(fpsDisplay) + " FPS", "Roboto", screenW - 160, 40, 32, fontManager.getFont("Roboto"));
@@ -203,6 +231,7 @@ void App::FPScalculator() {
 };
 
 void App::resetGame() {
+    this->state = AppState::PLAYING;
     this->lanePosition = Lane::COUNT / 2;
     distance = 0.0f;
 
@@ -214,7 +243,26 @@ void App::resetGame() {
 };
 
 void App::triggerGameOver() {
+    this->state = AppState::GAME_OVER;
+    this->menuFadeTime = 0.0f;
     menus.push(new GameOverMenu (
+        [this]() { resetGame(); },
+        [this]() {
+            while (!menus.empty())
+                menus.pop();
+            menus.push(new MainMenu(
+                [this]() { menus.pop(); },
+                [this]() { running = false;}
+            ));
+        }
+    ));
+};
+
+void App::triggerPause() {
+    this->state = AppState::PAUSED;
+    this->menuFadeTime = 0.0f;
+    menus.push(new PauseMenu (
+        [this]() { this->state = AppState::PLAYING; },
         [this]() { resetGame(); },
         [this]() {
             while (!menus.empty())

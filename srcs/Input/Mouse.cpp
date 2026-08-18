@@ -4,6 +4,15 @@
 
 void Mouse::processEvent(SDL_Event& e) {
 	switch (e.type) {
+		case SDL_MOUSEMOTION:
+			posX = e.motion.x;
+			posY = e.motion.y;
+			moved = true;
+			break;
+		case SDL_MOUSEBUTTONDOWN:
+			if (e.button.button == SDL_BUTTON_LEFT)
+				clicked = true;
+			break;
 		// 		case SDL_MOUSEBUTTONDOWN:
 		// 	if (e.button.button == SDL_BUTTON_LEFT)
 		// 		this->rotating = true;
