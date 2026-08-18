@@ -3,9 +3,13 @@
 ChunkManager::ChunkManager(GameScene& scene, ModelLoader& loader, int laneNb, float chunkLength, float runSpeed
                 , const std::string& floorMesh, const std::vector<std::string>& obstaclesMeshes, std::function<void()> killFunc, std::function<void()> bumpFunc)
                 : generator(floorMesh, obstaclesMeshes, loader, scene, chunkLength, killFunc, bumpFunc), scene(scene), laneNb(laneNb), chunkLength(chunkLength), runSpeed(runSpeed) {
-                ChunkQueue.push_back(generator.generateEmptyChunk(0));  
-                for (int i = 1; i < 10; ++i)
-                        ChunkQueue.push_back(generator.generateNewChunk((i * chunkLength) * 2));
+                ChunkQueue.push_back(generator.generateEmptyChunk(0));
+                spawnEmpty = false; // le prochain chunk sera un chunk d'obstacles, puis ca alterne
+                for (int i = 1; i < 10; ++i) {
+                        float pos = (i * chunkLength) * 2;
+                        ChunkQueue.push_back(spawnEmpty ? generator.generateEmptyChunk(pos) : generator.generateNewChunk(pos));
+                        spawnEmpty = !spawnEmpty;
+                }
 };
 
 void ChunkManager::destroyChunk() {
@@ -24,7 +28,9 @@ void ChunkManager::update(float deltaTime) {
         }
     if (ChunkQueue.front().zPos <= -this->chunkLength * 3) {
         destroyChunk();
-        ChunkQueue.push_back(generator.generateNewChunk(ChunkQueue.back().zPos + chunkLength * 2));
+        float pos = ChunkQueue.back().zPos + chunkLength * 2;
+        ChunkQueue.push_back(spawnEmpty ? generator.generateEmptyChunk(pos) : generator.generateNewChunk(pos));
+        spawnEmpty = !spawnEmpty;
     }
     runSpeed += 0.5f * deltaTime;
 };

@@ -9,7 +9,7 @@ void PauseMenu::update(Keyboard& kb, Mouse& mouse, FontManager& fontManager, int
             selector++;
 
         float offset = textBaselineToVisualCenter(fontManager.getFont("CalliCat"), screenH * 0.04f);
-        std::vector<float> positions = { screenH * 0.4f - offset, screenH * 0.5f - offset, screenH * 0.6f - offset };
+        std::vector<float> positions = { screenH * 0.5f - offset, screenH * 0.6f - offset, screenH * 0.7f - offset };
         int hovered = hitTestMenuRow(mouse, positions, screenW * 0.38f, screenW * 0.7f, screenH * 0.07f);
         if (mouse.consumeMoved() && hovered >= 0) selector = hovered;
         bool clicked = mouse.consumeClick();

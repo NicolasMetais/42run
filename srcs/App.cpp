@@ -13,7 +13,7 @@ App::App(int width, int height)
     scenes.push_back(GameScene::fromJson("resources/levels/menu.json", modelLoader));
     scenes.push_back(GameScene::fromJson("resources/levels/level1.json", modelLoader));
     activeScene = &scenes[0];
-    chunkManager.emplace(*activeScene, modelLoader, Lane::COUNT, 7.35f, 5.0f, "resources/Chunk.gltf", std::vector<std::string>{"resources/Obstacles.gltf", "resources/screens.gltf", "resources/RandomVents.gltf"}, [this]() { this->triggerGameOver(); }, [this]() { this->lanePosition = this->lastLanePosition; } );
+    chunkManager.emplace(*activeScene, modelLoader, Lane::COUNT, 7.35f, 5.0f, "resources/Chunk.gltf", std::vector<std::string>{"resources/Obstacles.gltf", "resources/screens.gltf", "resources/RandomVents.gltf", "resources/coin.gltf"}, [this]() { this->triggerGameOver(); }, [this]() { this->lanePosition = this->lastLanePosition; } );
     activeScene->loadPlayer("resources/player.json", modelLoader);
     activeScene->transforms[activeScene->playerId].setPosition(Lane::centerX(lanePosition), 0, 0);
     animManager.setAnimation(ANIM_RUN, RUN_ANIM_SPEED); // Cat.gltf : 0=jump, 1=run-cycle
@@ -239,7 +239,7 @@ void App::resetGame() {
     activeScene->transforms[activeScene->playerId].setPosition(Lane::centerX(lanePosition), 0, 0); //pour virer l'animation de transition
 
 
-    chunkManager.emplace(*activeScene, modelLoader, Lane::COUNT, 7.35f, 5.0f, "resources/Chunk.gltf", std::vector<std::string>{"resources/Obstacles.gltf", "resources/screens.gltf", "resources/RandomVents.gltf"}, [this]() { this->triggerGameOver(); }, [this]() { this->lanePosition = this->lastLanePosition; });
+    chunkManager.emplace(*activeScene, modelLoader, Lane::COUNT, 7.35f, 5.0f, "resources/Chunk.gltf", std::vector<std::string>{"resources/Obstacles.gltf", "resources/screens.gltf", "resources/RandomVents.gltf", "resources/coin.gltf"}, [this]() { this->triggerGameOver(); }, [this]() { this->lanePosition = this->lastLanePosition; });
 };
 
 void App::triggerGameOver() {
