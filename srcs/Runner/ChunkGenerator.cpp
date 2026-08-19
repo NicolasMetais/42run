@@ -1,15 +1,14 @@
 #include <Runner/ChunkGenerator.hpp>
 #include <algorithm>
 
-ChunkGenerator::ChunkGenerator(const std::string& floorMesh, const std::vector<std::string>& obstacleMeshes, ModelLoader& loader, GameScene& scene, float chunkLength, std::function<void()> killFunc, std::function<void()> bumpFunc) : rng(std::random_device{}()), floorMesh(floorMesh), obstacleMeshes(obstacleMeshes), loader(loader), scene(scene), chunkLength(chunkLength), killFunc(killFunc), bumpFunc(bumpFunc) {};
+ChunkGenerator::ChunkGenerator(const std::string& floorMesh, const std::vector<std::string>& obstacleMeshes, ModelLoader& loader, GameScene& scene, float chunkLength, std::function<void()> killFunc, std::function<void()> bumpFunc, std::function<void(EntityId)> pickupFunc) : rng(std::random_device{}()), floorMesh(floorMesh), obstacleMeshes(obstacleMeshes), loader(loader), scene(scene), chunkLength(chunkLength), killFunc(killFunc), bumpFunc(bumpFunc), pickupFunc(pickupFunc) {};
 
 void ChunkGenerator::screenGenerator(Chunk& newChunk, float x, float y, float z) {
-    EntityId id = scene.createEntity();
-    newChunk.ids.push_back(id);
     LoadedModel& lm = loader.load(obstacleMeshes[1]);
 
-    scene.transforms[id].setPosition(x, y, z);
-    scene.transforms[id].setScale(2.0f);
+    Transform screenT;
+    screenT.setPosition(x, y, z);
+    screenT.setScale(2.0f);
 
     RenderComponent screenRender{&lm};
     int bg = roll(1, 4);
@@ -17,7 +16,11 @@ void ChunkGenerator::screenGenerator(Chunk& newChunk, float x, float y, float z)
         if (i != bg)
             screenRender.hideNode("BG_" + std::to_string(i));
     }
-    scene.renders[id] = screenRender;
+
+    // meme routage que les bureaux : si le modele porte un node OBSTACLE_kill, spawnEntity
+    // cree en plus une entite trigger dediee ; sinon rien ne change (juste l'entite solide)
+    for (EntityId id : scene.spawnEntity(lm, screenT, screenRender, {{"kill", killFunc}}))
+        newChunk.ids.push_back(id);
 };
 
 void ChunkGenerator::ventsGenerator(Chunk& newChunk, float z, bool mirrored) {
@@ -52,6 +55,10 @@ void ChunkGenerator::coinGenerator(Chunk& newChunk, float x, float y, float z) {
 
     RenderComponent coinRender{&lm};
     scene.renders[id] = coinRender;
+
+    scene.colliders[id] = scene.colliderFromModel(lm);
+    scene.triggers[id].onTrigger = [this, id]() { pickupFunc(id); };
+    scene.pickups[id] = PickupComponent{};
 };
 
 void ChunkGenerator::spawnCoinTrail(Chunk& newChunk, const std::vector<int>& lanes, int count, float centerZ, float y, bool isGround) {
@@ -65,7 +72,10 @@ void ChunkGenerator::spawnCoinTrail(Chunk& newChunk, const std::vector<int>& lan
         lastGroundLane = lane;
     }
 
-    float span = chunkLength * 2.0f; // couvre tout le chunk (les chunks sont espaces de chunkLength*2) pour ne pas laisser de trou entre deux chunks consecutifs
+    float fullSpan = chunkLength * 2.0f; // largeur totale du chunk (les chunks sont espaces de chunkLength*2)
+    // recule d'un pas de chaque cote : sinon la derniere piece d'un trail et la premiere
+    // du suivant tombent exactement au meme Z quand les deux tirent la meme lane (superposition)
+    float span = (count > 1) ? fullSpan - fullSpan / count : fullSpan;
     for (int i = start; i < count; ++i) {
         float t = (count == 1) ? 0.5f : (float)i / (count - 1);
         float z = centerZ - span * 0.5f + span * t;

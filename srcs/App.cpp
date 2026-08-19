@@ -13,7 +13,7 @@ App::App(int width, int height)
     scenes.push_back(GameScene::fromJson("resources/levels/menu.json", modelLoader));
     scenes.push_back(GameScene::fromJson("resources/levels/level1.json", modelLoader));
     activeScene = &scenes[0];
-    chunkManager.emplace(*activeScene, modelLoader, Lane::COUNT, 7.35f, 5.0f, "resources/Chunk.gltf", std::vector<std::string>{"resources/Obstacles.gltf", "resources/screens.gltf", "resources/RandomVents.gltf", "resources/coin.gltf"}, [this]() { this->triggerGameOver(); }, [this]() { this->lanePosition = this->lastLanePosition; } );
+    chunkManager.emplace(*activeScene, modelLoader, Lane::COUNT, 7.35f, 5.0f, "resources/Chunk.gltf", std::vector<std::string>{"resources/Obstacles.gltf", "resources/screens.gltf", "resources/RandomVents.gltf", "resources/coin.gltf"}, [this]() { this->triggerGameOver(); }, [this]() { this->lanePosition = this->lastLanePosition; }, [this](EntityId id) { this->pendingPickups.push_back(id); } );
     activeScene->loadPlayer("resources/player.json", modelLoader);
     activeScene->transforms[activeScene->playerId].setPosition(Lane::centerX(lanePosition), 0, 0);
     animManager.setAnimation(ANIM_RUN, RUN_ANIM_SPEED); // Cat.gltf : 0=jump, 1=run-cycle
@@ -49,11 +49,14 @@ void App::update() {
             if (keyboard.consumeLeft() && lanePosition < Lane::COUNT - 1) { lastLanePosition = lanePosition; this->lanePosition++; }
             if (keyboard.consumeRight() && lanePosition > 0) { lastLanePosition = lanePosition; this->lanePosition--; }
             if (keyboard.isForward()) rb.velocity.z() =  SPEED;
-            if (keyboard.isBack())    rb.velocity.z() = -SPEED;
             if (keyboard.isJump() && rb.onGround) {
-                rb.velocity.y() = 8.0f;
+                rb.velocity.y() = 12.5f; // a ajuster
                 if (animManager.getCurrentAnim() != ANIM_JUMP)
                     animManager.setAnimation(ANIM_JUMP);
+            }
+            if (keyboard.isBack() && !rb.onGround) { // touche bas : sans effet au sol, chute rapide seulement en l'air
+                rb.velocity.z() = -SPEED;
+                rb.velocity.y() = -20.0f; // a ajuster : ecrase la vitesse Y courante tant que la touche est maintenue
             }
             float targetX = Lane::centerX(lanePosition);
             float currentX = activeScene->transforms[activeScene->playerId].getPosition().x();
@@ -62,6 +65,21 @@ void App::update() {
 
         PhysicsSystem::update(activeScene->transforms, activeScene->rigidbodies, deltaTime);
         CollisionSystem::resolveEntities(activeScene->transforms, activeScene->colliders, activeScene->rigidbodies, activeScene->triggers);
+
+        // onTrigger peut tirer plusieurs fois pour le meme coin sur une frame (une paire de box par overlap) :
+        // pickups.count(id) deduplique, l'entite disparait des le premier passage
+        for (EntityId id : pendingPickups) {
+            if (activeScene->pickups.count(id)) {
+                activeScene->destroyEntity(id);
+                coinCount++;
+            }
+        }
+        pendingPickups.clear();
+
+        for (auto& [id, pickup] : activeScene->pickups) {
+            (void)pickup;
+            activeScene->transforms[id].addRotation(0.0f, COIN_SPIN_SPEED * deltaTime, 0.0f);
+        }
 
         if (activeScene->playerId != UINT32_MAX
             && activeScene->rigidbodies[activeScene->playerId].onGround
@@ -153,6 +171,9 @@ void App::drawGameWorld(const Matrix<float>& view, Matrix<float>& projection) {
     std::string score = std::to_string((int)(distance));
     float endX = textRenderer.drawText(score, "Roboto", 20, 40, 32, fontManager.getFont("Roboto"), 0.03f);
     textRenderer.drawText(" Meters", "CalliCat", endX, 40, 32, fontManager.getFont("CalliCat"), 0.03f);
+
+    float coinEndX = textRenderer.drawText(std::to_string(coinCount), "Roboto", screenW - 160, 40, 32, fontManager.getFont("Roboto"), 0.03f);
+    textRenderer.drawText(" Coins", "CalliCat", coinEndX, 40, 32, fontManager.getFont("CalliCat"), 0.03f);
 };
 
 void App::render() {
@@ -196,7 +217,7 @@ void App::render() {
         drawGameWorld(view, projection);
     }
     if (showFps)
-        textRenderer.drawText(std::to_string(fpsDisplay) + " FPS", "Roboto", screenW - 160, 40, 32, fontManager.getFont("Roboto"));
+        textRenderer.drawText(std::to_string(fpsDisplay) + " FPS", "Roboto", screenW - 160, 80, 32, fontManager.getFont("Roboto"), 0.1f);
     SDL_GL_SwapWindow(window.getWin());
 };
 
@@ -234,12 +255,14 @@ void App::resetGame() {
     this->state = AppState::PLAYING;
     this->lanePosition = Lane::COUNT / 2;
     distance = 0.0f;
+    coinCount = 0;
+    pendingPickups.clear();
 
     activeScene->rigidbodies[activeScene->playerId].velocity = {0,0,0};
     activeScene->transforms[activeScene->playerId].setPosition(Lane::centerX(lanePosition), 0, 0); //pour virer l'animation de transition
 
 
-    chunkManager.emplace(*activeScene, modelLoader, Lane::COUNT, 7.35f, 5.0f, "resources/Chunk.gltf", std::vector<std::string>{"resources/Obstacles.gltf", "resources/screens.gltf", "resources/RandomVents.gltf", "resources/coin.gltf"}, [this]() { this->triggerGameOver(); }, [this]() { this->lanePosition = this->lastLanePosition; });
+    chunkManager.emplace(*activeScene, modelLoader, Lane::COUNT, 7.35f, 5.0f, "resources/Chunk.gltf", std::vector<std::string>{"resources/Obstacles.gltf", "resources/screens.gltf", "resources/RandomVents.gltf", "resources/coin.gltf"}, [this]() { this->triggerGameOver(); }, [this]() { this->lanePosition = this->lastLanePosition; }, [this](EntityId id) { this->pendingPickups.push_back(id); });
 };
 
 void App::triggerGameOver() {

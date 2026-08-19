@@ -13,7 +13,7 @@ Camera::Camera(float w, float h, Vector<float> pos) : cameraPos(3), target(3), u
 	this->aspect = w / h;
 	this->speed = 50.0f;
 	this->near = 0.1f;
-	this->far = 100.0f;
+	this->far = 200.0f;
 	cameraInit();
 	cameraUpdate();
 };
@@ -29,7 +29,7 @@ Camera::Camera(float w, float h, Vector<float> pos, Vector<float> target,Vector<
 	this->aspect = w / h;
 	this->speed = 50.0f;
 	this->near = 0.1f;
-	this->far = 100.0f;
+	this->far = 200.0f;
 	cameraInit();
 	cameraUpdate();
 };

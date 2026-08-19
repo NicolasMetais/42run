@@ -18,7 +18,7 @@ class ChunkManager {
         int chunkCount = 0;
         bool spawnEmpty = false; ///< type du prochain chunk a generer (alterne obstacle/vide)
     public:
-        ChunkManager(GameScene& scene, ModelLoader& loader, int laneNb, float chunkLength, float runSpeed, const std::string& floorMesh, const std::vector<std::string>& obstaclesMeshes, std::function<void()> killFunc, std::function<void()> bumpFunc);
+        ChunkManager(GameScene& scene, ModelLoader& loader, int laneNb, float chunkLength, float runSpeed, const std::string& floorMesh, const std::vector<std::string>& obstaclesMeshes, std::function<void()> killFunc, std::function<void()> bumpFunc, std::function<void(EntityId)> pickupFunc);
         void update(float deltaTime);
         void destroyChunk();
         int getChunkCount() { return this->chunkCount; };

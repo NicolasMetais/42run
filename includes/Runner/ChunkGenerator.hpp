@@ -16,6 +16,7 @@ class ChunkGenerator {
         float chunkLength;
         std::function<void()> killFunc;
         std::function<void()> bumpFunc;
+        std::function<void(EntityId)> pickupFunc;
         // paire garantie franchissable du dernier chunk genere : la suivante
         // est tiree a +/-1 de celle-ci pour que le chemin reste continu
         int lastFreePair = 1;
@@ -35,7 +36,7 @@ class ChunkGenerator {
          * la piece la plus proche du joueur (bord le plus proche de Z=0) est omise. */
         void spawnCoinTrail(Chunk& newChunk, const std::vector<int>& lanes, int count, float centerZ, float y, bool isGround);
     public:
-        ChunkGenerator(const std::string& floorMesh, const std::vector<std::string>& obstacleMeshes, ModelLoader& loader, GameScene& scene, float chunkLength, std::function<void()> killFunc, std::function<void()> bumpFunc);
+        ChunkGenerator(const std::string& floorMesh, const std::vector<std::string>& obstacleMeshes, ModelLoader& loader, GameScene& scene, float chunkLength, std::function<void()> killFunc, std::function<void()> bumpFunc, std::function<void(EntityId)> pickupFunc);
         Chunk generateNewChunk(float spawnPos);
         void screenGenerator(Chunk& newChunk, float x, float y, float z);
         void ventsGenerator(Chunk& newChunk, float z, bool mirrored);

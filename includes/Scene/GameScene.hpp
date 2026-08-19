@@ -10,6 +10,7 @@
 #include <Entity/RenderComponent.hpp>
 #include <Entity/RigidbodyComponent.hpp>
 #include <Entity/TriggerComponent.hpp>
+#include <Entity/PickupComponent.hpp>
 #include <ECS.hpp>
 #include <Scene/SceneManager.hpp>
 
@@ -24,6 +25,7 @@ struct GameScene {
     std::unordered_map<EntityId, ColliderComponent> colliders;
     std::unordered_map<EntityId, RigidbodyComponent> rigidbodies;
     std::unordered_map<EntityId, TriggerComponent> triggers;
+    std::unordered_map<EntityId, PickupComponent> pickups; ///< entites ramassables (coins), pour la rotation et le parcours dedie
 
     EntityId createEntity() { return nextId++; }
     void destroyEntity(EntityId id);

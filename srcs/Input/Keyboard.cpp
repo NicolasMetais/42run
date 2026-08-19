@@ -62,8 +62,8 @@ void Keyboard::processEvent(SDL_Event& e, bool& running, Camera& cam, float& fps
             pressed ? moveFlags |= PLAYER_RIGHT   : moveFlags &= ~PLAYER_RIGHT;   break;
         case SDL_SCANCODE_UP:
             pressed ? moveFlags |= PLAYER_JUMP    : moveFlags &= ~PLAYER_JUMP;    break;
-        // case SDL_SCANCODE_DOWN:
-        //     pressed ? moveFlags |= PLAYER_BACK    : moveFlags &= ~PLAYER_BACK;    break;
+        case SDL_SCANCODE_DOWN:
+            pressed ? moveFlags |= PLAYER_BACK    : moveFlags &= ~PLAYER_BACK;    break;
         case SDL_SCANCODE_W:
             pressed ? moveFlags |= PLAYER_JUMP    : moveFlags &= ~PLAYER_JUMP;    break;
         // case SDL_SCANCODE_S:

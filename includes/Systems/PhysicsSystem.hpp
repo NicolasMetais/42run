@@ -5,7 +5,7 @@
 #include <Entity/RigidbodyComponent.hpp>
 
 namespace PhysicsSystem {
-    constexpr float GRAVITY = -9.81f;
+    constexpr float GRAVITY = -15.5f;
 
     void update(
         std::unordered_map<EntityId, Transform>& transforms,

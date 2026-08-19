@@ -171,6 +171,7 @@ void GameScene::destroyEntity(EntityId id) {
     colliders.erase(id);
     rigidbodies.erase(id);
     triggers.erase(id);
+    pickups.erase(id);
 
 };
 

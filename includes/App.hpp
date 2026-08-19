@@ -61,6 +61,9 @@ class App {
 		int fpsDisplay = 0;
 		float deltaTime;
 		float distance;
+		int coinCount = 0;
+		std::vector<EntityId> pendingPickups; ///< coins ramasses cette frame, detruits apres resolveEntities (pas pendant, la map colliders est en cours d'iteration)
+		static constexpr float COIN_SPIN_SPEED = 3.0f; ///< radians/s, a ajuster
 		ModelLoader modelLoader;
 		std::optional<ChunkManager> chunkManager;
 		TextRenderer textRenderer;
