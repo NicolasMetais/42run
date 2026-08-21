@@ -292,6 +292,26 @@ void Renderer::rendering(Matrix<float>& mvp, MeshData& obj, Matrix<float> model,
 	}
 };
 
+void Renderer::renderNode(LoadedModel& lm, int nodeIdx, const Matrix<float>& parentWorld,
+                     const Matrix<float>& view, const Matrix<float>& projection,
+                     const std::unordered_set<int>& hiddenNodes, RenderPass pass,
+                     Camera& camera, GLuint skyboxId, GLuint prefilterMapId) {
+	if (hiddenNodes.count(nodeIdx)) return;
+	const Node& node = lm.gltf.nodes[nodeIdx];
+	Matrix<float> world = parentWorld * utils::nodeLocalMatrix(node);
+	Matrix<float> mvp = projection * view * world;
+
+	if (node.mesh >= 0 && node.mesh < (int)lm.meshes.size()) {
+		const std::vector<Matrix<float>>* jointMats = nullptr;
+		if (node.skin >= 0 && node.skin < (int)lm.jointMatrices.size())
+			jointMats = &lm.jointMatrices[node.skin];
+		rendering(mvp, lm.meshes[node.mesh], world, camera, skyboxId, prefilterMapId, jointMats, pass);
+	}
+
+	for (int child : node.children)
+		renderNode(lm, child, world, view, projection, hiddenNodes, pass, camera, skyboxId, prefilterMapId);
+};
+
 void Renderer::beginOpaquePass() {
 	glDisable(GL_BLEND);
 };

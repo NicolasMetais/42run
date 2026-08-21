@@ -1,6 +1,8 @@
 #pragma once
 #include <iostream>
+#include <unordered_set>
 #include <Loader/ObjImporter.hpp>
+#include <Loader/LoadedModel.hpp>
 #include <Texture/TextureManager.hpp>
 #include <Texture/TextureManager.hpp>
 #include <Shader.hpp>
@@ -56,6 +58,12 @@ class Renderer {
 		 * @param pass          Passe courante : seuls les submeshes du bon alphaMode sont dessines.
 		 */
 		void rendering(Matrix<float>& mvp, MeshData& obj, Matrix<float> model, Camera& camera, GLuint skyboxId, GLuint prefilterMapId, const std::vector<Matrix<float>>* jointMats = nullptr, RenderPass pass = RenderPass::Opaque);
+		/**
+		 * @brief Recursively renders a glTF node and its children, composing each node's local
+		 * transform against its parent. Generic scene-graph traversal, reused for anything from
+		 * full 3D world entities to a single small icon rendered with its own view/projection.
+		 */
+		void renderNode(LoadedModel& lm, int nodeIdx, const Matrix<float>& parentWorld, const Matrix<float>& view, const Matrix<float>& projection, const std::unordered_set<int>& hiddenNodes, RenderPass pass, Camera& camera, GLuint skyboxId, GLuint prefilterMapId);
 		/** @brief Coupe le blending pour la passe opaque (les pixels MASK restent pleins). */
 		void beginOpaquePass();
 		/** @brief Active le blending et gele l'ecriture de profondeur pour les transparents. */

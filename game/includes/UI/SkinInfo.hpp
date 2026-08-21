@@ -5,7 +5,7 @@
 struct SkinInfo {
     std::string file;
     std::string label;
-    int price;
+    unsigned int price;
     bool owned;
     bool equipped;
 };

@@ -1,6 +1,6 @@
 #include <UI/MainMenu.hpp>
 
-MainMenu::MainMenu(std::function<void()> onPlay, std::function<void()> onQuit, std::function<void(const std::string&)> onSelectSkin, std::vector<SkinInfo>& skins, int& coinCount) :onPlay(onPlay), onQuit(onQuit), onSelectSkin(onSelectSkin), skins(skins), coinCount(coinCount) {};
+MainMenu::MainMenu(std::function<void()> onPlay, std::function<void()> onQuit, std::function<void(const std::string&)> onSelectSkin, std::vector<SkinInfo>& skins, unsigned int& coinCount) :onPlay(onPlay), onQuit(onQuit), onSelectSkin(onSelectSkin), skins(skins), coinCount(coinCount) {};
 
 void MainMenu::update(Keyboard& kb, Mouse& mouse, FontManager& fontManager, int screenW, int screenH, std::stack<MenuScreen*>& stack) {
         if (kb.consumeMenuUp() && selector > 0)
@@ -50,4 +50,7 @@ void MainMenu::draw(RenderContext& tools) {
     Texture& upArrow = tools.textureManager.getOrLoad("keyboard_arrow_up_outline.png");
     tools.uiRenderer.drawUIComponent(upArrow, tools.screenW * 0.25f, tools.screenH * 0.92f, 0.0f, tools.screenH * 0.08f, tools.screenH * 0.08f);
     tools.textRenderer.drawText("Jump", "CalliCat", tools.screenW * 0.31f, tools.screenH * 0.97f, tools.screenH * 0.028f, tools.fontManager.getFont("CalliCat"));
+
+    float coinEndX = tools.textRenderer.drawText(std::to_string(coinCount), "Roboto", tools.screenW - 160, 40, 32, tools.fontManager.getFont("Roboto"), 0.03f);
+    tools.textRenderer.drawText(" Coins", "CalliCat", coinEndX, 40, 32, tools.fontManager.getFont("CalliCat"), 0.03f);
 };

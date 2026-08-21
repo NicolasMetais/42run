@@ -38,6 +38,7 @@ SRCS =	game/srcs/main.cpp \
 		engine/srcs/Animation/AnimationManager.cpp \
 		engine/srcs/Systems/PhysicsSystem.cpp \
 		engine/srcs/Systems/CollisionSystem.cpp \
+		engine/srcs/Save/SaveSystem.cpp \
 		game/srcs/Runner/ChunkManager.cpp \
 		game/srcs/Runner/ChunkGenerator.cpp \
 		engine/srcs/Font/FontManager.cpp \

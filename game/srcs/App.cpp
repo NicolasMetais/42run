@@ -1,5 +1,6 @@
 #include <App.hpp>
 #include <algorithm>
+#include <limits>
 
 App::App(int width, int height) 
         : window(width, height), renderer(), mesh(), camera(static_cast<float>(width), static_cast<float>(height)
@@ -15,6 +16,7 @@ App::App(int width, int height)
     activeScene = &scenes[0];
     chunkManager.emplace(*activeScene, modelLoader, Lane::COUNT, 7.35f, 5.0f, "resources/Chunk.gltf", std::vector<std::string>{"resources/Obstacles.gltf", "resources/screens.gltf", "resources/RandomVents.gltf", "resources/coin.gltf"}, [this]() { this->triggerGameOver(); }, [this]() { this->lanePosition = this->lastLanePosition; }, [this](EntityId id) { this->pendingPickups.push_back(id); } );
     activeScene->loadPlayer("resources/player.json", modelLoader);
+    loadSave(); // ecrase le skin de player.json par celui sauvegarde, si une sauvegarde existe
     activeScene->transforms[activeScene->playerId].setPosition(Lane::centerX(lanePosition), 0, 0);
     animManager.setAnimation(ANIM_RUN, RUN_ANIM_SPEED); // 0=jump, 1=run-cycle
     fontManager.load(this->textureManager, "resources/CalliCat.json", "CalliCat");
@@ -22,7 +24,7 @@ App::App(int width, int height)
     menus.push(new MainMenu(
         [this]() { keyboard.reset(); menus.pop(); this->distance = 0.0f; },
         [this]() { running = false;},
-        [this](const std::string& model) { activeScene->setPlayerModel(model, modelLoader); },
+        [this](const std::string& model) { activeScene->setPlayerModel(model, modelLoader); writeSave(); },
         skins, coinCount
     ));
 	// this->transform.setScale(1.0f);
@@ -31,7 +33,33 @@ App::App(int width, int height)
 	// this->transform.setPosition(-cent.x(), -cent.y(), -cent.z());
 };
 
-App::~App(){};
+App::~App(){ writeSave(); };
+
+void App::loadSave() {
+    nlohmann::json data = SaveSystem::load(SAVE_PATH);
+    coinCount = data.value("coins", coinCount);
+    if (data.contains("skins") && data["skins"].is_object()) {
+        for (auto& skin : skins) {
+            if (!data["skins"].contains(skin.file)) continue;
+            auto& s = data["skins"][skin.file];
+            skin.owned = s.value("owned", skin.owned);
+            skin.equipped = s.value("equipped", skin.equipped);
+        }
+    }
+    for (auto& skin : skins)
+        if (skin.equipped)
+            activeScene->setPlayerModel(skin.file, modelLoader);
+}
+
+void App::writeSave() {
+    nlohmann::json data;
+    data["coins"] = coinCount;
+    for (auto& skin : skins) {
+        data["skins"][skin.file]["owned"] = skin.owned;
+        data["skins"][skin.file]["equipped"] = skin.equipped;
+    }
+    SaveSystem::save(SAVE_PATH, data);
+}
 
 void App::update() {
     this->elapsedTime += this->deltaTime;
@@ -73,7 +101,8 @@ void App::update() {
         for (EntityId id : pendingPickups) {
             if (activeScene->pickups.count(id)) {
                 activeScene->destroyEntity(id);
-                coinCount++;
+                if (coinCount < std::numeric_limits<unsigned int>::max())
+                    coinCount++;
             }
         }
         pendingPickups.clear();
@@ -120,32 +149,13 @@ void App::processEvents() {
 	keyboard.applyMovement(this->camera, this->transform, this->deltaTime); //keyboard movement
 };
 
-void App::renderNode(LoadedModel& lm, int nodeIdx, const Matrix<float>& parentWorld,
-                     const Matrix<float>& view, const Matrix<float>& projection,
-                     const std::unordered_set<int>& hiddenNodes, RenderPass pass) {
-	if (hiddenNodes.count(nodeIdx)) return;
-	const Node& node = lm.gltf.nodes[nodeIdx];
-	Matrix<float> world = parentWorld * utils::nodeLocalMatrix(node);
-	Matrix<float> mvp = projection * view * world;
-
-	if (node.mesh >= 0 && node.mesh < (int)lm.meshes.size()) {
-		const std::vector<Matrix<float>>* jointMats = nullptr;
-		if (node.skin >= 0 && node.skin < (int)lm.jointMatrices.size())
-			jointMats = &lm.jointMatrices[node.skin];
-		renderer.rendering(mvp, lm.meshes[node.mesh], world, camera, skybox.getIrradianceMapId(), skybox.getPrefilterMapId(), jointMats, pass);
-	}
-
-	for (int child : node.children)
-		renderNode(lm, child, world, view, projection, hiddenNodes, pass);
-};
-
 void App::drawGameWorld(const Matrix<float>& view, Matrix<float>& projection) {
     auto drawEntity = [&](EntityId id, RenderComponent& render, RenderPass pass) {
         LoadedModel& lm = *render.model;
         const Scene& scene = lm.gltf.scenes[lm.gltf.defaultScene];
         Matrix<float> modelMat = activeScene->transforms[id].getModelMatrix() * transform.getModelMatrix();
         for (int rootIdx : scene.rootNodes)
-            renderNode(lm, rootIdx, modelMat, view, projection, render.hiddenNodes, pass);
+            renderer.renderNode(lm, rootIdx, modelMat, view, projection, render.hiddenNodes, pass, camera, skybox.getIrradianceMapId(), skybox.getPrefilterMapId());
     };
 
     // 1. opaques + MASK
@@ -271,6 +281,7 @@ void App::resetGame() {
 void App::triggerGameOver() {
     this->state = AppState::GAME_OVER;
     this->menuFadeTime = 0.0f;
+    writeSave(); // checkpoint : les coins de cette run sont deja dans coinCount (credit temps reel)
     menus.push(new GameOverMenu (
         [this]() { resetGame(); },
         [this]() {
@@ -279,7 +290,7 @@ void App::triggerGameOver() {
             menus.push(new MainMenu(
                 [this]() { keyboard.reset(); menus.pop(); },
                 [this]() { running = false;},
-                [this](const std::string& model) { activeScene->setPlayerModel(model, modelLoader); },
+                [this](const std::string& model) { activeScene->setPlayerModel(model, modelLoader); writeSave(); },
                 skins, coinCount
             ));
         }
@@ -298,7 +309,7 @@ void App::triggerPause() {
             menus.push(new MainMenu(
                 [this]() { keyboard.reset(); menus.pop(); },
                 [this]() { running = false;},
-                [this](const std::string& model) { activeScene->setPlayerModel(model, modelLoader); },
+                [this](const std::string& model) { activeScene->setPlayerModel(model, modelLoader); writeSave(); },
                 skins, coinCount
             ));
         }

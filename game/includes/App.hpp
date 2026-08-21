@@ -29,6 +29,7 @@
 #include <UI/MainMenu.hpp>
 #include <UI/SkinInfo.hpp>
 #include <Font/TextRenderer.hpp>
+#include <Save/SaveSystem.hpp>
 
 enum class AppState { PLAYING, GAME_OVER, PAUSED };
 
@@ -62,12 +63,15 @@ class App {
 		int fpsDisplay = 0;
 		float deltaTime;
 		float distance;
-		int coinCount = 0; ///< portefeuille : credite en temps reel a chaque ramassage, jamais remis a 0 (meme a la mort)
+		unsigned int coinCount = 0; ///< portefeuille : credite en temps reel a chaque ramassage, jamais remis a 0 (meme a la mort). Sature a UINT_MAX au lieu de wrap.
 		std::vector<SkinInfo> skins = {
-			{"Moulinette.gltf", "Moulinette", 0,   true,  true},
-			{"BlackCat.gltf",   "Black Cat",  100, false, false},
-			{"OrangeCat.gltf",  "Golden Cat", 150, false, false},
+			{"Moulinette.gltf", "Moulinette", 0,    true,  true},
+			{"BlackCat.gltf",   "Black Cat",  1500, false, false},
+			{"OrangeCat.gltf",  "Golden Cat", 9999, false, false},
 		}; // prix a ajuster
+		static constexpr const char* SAVE_PATH = "save.json";
+		void loadSave();
+		void writeSave();
 		std::vector<EntityId> pendingPickups; ///< coins ramasses cette frame, detruits apres resolveEntities (pas pendant, la map colliders est en cours d'iteration)
 		static constexpr float COIN_SPIN_SPEED = 3.0f; ///< radians/s, a ajuster
 		ModelLoader modelLoader;
@@ -95,15 +99,6 @@ class App {
 		void update();
 		/** @brief Issues draw calls for all loaded models and the skybox. */
 		void render();
-		/**
-		 * @brief Recursively renders a node and its children using the scene graph.
-		 * @param lm         The loaded model owning the node.
-		 * @param nodeIdx    Index of the node to render.
-		 * @param parentWorld World-space transform inherited from the parent node.
-		 * @param view        View matrix from the camera.
-		 * @param projection  Projection matrix.
-		 */
-		void renderNode(LoadedModel& lm, int nodeIdx, const Matrix<float>& parentWorld, const Matrix<float>& view, const Matrix<float>& projection, const std::unordered_set<int>& hiddenNodes, RenderPass pass);
 		/** @brief Draws the 3D game world (entities, skybox, transparents, score) for the given view/projection. */
 		void drawGameWorld(const Matrix<float>& view, Matrix<float>& projection);
 		float menuFadeTime = 0.0f; ///< temps ecoule depuis le game over/la pause, pour le fondu au noir derriere le menu

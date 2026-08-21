@@ -1,6 +1,6 @@
 #include <UI/SkinMenu.hpp>
 
-SkinMenu::SkinMenu(std::function<void(const std::string&)> onSelectSkin, std::vector<SkinInfo>& skins, int& coinCount) : onSelectSkin(onSelectSkin), skins(skins), coinCount(coinCount) {};
+SkinMenu::SkinMenu(std::function<void(const std::string&)> onSelectSkin, std::vector<SkinInfo>& skins, unsigned int& coinCount) : onSelectSkin(onSelectSkin), skins(skins), coinCount(coinCount) {};
 
 void SkinMenu::update(Keyboard& kb, Mouse& mouse, FontManager& fontManager, int screenW, int screenH, std::stack<MenuScreen*>& stack) {
         int backIndex = (int)skins.size();
@@ -63,4 +63,7 @@ void SkinMenu::draw(RenderContext& tools) {
         }
     }
     tools.textRenderer.drawText("Back", "CalliCat", tools.screenW * 0.47f, positions[backIndex], tools.screenH * 0.04f, tools.fontManager.getFont("CalliCat"));
+
+    float coinEndX = tools.textRenderer.drawText(std::to_string(coinCount), "Roboto", tools.screenW - 160, 40, 32, tools.fontManager.getFont("Roboto"), 0.03f);
+    tools.textRenderer.drawText(" Coins", "CalliCat", coinEndX, 40, 32, tools.fontManager.getFont("CalliCat"), 0.03f);
 };
