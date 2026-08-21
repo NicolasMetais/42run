@@ -1,6 +1,6 @@
 #include <UI/UIRenderer.hpp>
 
-UIRenderer::UIRenderer(TextureManager& TextureManager, int w, int h) : textureManager(TextureManager), menu("srcs/UI/menu.vs", "srcs/UI/menu.fs"), water("srcs/UI/water.vs", "srcs/UI/water.fs"), screenW(w), screenH(h) {
+UIRenderer::UIRenderer(TextureManager& TextureManager, int w, int h) : textureManager(TextureManager), menu("engine/srcs/UI/menu.vs", "engine/srcs/UI/menu.fs"), water("engine/srcs/UI/water.vs", "engine/srcs/UI/water.fs"), screenW(w), screenH(h) {
     glGenVertexArrays(1, &this->VAO);
     glBindVertexArray(this->VAO);
 

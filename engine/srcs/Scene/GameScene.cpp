@@ -162,7 +162,22 @@ void GameScene::loadPlayer(const std::string& path, ModelLoader& loader) {
 
     rigidbodies[id] = {};
     triggers[id] = {};
+}
 
+void GameScene::setPlayerModel(const std::string& modelFile, ModelLoader& loader) {
+    if (playerId == UINT32_MAX) return;
+
+    LoadedModel& lm = loader.load("resources/" + modelFile);
+    RenderComponent render{&lm};
+    render.hidePrefixed("HITBOX"); // jamais dessinee, pure geometrie de collision
+    renders[playerId] = render;
+
+    // hurtbox dediee (node "HITBOX"), recalculee au cas ou le skin a une geometrie differente
+    ColliderComponent col;
+    for (auto& box : colliderFromModel(lm).boxes)
+        if (box.name.rfind("HITBOX", 0) == 0)
+            col.boxes.push_back(box);
+    colliders[playerId] = col;
 }
 
 void GameScene::destroyEntity(EntityId id) {

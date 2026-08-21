@@ -27,6 +27,7 @@
 #include <UI/GameOverMenu.hpp>
 #include <UI/PauseMenu.hpp>
 #include <UI/MainMenu.hpp>
+#include <UI/SkinInfo.hpp>
 #include <Font/TextRenderer.hpp>
 
 enum class AppState { PLAYING, GAME_OVER, PAUSED };
@@ -61,7 +62,12 @@ class App {
 		int fpsDisplay = 0;
 		float deltaTime;
 		float distance;
-		int coinCount = 0;
+		int coinCount = 0; ///< portefeuille : credite en temps reel a chaque ramassage, jamais remis a 0 (meme a la mort)
+		std::vector<SkinInfo> skins = {
+			{"Moulinette.gltf", "Moulinette", 0,   true,  true},
+			{"BlackCat.gltf",   "Black Cat",  100, false, false},
+			{"OrangeCat.gltf",  "Golden Cat", 150, false, false},
+		}; // prix a ajuster
 		std::vector<EntityId> pendingPickups; ///< coins ramasses cette frame, detruits apres resolveEntities (pas pendant, la map colliders est en cours d'iteration)
 		static constexpr float COIN_SPIN_SPEED = 3.0f; ///< radians/s, a ajuster
 		ModelLoader modelLoader;

@@ -1,5 +1,5 @@
 #pragma once
-#include <../loader/include/glad/glad.h>
+#include <glad/glad.h>
 
 /** @brief Fixed OpenGL vertex attribute locations shared between the CPU and all shaders. */
 namespace VertexAttrib

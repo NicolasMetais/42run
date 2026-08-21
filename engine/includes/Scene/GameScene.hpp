@@ -46,4 +46,6 @@ struct GameScene {
 
     static GameScene fromJson(const std::string& path, ModelLoader& loader);
     void loadPlayer(const std::string& path, ModelLoader& loader);
+    /** @brief Change le modele/skin du joueur deja charge (garde position/scale/rigidbody/trigger). */
+    void setPlayerModel(const std::string& modelFile, ModelLoader& loader);
 };

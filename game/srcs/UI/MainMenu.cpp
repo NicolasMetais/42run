@@ -1,6 +1,6 @@
 #include <UI/MainMenu.hpp>
 
-MainMenu::MainMenu(std::function<void()> onPlay, std::function<void()> onQuit) :onPlay(onPlay), onQuit(onQuit) {};
+MainMenu::MainMenu(std::function<void()> onPlay, std::function<void()> onQuit, std::function<void(const std::string&)> onSelectSkin, std::vector<SkinInfo>& skins, int& coinCount) :onPlay(onPlay), onQuit(onQuit), onSelectSkin(onSelectSkin), skins(skins), coinCount(coinCount) {};
 
 void MainMenu::update(Keyboard& kb, Mouse& mouse, FontManager& fontManager, int screenW, int screenH, std::stack<MenuScreen*>& stack) {
         if (kb.consumeMenuUp() && selector > 0)
@@ -19,7 +19,7 @@ void MainMenu::update(Keyboard& kb, Mouse& mouse, FontManager& fontManager, int 
                 case 0:
                     onPlay(); break;
                 case 1:
-                    stack.push(new SkinMenu()); break ;
+                    stack.push(new SkinMenu(onSelectSkin, skins, coinCount)); break ;
                 case 2:
                     onQuit(); break;
                 default: break;

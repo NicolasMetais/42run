@@ -7,7 +7,7 @@ static const int DEBUG_MODE =
     0;
 #endif
 
-Skybox::Skybox() : shaders("srcs/Skybox/skybox.vs", "srcs/Skybox/skybox.fs"), hdr("resources/skybox.hdr"){
+Skybox::Skybox() : shaders("engine/srcs/Skybox/skybox.vs", "engine/srcs/Skybox/skybox.fs"), hdr("resources/skybox.hdr"){
 	this->skyboxVertices = {
     -1.0f,  1.0f, -1.0f,
     -1.0f, -1.0f, -1.0f,
@@ -85,7 +85,7 @@ Skybox::Skybox() : shaders("srcs/Skybox/skybox.vs", "srcs/Skybox/skybox.fs"), hd
 
 	Matrix<float> captureProjection = utils::perspective(90.0f * (3.1415926f / 180.0f), 1.0f, 0.1f, 10.0f);
 
-	Shader equirec("srcs/Skybox/irradiance.vs", "srcs/Skybox/equirec.fs");
+	Shader equirec("engine/srcs/Skybox/irradiance.vs", "engine/srcs/Skybox/equirec.fs");
 	equirec.bind();
 
 	equirec.setInt("equirectMap", 0);
@@ -165,7 +165,7 @@ void Skybox::generateIrradianceMap() {
 		utils::view(origin, Vector<float>{0, 0, -1}, Vector<float>{0, -1, 0}),
 	};
 
-	Shader irradianceShader("srcs/Skybox/irradiance.vs", "srcs/Skybox/irradiance.fs");
+	Shader irradianceShader("engine/srcs/Skybox/irradiance.vs", "engine/srcs/Skybox/irradiance.fs");
 	irradianceShader.bind();
 	irradianceShader.setInt("environmentMap", 0);
 	irradianceShader.setMatrix4_true("projection", captureProjection.datal());
@@ -231,7 +231,7 @@ void Skybox::generatePrefilterMap() {
 		utils::view(origin, Vector<float>{0, 0, -1}, Vector<float>{0, -1, 0}),
 	};
 
-	Shader prefilterShader("srcs/Skybox/prefilter.vs", "srcs/Skybox/prefilter.fs");
+	Shader prefilterShader("engine/srcs/Skybox/prefilter.vs", "engine/srcs/Skybox/prefilter.fs");
 	prefilterShader.bind();
 	prefilterShader.setInt("environmentMap", 0);
 	prefilterShader.setMatrix4_true("projection", captureProjection.datal());

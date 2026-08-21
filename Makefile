@@ -1,6 +1,6 @@
 NAME = 42Run
 CXX = c++
-CXXFLAGS = -Wall -Wextra -Werror -Iincludes -Iloader/include -std=c++17 -g3 $(shell sdl2-config --cflags) -fPIE
+CXXFLAGS = -Wall -Wextra -Werror -Iengine/includes -Igame/includes -Iloader/include -std=c++17 -g3 $(shell sdl2-config --cflags) -fPIE
 
 ifdef DEBUG
 CXXFLAGS += -DDEBUG_WHITE
@@ -13,41 +13,41 @@ endif
 
 LDFLAGS = $(shell sdl2-config --libs) -lGL -lz -lpng -ljpeg -fPIE
 
-SRCS =	srcs/main.cpp \
-		srcs/App.cpp \
-		srcs/Timer.cpp \
-		srcs/Window.cpp \
-		srcs/Camera.cpp \
-		srcs/Shader.cpp \
-		srcs/utils.cpp \
-		srcs/Input/Mouse.cpp \
-		srcs/Input/Keyboard.cpp \
-		srcs/Input/Event.cpp \
-		srcs/Texture/Texture.cpp \
-		srcs/Texture/TextureManager.cpp \
-		srcs/Scene/Transform.cpp \
-		srcs/Scene/SceneManager.cpp \
-		srcs/Scene/GameScene.cpp \
-		srcs/Skybox/Skybox.cpp \
-		srcs/Renderer/Renderer.cpp \
-		srcs/Loader/GltfModel.cpp \
-		srcs/Loader/GltfImporter.cpp \
-		srcs/Loader/AccessorView.cpp \
-		srcs/Loader/ObjImporter.cpp \
-		srcs/Loader/ModelLoader.cpp \
-		srcs/Animation/AnimationManager.cpp \
-		srcs/Systems/PhysicsSystem.cpp \
-		srcs/Systems/CollisionSystem.cpp \
-		srcs/Runner/ChunkManager.cpp \
-		srcs/Runner/ChunkGenerator.cpp \
-		srcs/Font/FontManager.cpp \
-		srcs/Font/TextRenderer.cpp \
-		srcs/UI/UIRenderer.cpp \
-		srcs/UI/MainMenu.cpp \
-		srcs/UI/PauseMenu.cpp \
-		srcs/UI/SkinMenu.cpp \
-		srcs/UI/GameOverMenu.cpp \
-		srcs/Skybox/ParseHdr.cpp \
+SRCS =	game/srcs/main.cpp \
+		game/srcs/App.cpp \
+		engine/srcs/Timer.cpp \
+		engine/srcs/Window.cpp \
+		engine/srcs/Camera.cpp \
+		engine/srcs/Shader.cpp \
+		engine/srcs/utils.cpp \
+		engine/srcs/Input/Mouse.cpp \
+		engine/srcs/Input/Keyboard.cpp \
+		engine/srcs/Input/Event.cpp \
+		engine/srcs/Texture/Texture.cpp \
+		engine/srcs/Texture/TextureManager.cpp \
+		engine/srcs/Scene/Transform.cpp \
+		engine/srcs/Scene/SceneManager.cpp \
+		engine/srcs/Scene/GameScene.cpp \
+		engine/srcs/Skybox/Skybox.cpp \
+		engine/srcs/Renderer/Renderer.cpp \
+		engine/srcs/Loader/GltfModel.cpp \
+		engine/srcs/Loader/GltfImporter.cpp \
+		engine/srcs/Loader/AccessorView.cpp \
+		engine/srcs/Loader/ObjImporter.cpp \
+		engine/srcs/Loader/ModelLoader.cpp \
+		engine/srcs/Animation/AnimationManager.cpp \
+		engine/srcs/Systems/PhysicsSystem.cpp \
+		engine/srcs/Systems/CollisionSystem.cpp \
+		game/srcs/Runner/ChunkManager.cpp \
+		game/srcs/Runner/ChunkGenerator.cpp \
+		engine/srcs/Font/FontManager.cpp \
+		engine/srcs/Font/TextRenderer.cpp \
+		engine/srcs/UI/UIRenderer.cpp \
+		game/srcs/UI/MainMenu.cpp \
+		game/srcs/UI/PauseMenu.cpp \
+		game/srcs/UI/SkinMenu.cpp \
+		game/srcs/UI/GameOverMenu.cpp \
+		engine/srcs/Skybox/ParseHdr.cpp \
 		loader/src/glad.c \
 
 OBJ_DIR = obj
@@ -66,7 +66,7 @@ $(OBJ_DIR)/%.o: %.cpp
 
 $(OBJ_DIR)/%.o: %.c
 	mkdir -p $(dir $@)
-	cc -Wall -Wextra -Werror -Iincludes -Iloader -g3 -MMD -MP -c $< -o  $@ -fPIC $(if $(ASAN),-fsanitize=address -fsanitize=undefined)
+	cc -Wall -Wextra -Werror -Iengine/includes -Igame/includes -Iloader -g3 -MMD -MP -c $< -o  $@ -fPIC $(if $(ASAN),-fsanitize=address -fsanitize=undefined)
 
 -include $(OBJS:.o=.d)
 

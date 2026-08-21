@@ -1,5 +1,5 @@
 #include <Window.hpp>
-#include <../loader/include/glad/glad.h>
+#include <glad/glad.h>
 
 Window::Window(int w, int h) {
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0)

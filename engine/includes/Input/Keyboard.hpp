@@ -33,4 +33,10 @@ class Keyboard {
 		bool consumeMenuDown();
 		bool consumeMenuConfirm();
 		bool consumePause();
+		/** @brief Efface toutes les touches actuellement enregistrees comme maintenues.
+		 * A appeler aux transitions vers/depuis le gameplay : processEvent et processMenuEvent
+		 * se partagent moveFlags mais ne connaissent chacun que leurs propres touches, donc un
+		 * KEYUP qui atterrit dans le mauvais handler (touche relachee juste apres l'ouverture
+		 * d'un menu) peut laisser un bit bloque a 1 indefiniment. */
+		void reset() { moveFlags = 0; }
 };

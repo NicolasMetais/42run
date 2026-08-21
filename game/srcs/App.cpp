@@ -16,12 +16,14 @@ App::App(int width, int height)
     chunkManager.emplace(*activeScene, modelLoader, Lane::COUNT, 7.35f, 5.0f, "resources/Chunk.gltf", std::vector<std::string>{"resources/Obstacles.gltf", "resources/screens.gltf", "resources/RandomVents.gltf", "resources/coin.gltf"}, [this]() { this->triggerGameOver(); }, [this]() { this->lanePosition = this->lastLanePosition; }, [this](EntityId id) { this->pendingPickups.push_back(id); } );
     activeScene->loadPlayer("resources/player.json", modelLoader);
     activeScene->transforms[activeScene->playerId].setPosition(Lane::centerX(lanePosition), 0, 0);
-    animManager.setAnimation(ANIM_RUN, RUN_ANIM_SPEED); // Cat.gltf : 0=jump, 1=run-cycle
+    animManager.setAnimation(ANIM_RUN, RUN_ANIM_SPEED); // 0=jump, 1=run-cycle
     fontManager.load(this->textureManager, "resources/CalliCat.json", "CalliCat");
     fontManager.load(this->textureManager, "resources/Roboto.json", "Roboto");
     menus.push(new MainMenu(
-        [this]() { menus.pop(); this->distance = 0.0f; },
-        [this]() { running = false;}
+        [this]() { keyboard.reset(); menus.pop(); this->distance = 0.0f; },
+        [this]() { running = false;},
+        [this](const std::string& model) { activeScene->setPlayerModel(model, modelLoader); },
+        skins, coinCount
     ));
 	// this->transform.setScale(1.0f);
 	// Vector<float> cent(3);
@@ -217,7 +219,7 @@ void App::render() {
         drawGameWorld(view, projection);
     }
     if (showFps)
-        textRenderer.drawText(std::to_string(fpsDisplay) + " FPS", "Roboto", screenW - 160, 80, 32, fontManager.getFont("Roboto"), 0.1f);
+        textRenderer.drawText(std::to_string(fpsDisplay) + " FPS", "Roboto", screenW - 160, 80, 32, fontManager.getFont("Roboto"), 0.01f);
     SDL_GL_SwapWindow(window.getWin());
 };
 
@@ -252,10 +254,11 @@ void App::FPScalculator() {
 };
 
 void App::resetGame() {
+    keyboard.reset(); // touche relachee pendant que le menu etait ouvert : evite un flag bloque
     this->state = AppState::PLAYING;
     this->lanePosition = Lane::COUNT / 2;
     distance = 0.0f;
-    coinCount = 0;
+    // coinCount n'est PAS remis a 0 : c'est le portefeuille, credite en temps reel a chaque ramassage
     pendingPickups.clear();
 
     activeScene->rigidbodies[activeScene->playerId].velocity = {0,0,0};
@@ -274,8 +277,10 @@ void App::triggerGameOver() {
             while (!menus.empty())
                 menus.pop();
             menus.push(new MainMenu(
-                [this]() { menus.pop(); },
-                [this]() { running = false;}
+                [this]() { keyboard.reset(); menus.pop(); },
+                [this]() { running = false;},
+                [this](const std::string& model) { activeScene->setPlayerModel(model, modelLoader); },
+                skins, coinCount
             ));
         }
     ));
@@ -285,14 +290,16 @@ void App::triggerPause() {
     this->state = AppState::PAUSED;
     this->menuFadeTime = 0.0f;
     menus.push(new PauseMenu (
-        [this]() { this->state = AppState::PLAYING; },
+        [this]() { keyboard.reset(); this->state = AppState::PLAYING; },
         [this]() { resetGame(); },
         [this]() {
             while (!menus.empty())
                 menus.pop();
             menus.push(new MainMenu(
-                [this]() { menus.pop(); },
-                [this]() { running = false;}
+                [this]() { keyboard.reset(); menus.pop(); },
+                [this]() { running = false;},
+                [this](const std::string& model) { activeScene->setPlayerModel(model, modelLoader); },
+                skins, coinCount
             ));
         }
     ));
