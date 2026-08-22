@@ -150,8 +150,9 @@ void Texture::openGl2DTextureGen() {
 
 	//sert a repeter la texture plusieurs fois
 	//si elle est trop petite par rapport au model
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// TEST DIAGNOSTIC : CLAMP_TO_EDGE au lieu de REPEAT, pour isoler un bug de bord de seam UV sur les ecrans (Fedora)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	//gestion de la texture si elle est scale en plus petit
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	//gestion de la texture si elle est scale en plus grand
