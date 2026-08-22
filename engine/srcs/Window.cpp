@@ -28,6 +28,12 @@ Window::Window(int w, int h) {
 	if (!gladLoadGLLoader((GLADloadproc)SDL_GL_GetProcAddress)) {
     	throw std::runtime_error("Failed to initialize GLAD");
 	}
+	int actualSamples = 0, actualBuffers = 0;
+	SDL_GL_GetAttribute(SDL_GL_MULTISAMPLEBUFFERS, &actualBuffers);
+	SDL_GL_GetAttribute(SDL_GL_MULTISAMPLESAMPLES, &actualSamples);
+	std::cerr << "MSAA negocie : buffers=" << actualBuffers << " samples=" << actualSamples << std::endl;
+	std::cerr << "GL_RENDERER: " << glGetString(GL_RENDERER) << std::endl;
+	std::cerr << "GL_VERSION: " << glGetString(GL_VERSION) << std::endl;
 };
 
 Window::~Window() {
