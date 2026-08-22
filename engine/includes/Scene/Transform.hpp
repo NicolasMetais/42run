@@ -6,7 +6,7 @@
 class Transform {
 	private:
 		Vector<float> position;
-		Vector<float> rotation; ///< Euler angles in radians (X, Y, Z).
+		Vector<float> rotation; // Euler angles in radians (X, Y, Z).
 		float scale;
 	public:
 		Transform(): position{0,0,0}, rotation{0,0,0}, scale(1) {};

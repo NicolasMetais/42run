@@ -17,19 +17,19 @@ struct GltfModel;
 
 /** @brief Sparse storage override for a subset of accessor values. */
 struct SparseAccessor {
-    uint32_t count = 0;           ///< Number of elements stored sparsely.
-    int indicesAccessor = -1;     ///< Accessor index for sparse indices.
-    int valuesAccessor = -1;      ///< Accessor index for sparse values.
+    uint32_t count = 0;           // Number of elements stored sparsely.
+    int indicesAccessor = -1;     // Accessor index for sparse indices.
+    int valuesAccessor = -1;      // Accessor index for sparse values.
 };
 
 /** @brief View into a GLTF binary buffer with type and layout metadata. */
 struct AccessorView {
-	BufferView* bufferView = nullptr; ///< Pointer to the associated buffer view.
-	uint32_t count = 0;               ///< Number of elements.
-	ComponentType component;          ///< Underlying component type (e.g. FLOAT, SHORT).
-	ValueType type;                   ///< Element type (e.g. VEC3, MAT4).
-	bool normalized = false;          ///< Whether integer values are normalized to [0,1].
-	uint32_t byteOffset = 0;          ///< Byte offset relative to the buffer view start.
+	BufferView* bufferView = nullptr; // Pointer to the associated buffer view.
+	uint32_t count = 0;               // Number of elements.
+	ComponentType component;          // Underlying component type (e.g. FLOAT, SHORT).
+	ValueType type;                   // Element type (e.g. VEC3, MAT4).
+	bool normalized = false;          // Whether integer values are normalized to [0,1].
+	uint32_t byteOffset = 0;          // Byte offset relative to the buffer view start.
     std::string name;
     SparseAccessor sparse;
     std::unordered_map<std::string, nlohmann::json> extensions;

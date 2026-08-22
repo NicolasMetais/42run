@@ -17,7 +17,7 @@
 #define PLAYER_PAUSE    0x4000
 
 void Keyboard::processMenuEvent(SDL_Event& e, bool& running) {
-    (void)running; // Echap ne quitte plus le jeu depuis un menu ; seul le Quit du menu principal ferme le jeu
+    (void)running;
     if (e.type != SDL_KEYDOWN && e.type != SDL_KEYUP) return;
 
     bool pressed = (e.type == SDL_KEYDOWN);
@@ -38,7 +38,7 @@ void Keyboard::processMenuEvent(SDL_Event& e, bool& running) {
 
 
 void Keyboard::processEvent(SDL_Event& e, bool& running, Camera& cam, float& fps, bool& lockCam) {
-    (void)running; // Echap ouvre desormais la pause (consumePause) au lieu de quitter directement pendant le jeu
+    (void)running;
     if (e.type != SDL_KEYDOWN && e.type != SDL_KEYUP) return;
 
     bool pressed = (e.type == SDL_KEYDOWN);

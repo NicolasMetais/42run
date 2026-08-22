@@ -46,8 +46,8 @@ struct Mat {
 	TextureInfo emissiveTexture;
 	std::vector<float> emissiveFactor{0.0f, 0.0f, 0.0f};
 
-	Texture* baseColorTextureGPU = nullptr;          ///< Resolved GPU texture for base color.
-	Texture* metallicRoughnessTextureGPU = nullptr;  ///< Resolved GPU texture for metallic-roughness.
+	Texture* baseColorTextureGPU = nullptr;          // Resolved GPU texture for base color.
+	Texture* metallicRoughnessTextureGPU = nullptr;  // Resolved GPU texture for metallic-roughness.
 	Texture* normalTextureGPU = nullptr;
 	Texture* occlusionTextureGPU = nullptr;
 	Texture* emissiveTextureGPU = nullptr;
@@ -57,13 +57,13 @@ struct Mat {
 	bool doubleSided = false;
 
 	// OBJ/MTL Phong fields
-	Vector<float> Ka{0.1f, 0.1f, 0.1f}; ///< Ambient color.
-	Vector<float> Kd{0.8f, 0.8f, 0.8f}; ///< Diffuse color.
-	Vector<float> Ks{0.2f, 0.2f, 0.2f}; ///< Specular color.
-	float Ns = 32;                        ///< Specular exponent.
-	float Ni = 1.0f;                      ///< Index of refraction.
-	float d = 1.0f;                       ///< Opacity (dissolve).
-	int illum = 0;                        ///< Illumination model index.
+	Vector<float> Ka{0.1f, 0.1f, 0.1f}; // Ambient color.
+	Vector<float> Kd{0.8f, 0.8f, 0.8f}; // Diffuse color.
+	Vector<float> Ks{0.2f, 0.2f, 0.2f}; // Specular color.
+	float Ns = 32;                        // Specular exponent.
+	float Ni = 1.0f;                      // Index of refraction.
+	float d = 1.0f;                       // Opacity (dissolve).
+	int illum = 0;                        // Illumination model index.
 
 	std::string map_Ka;
 	std::string map_Ks;

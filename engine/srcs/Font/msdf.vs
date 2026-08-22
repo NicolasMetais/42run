@@ -1,4 +1,5 @@
 #version 330 core
+//MSDF = MULTI-channel Signed Distance Field
 
 layout(location = 0) in vec2 pos;
 layout(location = 1) in vec2 texCoords;

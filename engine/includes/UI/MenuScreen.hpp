@@ -30,7 +30,7 @@ struct RenderContext {
     TextRenderer& textRenderer;
     FontManager& fontManager;
     UIRenderer& uiRenderer;
-    TextureManager& textureManager; ///< pour resoudre une image brute (icones UI) en Texture&
+    TextureManager& textureManager; // pour resoudre une image brute (icones UI) en Texture&
     int screenW;
     int screenH;
     RenderContext(TextRenderer& textRenderer, FontManager& fontManager, UIRenderer& uiRenderer, TextureManager& textureManager, int screenW, int screenH) :

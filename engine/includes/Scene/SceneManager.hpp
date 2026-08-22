@@ -7,7 +7,7 @@
 /** @brief Tracks the active model and current scene within that model. */
 class SceneManager {
     public:
-        int currentSceneIndex = -1;         ///< Index of the active scene (-1 = none).
+        int currentSceneIndex = -1;         // Index of the active scene (-1 = none).
         const LoadedModel* activeModel = nullptr; ///< Non-owning pointer to the currently displayed model.
 
         /** @brief Sets the model to draw scenes from. */

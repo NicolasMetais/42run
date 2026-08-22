@@ -31,9 +31,6 @@ void main() {
     float fillAlpha = clamp(px * (dist - 0.5) + 0.5, 0.0, 1.0);
     float outlineAlpha = clamp(px * (dist - (0.5 - outlineWidth)) + 0.5, 0.0, 1.0);
 
-    // a outlineWidth == 0, mix() teintait quand meme les pixels du bord anti-aliase
-    // vers outlineColor (juste avec une alpha faible) : invisible sur fond clair,
-    // mais un lisere blanc bien visible sur fond sombre. Pas de contour = pas de teinte.
     vec3 color = outlineWidth > 0.0 ? mix(outlineColor, textColor, fillAlpha) : textColor;
     fragColor = vec4(color, outlineAlpha);
 }

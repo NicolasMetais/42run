@@ -14,8 +14,6 @@ bool SaveSystem::save(const std::string& path, const nlohmann::json& data) {
     file << data.dump(4);
     file.close();
 
-    // rename() est atomique sur un meme systeme de fichiers : un crash pendant l'ecriture
-    // laisse le .tmp partiel orphelin plutot que de corrompre le fichier de sauvegarde existant
     if (std::rename(tmpPath.c_str(), path.c_str()) != 0) {
         std::cerr << "SaveSystem: rename de " << tmpPath << " vers " << path << " a echoue" << std::endl;
         return false;

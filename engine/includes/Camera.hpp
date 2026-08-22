@@ -10,9 +10,9 @@ class Camera {
 		Vector<float> cameraPos;
 		Vector<float> target;
 		Vector<float> up;
-		Vector<float> U;       ///< Right basis vector of the camera frame.
-		Vector<float> V;       ///< Up basis vector of the camera frame.
-		Vector<float> N;       ///< Forward basis vector of the camera frame.
+		Vector<float> U;       // Right basis vector of the camera frame.
+		Vector<float> V;       // Up basis vector of the camera frame.
+		Vector<float> N;       // Forward basis vector of the camera frame.
 		Vector<float> mousePos;
 		int winWidth;
 		int winHeight;
@@ -21,8 +21,8 @@ class Camera {
 		float near;
 		float far;
 		float speed;
-		float angleH;          ///< Horizontal look angle in radians.
-		float angleV;          ///< Vertical look angle in radians.
+		float angleH;          // Horizontal look angle in radians.
+		float angleV;          // Vertical look angle in radians.
 		bool upperEdge;
 		bool leftEdge;
 		bool rightEdge;

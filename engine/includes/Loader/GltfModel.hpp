@@ -32,7 +32,7 @@ struct GltfModel {
 	std::vector<TextureSampler> samplers;
 	std::vector<Animation> animations;
 	std::vector<Skin> skins;
-	std::vector<uint8_t> binaryData; ///< Raw binary payload of a GLB file.
+	std::vector<uint8_t> binaryData; // Raw binary payload of a GLB file.
 
 	/** @brief Parses all mesh primitives and their accessor references from the JSON. */
 	void parseMeshes(const nlohmann::json& gltf);

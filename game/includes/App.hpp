@@ -58,12 +58,12 @@ class App {
 		bool mouselock = true;
 		float fps;
 		bool showFps = false;
-		float fpsAccumTime = 0.0f;   ///< fenetre de lissage du compteur affiche
+		float fpsAccumTime = 0.0f;   // fenetre de lissage du compteur affiche
 		int fpsAccumFrames = 0;
 		int fpsDisplay = 0;
 		float deltaTime;
 		float distance;
-		unsigned int coinCount = 0; ///< portefeuille : credite en temps reel a chaque ramassage, jamais remis a 0 (meme a la mort). Sature a UINT_MAX au lieu de wrap.
+		unsigned int coinCount = 0; // portefeuille : credite en temps reel a chaque ramassage, jamais remis a 0 (meme a la mort). Sature a UINT_MAX au lieu de wrap.
 		std::vector<SkinInfo> skins = {
 			{"Moulinette.gltf", "Moulinette", 0,    true,  true},
 			{"BlackCat.gltf",   "Black Cat",  1500, false, false},
@@ -72,8 +72,8 @@ class App {
 		static constexpr const char* SAVE_PATH = "save.json";
 		void loadSave();
 		void writeSave();
-		std::vector<EntityId> pendingPickups; ///< coins ramasses cette frame, detruits apres resolveEntities (pas pendant, la map colliders est en cours d'iteration)
-		static constexpr float COIN_SPIN_SPEED = 3.0f; ///< radians/s, a ajuster
+		std::vector<EntityId> pendingPickups; // coins ramasses cette frame, detruits apres resolveEntities (pas pendant, la map colliders est en cours d'iteration)
+		static constexpr float COIN_SPIN_SPEED = 3.0f; // radians/s, a ajuster
 		ModelLoader modelLoader;
 		std::optional<ChunkManager> chunkManager;
 		TextRenderer textRenderer;
@@ -81,7 +81,7 @@ class App {
 		AppState state = AppState::PLAYING;
 		UIRenderer uiRenderer;
 		std::vector<RippleDrop> ripples;
-		std::vector<std::pair<float, EntityId>> byDistance; ///< buffer reutilise pour le tri des transparents (evite une reallocation par frame)
+		std::vector<std::pair<float, EntityId>> byDistance; // buffer reutilise pour le tri des transparents (evite une reallocation par frame)
 		int screenW;
 		int screenH;
 		float prevMouseU = 0.0f;
@@ -90,7 +90,7 @@ class App {
 		float lastDropTime = 0.0f;
 		int selectedOption = 0;
 		int lanePosition = Lane::COUNT / 2;
-		int lastLanePosition = lanePosition; ///< valeur d'avant la derniere tentative de changement de lane, pour le rejet "bump"
+		int lastLanePosition = lanePosition; // valeur d'avant la derniere tentative de changement de lane, pour le rejet "bump"
 		std::stack<MenuScreen*> menus;
 		RenderContext menuContext;
 		/** @brief Polls and dispatches SDL events to input subsystems. */

@@ -11,8 +11,8 @@ class Mouse {
 		float rotX = 0.0f, rotY = 0.0f, wheel = 0.0f;
 		bool rotating = false;
 		int posX = 0, posY = 0;
-		bool clicked = false; ///< clic gauche en attente, consomme une seule fois
-		bool moved = false; ///< mouvement en attente, consomme une seule fois
+		bool clicked = false; // clic gauche en attente, consomme une seule fois
+		bool moved = false; // mouvement en attente, consomme une seule fois
 	public:
 		~Mouse() {};
 		/** @brief Reads mouse motion and button state from an SDL event. */

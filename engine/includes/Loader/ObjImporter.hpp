@@ -16,9 +16,9 @@
 class ObjImporter {
 	private:
 		std::string name;
-		std::vector<Vector<float>> v;           ///< Raw vertex positions.
-		std::vector<Vector<float>> vt;          ///< Raw texture coordinates.
-		std::vector<Vector<float>> vn;          ///< Raw vertex normals.
+		std::vector<Vector<float>> v;           // Raw vertex positions.
+		std::vector<Vector<float>> vt;          // Raw texture coordinates.
+		std::vector<Vector<float>> vn;          // Raw vertex normals.
 		std::vector<Vector<float>> smoothNormals;
 		Vector<float> minVert;
 		Vector<float> maxVert;

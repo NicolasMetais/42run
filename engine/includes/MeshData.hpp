@@ -13,11 +13,11 @@ struct Vertex {
 	Vector<float> normal;
 	Vector<float> tangent;
 
-	std::vector<Vector<float>> uv;    ///< One entry per UV set.
-	std::vector<float> color;         ///< Raw color components.
+	std::vector<Vector<float>> uv;    // One entry per UV set.
+	std::vector<float> color;         // Raw color components.
 
-	std::array<int, 4>   joints  = {0, 0, 0, 0};   ///< Up to 4 joint indices for skinning.
-	std::array<float, 4> weights = {0.f, 0.f, 0.f, 0.f}; ///< Corresponding blend weights.
+	std::array<int, 4>   joints  = {0, 0, 0, 0};   // Up to 4 joint indices for skinning.
+	std::array<float, 4> weights = {0.f, 0.f, 0.f, 0.f}; // Corresponding blend weights.
 };
 
 /** @brief A contiguous batch of vertices sharing a single material, with its own VAO/VBO/EBO. */
@@ -57,10 +57,10 @@ struct MeshData {
 	std::vector<SubMesh> submeshes;
 	std::vector<Mat> materials;
 	std::vector<Image> images;
-	std::vector<Text> textures; ///< Sampler + source pairs used by materials.
+	std::vector<Text> textures; // Sampler + source pairs used by materials.
 
-	Vector<float> min = {FLT_MAX, FLT_MAX, FLT_MAX}; ///< AABB minimum corner.
-	Vector<float> max = {FLT_MIN, FLT_MIN, FLT_MIN}; ///< AABB maximum corner.
-	Vector<float> center;   ///< Bounding sphere center.
-	float radius = 0.0f;    ///< Bounding sphere radius.
+	Vector<float> min = {FLT_MAX, FLT_MAX, FLT_MAX}; // AABB minimum corner.
+	Vector<float> max = {FLT_MIN, FLT_MIN, FLT_MIN}; // AABB maximum corner.
+	Vector<float> center;   // Bounding sphere center.
+	float radius = 0.0f;    // Bounding sphere radius.
 };

@@ -14,11 +14,11 @@
 
 /** @brief Describes a single vertex attribute for dynamic VAO construction. */
 struct VertexAttribute {
-	GLuint index;      ///< Shader attribute location.
-	GLuint size;       ///< Number of components (e.g. 3 for a VEC3).
-	GLenum type;       ///< Component GL type (e.g. GL_FLOAT).
+	GLuint index;      // Shader attribute location.
+	GLuint size;       // Number of components (e.g. 3 for a VEC3).
+	GLenum type;       // Component GL type (e.g. GL_FLOAT).
 	bool normalized;
-	size_t offset;     ///< Byte offset within the vertex struct.
+	size_t offset;     // Byte offset within the vertex struct.
 };
 
 /** @brief A full vertex format description: ordered attributes and total stride. */

@@ -14,7 +14,7 @@ class TextRenderer {
 	    GLuint VBO;
         int screenW;
         int screenH;
-        std::vector<float> vertices; ///< buffer reutilise entre les appels (evite une reallocation par drawText)
+        std::vector<float> vertices; // buffer reutilise entre les appels (evite une reallocation par drawText)
     public:
         TextRenderer(TextureManager& TextureManager, int screenW, int screenH);
         /** @brief Resynchronise les dimensions ecran utilisees pour la projection texte (a appeler au resize). */

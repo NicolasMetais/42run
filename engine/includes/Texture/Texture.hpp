@@ -16,7 +16,7 @@ class Texture {
 		u_int32_t width;
 		u_int32_t height;
 		GLenum inputFormat;
-		int bpp;                          ///< Bits per pixel.
+		int bpp;                          // Bits per pixel.
 		std::vector<unsigned char> data;
 
 		/** @brief Decodes a BMP file into @p data. */

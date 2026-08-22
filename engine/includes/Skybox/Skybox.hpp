@@ -15,9 +15,9 @@
 class Skybox {
 	private:
 		GLuint skyboxVAO, skyboxVBO;
-		GLuint cubeMaptexture;    ///< Main environment cubemap texture ID.
-		GLuint irradianceMapId;   ///< Diffuse irradiance cubemap for PBR ambient.
-		GLuint prefilterMapId;    ///< Prefiltered specular cubemap for PBR reflections.
+		GLuint cubeMaptexture;    // Main environment cubemap texture ID.
+		GLuint irradianceMapId;   // Diffuse irradiance cubemap for PBR ambient.
+		GLuint prefilterMapId;    // Prefiltered specular cubemap for PBR reflections.
 		std::vector<float> skyboxVertices;
 		Shader shaders;
 		parseHdr hdr;

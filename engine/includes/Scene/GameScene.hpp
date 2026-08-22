@@ -14,6 +14,7 @@
 #include <ECS.hpp>
 #include <Scene/SceneManager.hpp>
 
+//ECS = Entity Component System
 struct GameScene {
 	SceneManager sceneManager;
     std::string name;
@@ -25,7 +26,7 @@ struct GameScene {
     std::unordered_map<EntityId, ColliderComponent> colliders;
     std::unordered_map<EntityId, RigidbodyComponent> rigidbodies;
     std::unordered_map<EntityId, TriggerComponent> triggers;
-    std::unordered_map<EntityId, PickupComponent> pickups; ///< entites ramassables (coins), pour la rotation et le parcours dedie
+    std::unordered_map<EntityId, PickupComponent> pickups; // entites ramassables (coins), pour la rotation et le parcours dedie
 
     EntityId createEntity() { return nextId++; }
     void destroyEntity(EntityId id);

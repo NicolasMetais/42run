@@ -1,4 +1,9 @@
 #version 330 core
+
+//vertex shader (vs) tourne une fois par sommet. 
+//Il passe la position (ecran) des sommets au GPU pour qu'il render le point sur l'ecran
+//il passe aussi la position (monde) du sommet dans l'espace au fragment shader (fs)
+
 layout(location = 0) in vec3 aPos;
 layout(location = 1) in vec3 aNormal;
 layout(location = 2) in vec2 aTexCoord;
