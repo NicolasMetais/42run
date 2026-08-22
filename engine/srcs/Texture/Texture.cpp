@@ -157,6 +157,12 @@ void Texture::openGl2DTextureGen() {
 	//gestion de la texture si elle est scale en plus grand
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+	//filtrage anisotropique : evite le moire/aliasing sur les textures vues en angle (ex: ecrans),
+	//plus visible sur certains drivers (Mesa/Intel) que d'autres sans ce filtrage
+	GLfloat maxAniso = 1.0f;
+	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &maxAniso);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, maxAniso);
+
 	GLenum internalFormat = (bpp == 4) ? GL_RGBA8 : GL_RGB8;
 	GLenum dataFormat = (bpp == 4) ? GL_RGBA : GL_RGB;
 

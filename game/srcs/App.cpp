@@ -295,7 +295,8 @@ void App::triggerGameOver() {
                 [this](const std::string& model) { activeScene->setPlayerModel(model, modelLoader); writeSave(); },
                 skins, coinCount
             ));
-        }
+        },
+        distance
     ));
 };
 

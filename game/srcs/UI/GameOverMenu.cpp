@@ -1,6 +1,6 @@
 #include <UI/GameOverMenu.hpp>
 
-GameOverMenu::GameOverMenu(std::function<void()> resetGame, std::function<void()> onMainMenu) : resetGame(resetGame), onMainMenu(onMainMenu) {};
+GameOverMenu::GameOverMenu(std::function<void()> resetGame, std::function<void()> onMainMenu, float& distance) : resetGame(resetGame), onMainMenu(onMainMenu), distance(distance) {};
 
 void GameOverMenu::update(Keyboard& kb, Mouse& mouse, FontManager& fontManager, int screenW, int screenH, std::stack<std::unique_ptr<MenuScreen>>& stack) {
         (void)stack;
@@ -32,7 +32,8 @@ void GameOverMenu::update(Keyboard& kb, Mouse& mouse, FontManager& fontManager, 
 
 void GameOverMenu::draw(RenderContext& tools) {
     tools.textRenderer.drawText("GAME OVER", "CalliCat", tools.screenW * 0.40f, tools.screenH * 0.3f, tools.screenH * 0.08f, tools.fontManager.getFont("CalliCat"), 0.01f);
-    tools.textRenderer.drawText("NB Meters", "CalliCat", tools.screenW * 0.48f, tools.screenH * 0.4f, tools.screenH * 0.06f, tools.fontManager.getFont("CalliCat"), 0.01f);
+    float scoreEndX = tools.textRenderer.drawText(std::to_string((int)distance), "Roboto", tools.screenW * 0.44f, tools.screenH * 0.4f, tools.screenH * 0.06f, tools.fontManager.getFont("Roboto"), 0.01f);
+    tools.textRenderer.drawText(" Meters", "CalliCat", scoreEndX, tools.screenH * 0.4f, tools.screenH * 0.06f, tools.fontManager.getFont("CalliCat"), 0.01f);
     float positions[] = { tools.screenH * 0.6f, tools.screenH * 0.7f};
     Texture& pawTex = tools.textureManager.getOrLoad("cat_paw.png");
     float pawSize = tools.screenH * 0.04f;
