@@ -153,7 +153,8 @@ void Texture::openGl2DTextureGen() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	//gestion de la texture si elle est scale en plus petit
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	// TEST DIAGNOSTIC : mipmap desactive temporairement pour isoler le bug des lignes noires sur les ecrans (Fedora)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	//gestion de la texture si elle est scale en plus grand
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -169,7 +170,7 @@ void Texture::openGl2DTextureGen() {
 	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat,
              width, height, 0, dataFormat, GL_UNSIGNED_BYTE, this->data.data());
 
-	glGenerateMipmap(GL_TEXTURE_2D);
+	// glGenerateMipmap(GL_TEXTURE_2D); // desactive pour le test diagnostic ci-dessus
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
