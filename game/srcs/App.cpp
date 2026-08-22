@@ -10,6 +10,7 @@ App::App(int width, int height)
         , menuContext(textRenderer, fontManager, uiRenderer, textureManager, screenW, screenH) {
     this->skybox.generateIrradianceMap();
     this->skybox.generatePrefilterMap();
+    glViewport(0, 0, width, height); // les deux appels precedents laissent le viewport bloque sur leur derniere taille de mip offscreen (16x16)
 
     scenes.push_back(GameScene::fromJson("resources/levels/menu.json", modelLoader));
     scenes.push_back(GameScene::fromJson("resources/levels/level1.json", modelLoader));
