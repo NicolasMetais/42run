@@ -1,6 +1,7 @@
 #pragma once
 #include <stack>
 #include <vector>
+#include <memory>
 #include <Input/Keyboard.hpp>
 #include <Input/Mouse.hpp>
 #include <UI/UIRenderer.hpp>
@@ -39,7 +40,7 @@ struct RenderContext {
 
 class MenuScreen {
     public:
-        virtual void update(Keyboard& kb, Mouse& mouse, FontManager& fontManager, int screenW, int screenH, std::stack<MenuScreen*>& stack) = 0;
+        virtual void update(Keyboard& kb, Mouse& mouse, FontManager& fontManager, int screenW, int screenH, std::stack<std::unique_ptr<MenuScreen>>& stack) = 0;
         virtual void draw(RenderContext& tools) = 0;
         virtual ~MenuScreen() = default;
 };

@@ -2,7 +2,7 @@
 
 GameOverMenu::GameOverMenu(std::function<void()> resetGame, std::function<void()> onMainMenu) : resetGame(resetGame), onMainMenu(onMainMenu) {};
 
-void GameOverMenu::update(Keyboard& kb, Mouse& mouse, FontManager& fontManager, int screenW, int screenH, std::stack<MenuScreen*>& stack) {
+void GameOverMenu::update(Keyboard& kb, Mouse& mouse, FontManager& fontManager, int screenW, int screenH, std::stack<std::unique_ptr<MenuScreen>>& stack) {
         (void)stack;
         if (kb.consumeMenuUp() && selector > 0)
             selector--;

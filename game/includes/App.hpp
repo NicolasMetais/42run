@@ -91,7 +91,7 @@ class App {
 		int selectedOption = 0;
 		int lanePosition = Lane::COUNT / 2;
 		int lastLanePosition = lanePosition; // valeur d'avant la derniere tentative de changement de lane, pour le rejet "bump"
-		std::stack<MenuScreen*> menus;
+		std::stack<std::unique_ptr<MenuScreen>> menus;
 		RenderContext menuContext;
 		/** @brief Polls and dispatches SDL events to input subsystems. */
 		void processEvents();

@@ -21,8 +21,8 @@ App::App(int width, int height)
     animManager.setAnimation(ANIM_RUN, RUN_ANIM_SPEED); // 0=jump, 1=run-cycle
     fontManager.load(this->textureManager, "resources/CalliCat.json", "CalliCat");
     fontManager.load(this->textureManager, "resources/Roboto.json", "Roboto");
-    menus.push(new MainMenu(
-        [this]() { keyboard.reset(); menus.pop(); this->distance = 0.0f; },
+    menus.push(std::make_unique<MainMenu>(
+        [this]() { keyboard.reset(); auto self = std::move(menus.top()); menus.pop(); this->distance = 0.0f; },
         [this]() { running = false;},
         [this](const std::string& model) { activeScene->setPlayerModel(model, modelLoader); writeSave(); },
         skins, coinCount
@@ -282,12 +282,14 @@ void App::triggerGameOver() {
     this->state = AppState::GAME_OVER;
     this->menuFadeTime = 0.0f;
     writeSave(); // checkpoint : les coins de cette run sont deja dans coinCount (credit temps reel)
-    menus.push(new GameOverMenu (
+    menus.push(std::make_unique<GameOverMenu>(
         [this]() { resetGame(); },
         [this]() {
+            auto self = std::move(menus.top());
+            menus.pop();
             while (!menus.empty())
                 menus.pop();
-            menus.push(new MainMenu(
+            menus.push(std::make_unique<MainMenu>(
                 [this]() { keyboard.reset(); menus.pop(); },
                 [this]() { running = false;},
                 [this](const std::string& model) { activeScene->setPlayerModel(model, modelLoader); writeSave(); },
@@ -300,13 +302,15 @@ void App::triggerGameOver() {
 void App::triggerPause() {
     this->state = AppState::PAUSED;
     this->menuFadeTime = 0.0f;
-    menus.push(new PauseMenu (
+    menus.push(std::make_unique<PauseMenu>(
         [this]() { keyboard.reset(); this->state = AppState::PLAYING; },
         [this]() { resetGame(); },
         [this]() {
+            auto self = std::move(menus.top());
+            menus.pop();
             while (!menus.empty())
                 menus.pop();
-            menus.push(new MainMenu(
+            menus.push(std::make_unique<MainMenu>(
                 [this]() { keyboard.reset(); menus.pop(); },
                 [this]() { running = false;},
                 [this](const std::string& model) { activeScene->setPlayerModel(model, modelLoader); writeSave(); },

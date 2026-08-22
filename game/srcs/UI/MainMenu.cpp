@@ -2,7 +2,7 @@
 
 MainMenu::MainMenu(std::function<void()> onPlay, std::function<void()> onQuit, std::function<void(const std::string&)> onSelectSkin, std::vector<SkinInfo>& skins, unsigned int& coinCount) :onPlay(onPlay), onQuit(onQuit), onSelectSkin(onSelectSkin), skins(skins), coinCount(coinCount) {};
 
-void MainMenu::update(Keyboard& kb, Mouse& mouse, FontManager& fontManager, int screenW, int screenH, std::stack<MenuScreen*>& stack) {
+void MainMenu::update(Keyboard& kb, Mouse& mouse, FontManager& fontManager, int screenW, int screenH, std::stack<std::unique_ptr<MenuScreen>>& stack) {
         if (kb.consumeMenuUp() && selector > 0)
             selector--;
         if (kb.consumeMenuDown() && selector < 2)
@@ -19,7 +19,7 @@ void MainMenu::update(Keyboard& kb, Mouse& mouse, FontManager& fontManager, int 
                 case 0:
                     onPlay(); break;
                 case 1:
-                    stack.push(new SkinMenu(onSelectSkin, skins, coinCount)); break ;
+                    stack.push(std::make_unique<SkinMenu>(onSelectSkin, skins, coinCount)); break ;
                 case 2:
                     onQuit(); break;
                 default: break;

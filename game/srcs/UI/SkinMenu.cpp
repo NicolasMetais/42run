@@ -2,7 +2,7 @@
 
 SkinMenu::SkinMenu(std::function<void(const std::string&)> onSelectSkin, std::vector<SkinInfo>& skins, unsigned int& coinCount) : onSelectSkin(onSelectSkin), skins(skins), coinCount(coinCount) {};
 
-void SkinMenu::update(Keyboard& kb, Mouse& mouse, FontManager& fontManager, int screenW, int screenH, std::stack<MenuScreen*>& stack) {
+void SkinMenu::update(Keyboard& kb, Mouse& mouse, FontManager& fontManager, int screenW, int screenH, std::stack<std::unique_ptr<MenuScreen>>& stack) {
         int backIndex = (int)skins.size();
 
         if (kb.consumeMenuUp() && selector > 0)

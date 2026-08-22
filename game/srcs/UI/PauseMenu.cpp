@@ -2,7 +2,7 @@
 
 PauseMenu::PauseMenu(std::function<void()> onResume, std::function<void()> resetGame, std::function<void()> onMainMenu) : onResume(onResume), resetGame(resetGame), onMainMenu(onMainMenu) {};
 
-void PauseMenu::update(Keyboard& kb, Mouse& mouse, FontManager& fontManager, int screenW, int screenH, std::stack<MenuScreen*>& stack) {
+void PauseMenu::update(Keyboard& kb, Mouse& mouse, FontManager& fontManager, int screenW, int screenH, std::stack<std::unique_ptr<MenuScreen>>& stack) {
         if (kb.consumeMenuUp() && selector > 0)
             selector--;
         if (kb.consumeMenuDown() && selector < 2)
