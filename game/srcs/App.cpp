@@ -243,7 +243,7 @@ void App::render() {
 };
 
 void App::run(){
-    SDL_GL_SetSwapInterval(0);
+    SDL_GL_SetSwapInterval(1);
     timer.tick(); // discard loading time
 
     while(this->running)
