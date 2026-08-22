@@ -190,6 +190,14 @@ void App::drawGameWorld(const Matrix<float>& view, Matrix<float>& projection) {
 };
 
 void App::render() {
+    static bool loggedSamples = false;
+    if (!loggedSamples) {
+        loggedSamples = true;
+        GLint sampleBuffers = 0, samples = 0;
+        glGetIntegerv(GL_SAMPLE_BUFFERS, &sampleBuffers);
+        glGetIntegerv(GL_SAMPLES, &samples);
+        std::cerr << "MSAA reel au rendu : GL_SAMPLE_BUFFERS=" << sampleBuffers << " GL_SAMPLES=" << samples << std::endl;
+    }
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     Matrix<float> view = camera.buildView();
     Matrix<float> projection = camera.buildProjection();
