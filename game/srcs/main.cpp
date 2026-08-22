@@ -12,7 +12,7 @@
 #include <Loader/GltfModel.hpp>
 #include <SDL2/SDL.h>
 
-#define HEIGHT 1500
+#define HEIGHT 1200
 #define WIDTH 1500
 
 int main(int ac, char **av) {
